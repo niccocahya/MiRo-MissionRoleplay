@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
+import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/back_button.dart'; // Wajib narik custom back button
 
 // ==========================================
@@ -126,7 +127,7 @@ class CertificateDetailPage extends ConsumerWidget {
     final previewBadges = badges.take(3).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       // NAVBAR OTOMATIS HILANG DI SINI (Scaffold Fullscreen)
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -145,7 +146,7 @@ class CertificateDetailPage extends ConsumerWidget {
                   Text(
                     texts['title']!,
                     style: const TextStyle(
-                      color: Color(0xFF0A264F),
+                      color: AppColors.primary,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -162,7 +163,7 @@ class CertificateDetailPage extends ConsumerWidget {
                   Text(
                     roleLabel,
                     style: TextStyle(
-                      color: const Color(0xFF0A264F).withValues(alpha: 0.5),
+                      color: AppColors.primary.withValues(alpha: 0.5),
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
@@ -183,7 +184,7 @@ class CertificateDetailPage extends ConsumerWidget {
                         end: Alignment.bottomRight,
                         colors:
                             certData['gradient'] ??
-                            [const Color(0xFF0A264F), const Color(0xFF163C73)],
+                            [AppColors.primary, AppColors.primaryLight],
                       ),
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: const [
@@ -225,7 +226,7 @@ class CertificateDetailPage extends ConsumerWidget {
                                 width: 65,
                                 height: 65,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFDF1E8),
+                                  color: AppColors.accentTint,
                                   borderRadius: BorderRadius.circular(
                                     16,
                                   ), // Frame Kotak Rounded
@@ -400,7 +401,7 @@ class CertificateDetailPage extends ConsumerWidget {
                       Expanded(
                         child: _buildActionButton(
                           texts['download']!,
-                          const Color(0xFFE57B65),
+                          AppColors.accent,
                           isComplete,
                         ),
                       ),
@@ -408,7 +409,7 @@ class CertificateDetailPage extends ConsumerWidget {
                       Expanded(
                         child: _buildActionButton(
                           texts['share']!,
-                          const Color(0xFF0A264F),
+                          AppColors.primary,
                           isComplete,
                         ),
                       ),

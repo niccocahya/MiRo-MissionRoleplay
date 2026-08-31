@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/notification_provider.dart';
 import '../../shared/widgets/back_button.dart';
+import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/app_state_views.dart';
 
 // ==========================================
 // 1. DICTIONARY KAMUS BAHASA
@@ -36,15 +38,13 @@ class NotificationsPage extends ConsumerWidget {
     final notifsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // ==================== KONTEN UTAMA (LIST/EMPTY STATE) ====================
           notifsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-            ),
-            error: (error, stack) => Center(child: Text("Error: $error")),
+            loading: () => const AppLoading(),
+            error: (error, stack) => AppErrorView(message: "Error: $error"),
             data: (notifications) {
               if (notifications.isEmpty) {
                 return _buildEmptyState(texts);
@@ -70,7 +70,7 @@ class NotificationsPage extends ConsumerWidget {
               texts['title']!,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF0A264F),
+                color: AppColors.primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -117,19 +117,19 @@ class NotificationsPage extends ConsumerWidget {
     switch (notif['type']) {
       case 'reward':
         iconData = Icons.emoji_events_rounded;
-        iconBgColor = const Color(0xFFFFF4E5);
-        iconColor = const Color(0xFFE57B65);
+        iconBgColor = AppColors.goldTint;
+        iconColor = AppColors.accent;
         break;
       case 'reminder':
         iconData = Icons.access_time_filled_rounded;
-        iconBgColor = const Color(0xFFE8F2E6);
-        iconColor = const Color(0xFF4CAF50);
+        iconBgColor = AppColors.successTint;
+        iconColor = AppColors.success;
         break;
       case 'info':
       default:
         iconData = Icons.info_rounded;
-        iconBgColor = const Color(0xFFEBF4FA);
-        iconColor = const Color(0xFFA5CBEB);
+        iconBgColor = AppColors.primaryTint;
+        iconColor = AppColors.primaryLighter;
         break;
     }
 
@@ -141,8 +141,8 @@ class NotificationsPage extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isRead
-              ? const Color(0xFF0A264F).withValues(alpha: 0.05)
-              : const Color(0xFFA5CBEB).withValues(alpha: 0.5),
+              ? AppColors.primary.withValues(alpha: 0.05)
+              : AppColors.primaryLighter.withValues(alpha: 0.5),
           width: isRead ? 1 : 1.5,
         ),
       ),
@@ -170,7 +170,7 @@ class NotificationsPage extends ConsumerWidget {
                       child: Text(
                         title,
                         style: TextStyle(
-                          color: const Color(0xFF0A264F),
+                          color: AppColors.primary,
                           fontSize: 14,
                           fontWeight: isRead
                               ? FontWeight.w600
@@ -184,7 +184,7 @@ class NotificationsPage extends ConsumerWidget {
                     Text(
                       timeFormatted,
                       style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -195,7 +195,7 @@ class NotificationsPage extends ConsumerWidget {
                 Text(
                   desc,
                   style: TextStyle(
-                    color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+                    color: AppColors.primary.withValues(alpha: 0.6),
                     fontSize: 12,
                     height: 1.4,
                   ),
@@ -210,7 +210,7 @@ class NotificationsPage extends ConsumerWidget {
               width: 8,
               height: 8,
               decoration: const BoxDecoration(
-                color: Color(0xFFE57B65),
+                color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
             ),
@@ -231,12 +231,14 @@ class NotificationsPage extends ConsumerWidget {
             Opacity(
               opacity: 0.5,
               child: Image.asset(
-                'assets/images/penguin_sleeping.png',
+                // 'penguin_sleeping.png' nggak pernah ada di assets, jadi
+                // ilustrasi ini selama ini SELALU jatuh ke fallback icon.
+                'assets/images/penguin_peek.png',
                 height: 150,
                 errorBuilder: (context, error, stackTrace) => const Icon(
                   Icons.notifications_off_rounded,
                   size: 80,
-                  color: Color(0xFFA5CBEB),
+                  color: AppColors.primaryLighter,
                 ),
               ),
             ),
@@ -244,7 +246,7 @@ class NotificationsPage extends ConsumerWidget {
             Text(
               texts['empty_title']!,
               style: const TextStyle(
-                color: Color(0xFF0A264F),
+                color: AppColors.primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -254,7 +256,7 @@ class NotificationsPage extends ConsumerWidget {
               texts['empty_desc']!,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+                color: AppColors.primary.withValues(alpha: 0.6),
                 fontSize: 14,
                 height: 1.5,
               ),

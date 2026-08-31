@@ -4,110 +4,19 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // PASTIKAN IMPORT INI SESUAI
 import 'certificate_detail_page.dart';
+import '../data/certificate_provider.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib panggil otak bahasa
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/responsive.dart';
+import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/back_button.dart'; // Wajib panggil tombol kembali estetik
 
-// ==========================================
-// PROVIDER 1: MENGAMBIL SEMUA SERTIFIKAT DARI DATABASE
-// ==========================================
-final allCertificatesProvider = FutureProvider<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  try {
-    final supabase = Supabase.instance.client;
-
-    // Tarik data sertifikat dan daftar lencana dari DB
-    final certsRes = await supabase.from('certifications_master').select();
-    final achRes = await supabase.from('achievements_master').select();
-
-    // Buat map pencarian lencana agar cepat
-    Map<String, dynamic> achMap = {};
-    for (var a in achRes) {
-      achMap[a['id']] = a;
-    }
-
-    List<Map<String, dynamic>> mappedCerts = [];
-
-    for (var c in certsRes) {
-      String role = c['role_id'];
-      List<dynamic> reqIds = c['required_achievement_ids'] ?? [];
-
-      // Tentukan warna tema berdasarkan role & Label Role Multibahasa
-      List<Color> gradient;
-      Color badgeColor;
-      String roleLabelId = "";
-      String roleLabelEn = "";
-
-      if (role == 'chef') {
-        gradient = [const Color(0xFFA5CBEB), const Color(0xFF75AADB)];
-        badgeColor = const Color(0xFF75AADB);
-        roleLabelId = "KOKI CILIK";
-        roleLabelEn = "LITTLE CHEF";
-      } else if (role == 'doctor') {
-        gradient = [const Color(0xFFB9E4C9), const Color(0xFF81C784)];
-        badgeColor = const Color(0xFF81C784);
-        roleLabelId = "DOKTER CILIK";
-        roleLabelEn = "LITTLE DOCTOR";
-      } else if (role == 'artist') {
-        gradient = [const Color(0xFFF1A22F), const Color(0xFFE57B65)];
-        badgeColor = const Color(0xFFE57B65);
-        roleLabelId = "PELUKIS CILIK";
-        roleLabelEn = "LITTLE ARTIST";
-      } else if (role == 'athlete') {
-        gradient = [const Color(0xFFFFCC80), const Color(0xFFFFB74D)];
-        badgeColor = const Color(0xFFFFB74D);
-        roleLabelId = "ATLET CILIK";
-        roleLabelEn = "LITTLE ATHLETE";
-      } else if (role == 'teacher') {
-        gradient = [const Color(0xFF80CBC4), const Color(0xFF4DB6AC)];
-        badgeColor = const Color(0xFF4DB6AC);
-        roleLabelId = "GURU CILIK";
-        roleLabelEn = "LITTLE TEACHER";
-      } else {
-        gradient = [const Color(0xFFB0BEC5), const Color(0xFF90A4AE)];
-        badgeColor = const Color(0xFF90A4AE);
-        roleLabelId = role.toUpperCase();
-        roleLabelEn = role.toUpperCase();
-      }
-
-      // Rakit lencana untuk sertifikat ini (mengambil ID & EN)
-      List<Map<String, dynamic>> badges = [];
-      for (var reqId in reqIds) {
-        var ach = achMap[reqId];
-        if (ach != null) {
-          badges.add({
-            'id': ach['id'],
-            'nameId': ach['title_id'],
-            'nameEn': ach['title_en'],
-            'emoji': ach['icon_url'], // Menggunakan Emoji dari DB!
-            'color': badgeColor,
-          });
-        }
-      }
-
-      mappedCerts.add({
-        'id': c['id'],
-        'role_id': role,
-        'roleLabelId': roleLabelId,
-        'roleLabelEn': roleLabelEn,
-        'cardTitleId': c['title_id'],
-        'cardTitleEn': c['title_en'],
-        'characterImg': c['icon_url'],
-        'gradient': gradient,
-        'badges': badges,
-      });
-    }
-
-    return mappedCerts;
-  } catch (e) {
-    debugPrint("Gagal memuat master sertifikat: $e");
-    return [];
-  }
-});
+// allCertificatesProvider sekarang di ../data/certificate_provider.dart
+// (dulu ada salinan identik di sini DAN di profile_page.dart).
 
 // ==========================================
-// PROVIDER 2: MENGHITUNG LENCANA YANG SUDAH DIBUKA PER ROLE
+// PROVIDER: MENGHITUNG LENCANA YANG SUDAH DIBUKA PER ROLE
 // ==========================================
 final certificateProgressProvider =
     FutureProvider.family<Map<String, int>, String>((ref, childId) async {
@@ -176,7 +85,7 @@ class AllCertificatesPage extends ConsumerWidget {
     final certProgressAsync = ref.watch(certificateProgressProvider(childId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           // HEADER SEDERHANA
@@ -189,7 +98,7 @@ class AllCertificatesPage extends ConsumerWidget {
                 Text(
                   texts['title']!,
                   style: const TextStyle(
-                    color: Color(0xFF0A264F),
+                    color: AppColors.primary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -201,21 +110,16 @@ class AllCertificatesPage extends ConsumerWidget {
           // LIST SEMUA SERTIFIKAT DINAMIS
           Expanded(
             child: allCertsAsync.when(
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-              ),
-              error: (e, s) => Center(child: Text("${texts['err_cert']}$e")),
+              loading: () => const AppLoading(),
+              error: (e, s) => AppErrorView(message: "${texts['err_cert']}$e"),
               data: (allCerts) {
                 if (allCerts.isEmpty) {
-                  return Center(child: Text(texts['empty_cert']!));
+                  return AppEmptyState(message: texts['empty_cert']!);
                 }
 
                 return certProgressAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-                  ),
-                  error: (e, s) =>
-                      Center(child: Text("${texts['err_prog']}$e")),
+                  loading: () => const AppLoading(),
+                  error: (e, s) => AppErrorView(message: "${texts['err_prog']}$e"),
                   data: (roleCounts) {
                     return ListView.builder(
                       physics: const BouncingScrollPhysics(),
@@ -266,7 +170,7 @@ class AllCertificatesPage extends ConsumerWidget {
     String lang,
   ) {
     // Kita buat cardWidth statis proporsional, misalnya 88% dari layar
-    final cardWidth = MediaQuery.of(context).size.width * 0.88;
+    final cardWidth = context.screenWidth * 0.88;
 
     final totalBadges = (cert['badges'] as List).length;
     final unlockedCount = dbUnlockedCount > totalBadges
@@ -300,7 +204,7 @@ class AllCertificatesPage extends ConsumerWidget {
             end: Alignment.bottomRight,
             colors:
                 cert['gradient'] ??
-                [const Color(0xFF0A264F), const Color(0xFF163C73)],
+                [AppColors.primary, AppColors.primaryLight],
           ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
@@ -337,7 +241,7 @@ class AllCertificatesPage extends ConsumerWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFDF1E8),
+                  color: AppColors.accentTint,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white, width: 2),
                   boxShadow: const [
