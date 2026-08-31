@@ -6,8 +6,12 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
-
-// 🔥 IMPORT INI UNTUK MENGAKSES PROVIDER VISIBILITAS MINK
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/responsive.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
 
 // ==========================================
@@ -63,7 +67,7 @@ final childRealtimeXpProvider = StreamProvider.family<int, String>((
       .map((event) {
         try {
           final childRow = event.firstWhere((row) => row['id'] == childId);
-          return childRow['total_xp'] as int? ?? childRow['xp'] as int? ?? 0;
+          return childRow['total_xp'] as int? ?? 0;
         } catch (e) {
           return 0;
         }
@@ -234,6 +238,9 @@ const Map<String, Map<String, String>> _t = {
 
 // ==========================================
 // DATA ROLE
+// TODO: role card butuh gambar & warna aksen per-peran yang belum ada
+// kolomnya di tabel `roles_master` (cuma ada nama). Selama kolom itu belum
+// ditambah, data visual role ini terpaksa tetap hardcode di client.
 // ==========================================
 final List<Map<String, dynamic>> roleData = [
   {
@@ -249,7 +256,7 @@ final List<Map<String, dynamic>> roleData = [
     ],
     "bgImage": "assets/images/artist_trans.png",
     "cardImage": "assets/images/penguin_artist.png",
-    "cardBg": const Color(0xFFFDF1E8),
+    "cardBg": AppColors.accentTint,
   },
   {
     "id": "chef",
@@ -264,7 +271,7 @@ final List<Map<String, dynamic>> roleData = [
     ],
     "bgImage": "assets/images/chef_trans.png",
     "cardImage": "assets/images/penguin_chef.png",
-    "cardBg": const Color(0xFFEBF4FA),
+    "cardBg": AppColors.primaryTint,
   },
   {
     "id": "doctor",
@@ -280,7 +287,7 @@ final List<Map<String, dynamic>> roleData = [
     ],
     "bgImage": "assets/images/doctor_trans.png",
     "cardImage": "assets/images/penguin_doctor.png",
-    "cardBg": const Color(0xFFE8F2E6),
+    "cardBg": AppColors.successTint,
   },
   {
     "id": "athlete",
@@ -312,7 +319,6 @@ final List<Map<String, dynamic>> roleData = [
   },
 ];
 
-// 🔥 DIUBAH JADI STATEFUL WIDGET AGAR BISA INITSTATE
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
@@ -377,22 +383,19 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     return childDataAsync.when(
       loading: () => const Scaffold(
-        backgroundColor: Color(0xFFF5F8FB),
-        body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-        ),
+        backgroundColor: AppColors.background,
+        body: AppLoading(),
       ),
       error: (error, stackTrace) => Scaffold(
-        backgroundColor: const Color(0xFFF5F8FB),
-        body: Center(child: Text("${texts['err_loading']}$error")),
+        backgroundColor: AppColors.background,
+        body: AppErrorView(message: "${texts['err_loading']}$error"),
       ),
       data: (data) {
         final String childId = data?['id'] ?? '';
         final String childName = data?['name'] ?? "Anak Hebat";
 
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
-        final int totalXp =
-            realtimeXpAsync.value ?? data?['total_xp'] ?? data?['xp'] ?? 0;
+        final int totalXp = realtimeXpAsync.value ?? data?['total_xp'] ?? 0;
 
         final levelData = _calculateLevelData(totalXp);
         final int childLevel = levelData['level']!;
@@ -405,51 +408,54 @@ class _HomePageState extends ConsumerState<HomePage> {
         final achievementsAsync = ref.watch(childAchievementsProvider(childId));
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F8FB),
+          backgroundColor: AppColors.background,
           body: SafeArea(
             bottom: false,
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context, texts, parentName),
-                  _buildUserCard(
-                    context,
-                    texts,
-                    childName,
-                    childLevel,
-                    childCurrentXp,
-                    childMaxXp,
-                  ),
-                  _buildTodayMissionCard(context, texts),
-                  _buildChooseRole(context, texts, lang),
+              child: ResponsiveCenter(
+                maxWidth: 640,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(context, texts, parentName),
+                    _buildUserCard(
+                      context,
+                      texts,
+                      childName,
+                      childLevel,
+                      childCurrentXp,
+                      childMaxXp,
+                    ),
+                    _buildTodayMissionCard(context, texts),
+                    _buildChooseRole(context, texts, lang),
 
-                  progressAsync.when(
-                    loading: () => const Padding(
-                      padding: EdgeInsets.all(40),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFFE57B65),
-                        ),
+                    progressAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(AppSpacing.xl),
+                        child: AppLoading(),
+                      ),
+                      error: (e, s) => Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Text("${texts['err_loading']}$e"),
+                      ),
+                      data: (progressData) =>
+                          _buildStackedBoxProgress(context, texts, progressData, lang),
+                    ),
+
+                    achievementsAsync.when(
+                      loading: () => const SizedBox(),
+                      error: (e, s) => const SizedBox(),
+                      data: (achievementsData) => _buildRecentAchievements(
+                        context,
+                        texts,
+                        achievementsData,
+                        lang,
                       ),
                     ),
-                    error: (e, s) => Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text("${texts['err_loading']}$e"),
-                    ),
-                    data: (progressData) =>
-                        _buildStackedBoxProgress(texts, progressData, lang),
-                  ),
-
-                  achievementsAsync.when(
-                    loading: () => const SizedBox(),
-                    error: (e, s) => const SizedBox(),
-                    data: (achievementsData) =>
-                        _buildRecentAchievements(texts, achievementsData, lang),
-                  ),
-                  const SizedBox(height: 120),
-                ],
+                    const SizedBox(height: 120),
+                  ],
+                ),
               ),
             ),
           ),
@@ -463,8 +469,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     Map<String, String> texts,
     String parentName,
   ) {
+    final hPad = context.pageHPadding;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.lg, hPad, AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -474,28 +481,21 @@ class _HomePageState extends ConsumerState<HomePage> {
               children: [
                 Text(
                   "${texts['greeting']} $parentName".trim(),
-                  style: const TextStyle(
-                    color: Color(0xFF0A264F),
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.h2(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   texts['subtitle']!,
-                  style: TextStyle(
-                    color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyles.body(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           GestureDetector(
             onTap: () => context.push('/notifications'),
             child: Stack(
@@ -504,20 +504,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surface,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: AppColors.border),
                     boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
+                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                     ],
                   ),
                   child: const Icon(
                     Icons.notifications_none_rounded,
-                    color: Color(0xFF0A264F),
+                    color: AppColors.primary,
                     size: 24,
                   ),
                 ),
@@ -528,7 +524,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE57B65),
+                      color: AppColors.accent,
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 1.5),
                     ),
@@ -552,14 +548,15 @@ class _HomePageState extends ConsumerState<HomePage> {
   ) {
     double progressPercent = maxXp > 0 ? xp / maxXp : 0.0;
     progressPercent = progressPercent.clamp(0.0, 1.0);
+    final hPad = context.pageHPadding;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.sm),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Container(
           width: double.infinity,
-          color: const Color(0xFF0A264F),
+          color: AppColors.primary,
           child: Stack(
             children: [
               Positioned(
@@ -575,7 +572,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpacing.md + 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -590,34 +587,23 @@ class _HomePageState extends ConsumerState<HomePage> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
+                                border: Border.all(color: Colors.white, width: 2),
                               ),
                               alignment: Alignment.center,
-                              child: const Text(
-                                "👦🏻",
-                                style: TextStyle(fontSize: 24),
-                              ),
+                              child: const Text("👦🏻", style: TextStyle(fontSize: 24)),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.sm + 4),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   childName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
+                                  style: AppTextStyles.h3(color: Colors.white),
                                 ),
                                 Text(
                                   texts['little_explorer']!,
-                                  style: TextStyle(
+                                  style: AppTextStyles.caption(
                                     color: Colors.white.withValues(alpha: 0.7),
-                                    fontSize: 12,
                                   ),
                                 ),
                               ],
@@ -630,7 +616,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             width: 32,
                             height: 32,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFE57B65),
+                              color: AppColors.accent,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -642,35 +628,31 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           "⭐ Level $level",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                          style: AppTextStyles.caption(color: Colors.white).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           "$xp/$maxXp XP",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
+                          style: AppTextStyles.caption(color: Colors.white).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Container(
                       height: 10,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       child: FractionallySizedBox(
                         alignment: Alignment.centerLeft,
@@ -681,17 +663,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                             gradient: const LinearGradient(
                               colors: [Color(0xFF6DD5FA), Color(0xFF2980B9)],
                             ),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       texts['motivation']!,
-                      style: TextStyle(
+                      style: AppTextStyles.caption(
                         color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -708,13 +689,14 @@ class _HomePageState extends ConsumerState<HomePage> {
     BuildContext context,
     Map<String, String> texts,
   ) {
+    final hPad = context.pageHPadding;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.md),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Container(
           width: double.infinity,
-          color: const Color(0xFFA5CBEB),
+          color: AppColors.primaryLighter,
           child: Stack(
             children: [
               Positioned.fill(
@@ -730,10 +712,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.4,
-                  child: Image.asset(
-                    'assets/images/snow.png',
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset('assets/images/snow.png', fit: BoxFit.cover),
                 ),
               ),
               Positioned(
@@ -746,40 +725,26 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.55,
+                  width: context.screenWidth * 0.55,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         texts['today_rec']!,
-                        style: TextStyle(
-                          color: const Color(0xFF0A264F).withValues(alpha: 0.8),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
+                        style: AppTextStyles.caption(
+                          color: AppColors.primary.withValues(alpha: 0.8),
+                        ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        texts['mission_title']!,
-                        style: const TextStyle(
-                          color: Color(0xFF0A264F),
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(texts['mission_title']!, style: AppTextStyles.h1()),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         texts['mission_desc']!,
-                        style: TextStyle(
-                          color: const Color(0xFF0A264F).withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
+                        style: AppTextStyles.body(color: AppColors.primary.withValues(alpha: 0.7)),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.lg),
                       ElevatedButton(
                         onPressed: () => context.go('/missions?role=chef'),
                         style: ElevatedButton.styleFrom(
@@ -787,29 +752,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
                           ),
                         ).copyWith(elevation: WidgetStateProperty.all(5)),
                         child: Ink(
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFF1A22F), Color(0xFFF5B555)],
+                            gradient: LinearGradient(
+                              colors: [AppColors.gold, AppColors.gold.withValues(alpha: 0.85)],
                             ),
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            constraints: const BoxConstraints(
-                              minWidth: 100,
-                              minHeight: 40,
-                            ),
+                            constraints: const BoxConstraints(minWidth: 100, minHeight: 40),
                             child: Text(
                               texts['btn_start_mission']!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                              style: AppTextStyles.button(),
                             ),
                           ),
                         ),
@@ -830,52 +788,45 @@ class _HomePageState extends ConsumerState<HomePage> {
     Map<String, String> texts,
     String lang,
   ) {
+    final hPad = context.pageHPadding;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: hPad),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 texts['choose_role']!,
-                style: const TextStyle(
-                  color: Color(0xFF0A264F),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
+                style: AppTextStyles.h2().copyWith(height: 1.2),
               ),
               SizedBox(
                 width: 100,
                 child: Text(
                   texts['choose_role_desc']!,
                   textAlign: TextAlign.right,
-                  style: TextStyle(
-                    color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
+                  style: AppTextStyles.caption(color: AppColors.textSecondary),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: hPad),
           child: Row(
             children: roleData.map((role) {
               final title = lang == 'id' ? role["title"] : role["title_en"];
               return Padding(
-                padding: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(right: AppSpacing.md),
                 child: GestureDetector(
                   onTap: () => _showRoleDetail(context, role, texts, lang),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     child: Container(
                       width: 140,
                       height: 190,
@@ -889,11 +840,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               errorBuilder: (_, __, ___) => Container(
                                 color: role["cardBg"] as Color,
                                 child: const Center(
-                                  child: Icon(
-                                    Icons.stars_rounded,
-                                    color: Colors.black12,
-                                    size: 60,
-                                  ),
+                                  child: Icon(Icons.stars_rounded, color: Colors.black12, size: 60),
                                 ),
                               ),
                             ),
@@ -909,9 +856,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   begin: Alignment.bottomCenter,
                                   end: Alignment.topCenter,
                                   colors: [
-                                    const Color(
-                                      0xFF0A264F,
-                                    ).withValues(alpha: 0.9),
+                                    AppColors.primary.withValues(alpha: 0.9),
                                     Colors.transparent,
                                   ],
                                 ),
@@ -919,16 +864,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                           ),
                           Positioned(
-                            bottom: 16,
-                            left: 16,
-                            right: 16,
+                            bottom: AppSpacing.md,
+                            left: AppSpacing.md,
+                            right: AppSpacing.md,
                             child: Text(
                               title as String,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
+                              style: AppTextStyles.bodyBold(color: Colors.white),
                             ),
                           ),
                         ],
@@ -945,111 +886,57 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   String _getDayName(int weekday, String lang) {
-    if (lang == 'id') {
-      switch (weekday) {
-        case 1:
-          return 'Sen';
-        case 2:
-          return 'Sel';
-        case 3:
-          return 'Rab';
-        case 4:
-          return 'Kam';
-        case 5:
-          return 'Jum';
-        case 6:
-          return 'Sab';
-        case 7:
-          return 'Min';
-        default:
-          return '-';
-      }
-    } else {
-      switch (weekday) {
-        case 1:
-          return 'Mon';
-        case 2:
-          return 'Tue';
-        case 3:
-          return 'Wed';
-        case 4:
-          return 'Thu';
-        case 5:
-          return 'Fri';
-        case 6:
-          return 'Sat';
-        case 7:
-          return 'Sun';
-        default:
-          return '-';
-      }
-    }
+    const idNames = {1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 7: 'Min'};
+    const enNames = {1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 7: 'Sun'};
+    return (lang == 'id' ? idNames[weekday] : enNames[weekday]) ?? '-';
+  }
+
+  /// Card putih placeholder untuk state "belum ada data" — dipakai di
+  /// progress mingguan & pencapaian, sebelumnya 2 blok kode ~30 baris yang
+  /// isinya identik cuma beda icon & pesan.
+  Widget _emptyCard({required IconData icon, required String message}) {
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          Icon(icon, color: AppColors.accent, size: 40),
+          const SizedBox(height: AppSpacing.sm + 4),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildStackedBoxProgress(
+    BuildContext context,
     Map<String, String> texts,
     List progressData,
     String lang,
   ) {
+    final hPad = context.pageHPadding;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.xl, hPad, AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            texts['weekly_prog']!,
-            style: const TextStyle(
-              color: Color(0xFF0A264F),
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-
+          Text(texts['weekly_prog']!, style: AppTextStyles.h3()),
+          const SizedBox(height: AppSpacing.md),
           if (progressData.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF0A264F).withValues(alpha: 0.05),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.dashboard_customize_rounded,
-                    color: Color(0xFFE57B65),
-                    size: 40,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    texts['empty_progress']!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
+            _emptyCard(
+              icon: Icons.dashboard_customize_rounded,
+              message: texts['empty_progress']!,
             )
           else
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            AppCard(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md + 4,
+                AppSpacing.xl - 2,
+                AppSpacing.md + 4,
+                AppSpacing.md + 4,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1085,40 +972,30 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   curve: Curves.easeOutBack,
                                   width: 26,
                                   height: 26,
-                                  margin: const EdgeInsets.only(top: 4),
+                                  margin: const EdgeInsets.only(top: AppSpacing.xs),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFE57B65),
+                                    color: AppColors.accent,
                                     borderRadius: BorderRadius.circular(6),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(
-                                          0xFFE57B65,
-                                        ).withValues(alpha: 0.3),
+                                        color: AppColors.accent.withValues(alpha: 0.3),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(
-                                    Icons.star_rounded,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
+                                  child: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
                                 );
                               }),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm + 4),
                       Text(
                         dayName,
-                        style: TextStyle(
-                          color: const Color(
-                            0xFF0A264F,
-                          ).withValues(alpha: count > 0 ? 0.9 : 0.4),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.caption(
+                          color: AppColors.primary.withValues(alpha: count > 0 ? 0.9 : 0.4),
+                        ).copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   );
@@ -1131,53 +1008,23 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildRecentAchievements(
+    BuildContext context,
     Map<String, String> texts,
     List achievementsData,
     String lang,
   ) {
+    final hPad = context.pageHPadding;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            texts['recent_achieve']!,
-            style: const TextStyle(
-              color: Color(0xFF0A264F),
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
+          Text(texts['recent_achieve']!, style: AppTextStyles.h3()),
+          const SizedBox(height: AppSpacing.md),
           if (achievementsData.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF0A264F).withValues(alpha: 0.05),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.emoji_events_outlined,
-                    color: Color(0xFFE57B65),
-                    size: 40,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    texts['empty_achieve']!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
+            _emptyCard(
+              icon: Icons.emoji_events_outlined,
+              message: texts['empty_achieve']!,
             )
           else
             SizedBox(
@@ -1186,7 +1033,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: achievementsData.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm + 4),
                 itemBuilder: (context, index) {
                   final item = achievementsData[index];
 
@@ -1199,62 +1046,41 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ? (item['title_id'] ?? 'Prestasi Baru')
                       : (item['title_en'] ?? 'New Achievement');
 
-                  return Container(
-                    width: 180,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFF1A22F,
-                            ).withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
+                  return AppCard(
+                    padding: const EdgeInsets.all(AppSpacing.sm + 4),
+                    child: SizedBox(
+                      width: 180 - (AppSpacing.sm + 4) * 2,
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.gold.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              item['icon_url'] ?? '🏅',
+                              style: const TextStyle(fontSize: 20),
+                            ),
                           ),
-                          child: Text(
-                            item['icon_url'] ?? '🏅',
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                badgeTitle,
-                                style: const TextStyle(
-                                  color: Color(0xFF0A264F),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
+                          const SizedBox(width: AppSpacing.sm + 2),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  badgeTitle,
+                                  style: AppTextStyles.bodyBold(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                formattedDate,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                            ],
+                                const SizedBox(height: AppSpacing.xs),
+                                Text(formattedDate, style: AppTextStyles.caption()),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -1283,10 +1109,10 @@ class _HomePageState extends ConsumerState<HomePage> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.65,
-          decoration: const BoxDecoration(
-            color: Color(0xFFA5CBEB),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+          height: context.screenHeight * 0.65,
+          decoration: BoxDecoration(
+            color: AppColors.primaryLighter,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
           ),
           child: Stack(
             children: [
@@ -1296,10 +1122,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 right: 0,
                 child: Opacity(
                   opacity: 0.9,
-                  child: Image.asset(
-                    'assets/images/snow.png',
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset('assets/images/snow.png', fit: BoxFit.cover),
                 ),
               ),
               Positioned(
@@ -1316,21 +1139,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
               ),
               Positioned(
-                top: 24,
-                right: 24,
+                top: AppSpacing.lg,
+                right: AppSpacing.lg,
                 child: GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Color(0xFF0A264F),
-                      size: 20,
-                    ),
+                    child: const Icon(Icons.close, color: AppColors.primary, size: 20),
                   ),
                 ),
               ),
@@ -1341,28 +1160,21 @@ class _HomePageState extends ConsumerState<HomePage> {
                   children: [
                     Text(
                       title as String,
-                      style: const TextStyle(
-                        color: Color(0xFF0A264F),
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.h1(),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm + 4),
                     Text(
                       description as String,
-                      style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        height: 1.4,
-                      ),
+                      style: AppTextStyles.bodyLarge(
+                        color: AppColors.primary.withValues(alpha: 0.8),
+                      ).copyWith(fontWeight: FontWeight.w500),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
+                      spacing: AppSpacing.sm + 4,
+                      runSpacing: AppSpacing.sm + 4,
                       alignment: WrapAlignment.center,
                       children: (role["skills"] as List<dynamic>).map((skill) {
                         final skillName = lang == 'id'
@@ -1370,58 +1182,42 @@ class _HomePageState extends ConsumerState<HomePage> {
                             : skill["name_en"];
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.sm,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 4),
-                            ],
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
+                            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                skillName as String,
-                                style: const TextStyle(
-                                  color: Color(0xFF0A264F),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                skill["icon"] as String,
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                              Text(skillName as String, style: AppTextStyles.bodyBold()),
+                              const SizedBox(width: AppSpacing.sm),
+                              Text(skill["icon"] as String, style: const TextStyle(fontSize: 16)),
                             ],
                           ),
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
                         context.go('/missions?role=${role["id"]}');
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE57B65),
+                        backgroundColor: AppColors.accent,
                         minimumSize: const Size(double.infinity, 56),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
                         ),
                         elevation: 5,
                       ),
                       child: Text(
                         texts['btn_start_role']!,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.button().copyWith(fontSize: 18),
                       ),
                     ),
                   ],
