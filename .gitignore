@@ -43,3 +43,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Build artifacts (nested)
+android/build/
+android/app/build/
+android/.gradle/
+android/.kotlin/
+**/*.log
+flutter_0*.png
+
+# Secrets
+.env
+.env.*
+!.env.example
