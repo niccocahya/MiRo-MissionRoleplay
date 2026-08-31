@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/constants/role_visuals.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -235,89 +236,6 @@ const Map<String, Map<String, String>> _t = {
     'err_loading': "Error memuat data: ",
   },
 };
-
-// ==========================================
-// DATA ROLE
-// TODO: role card butuh gambar & warna aksen per-peran yang belum ada
-// kolomnya di tabel `roles_master` (cuma ada nama). Selama kolom itu belum
-// ditambah, data visual role ini terpaksa tetap hardcode di client.
-// ==========================================
-final List<Map<String, dynamic>> roleData = [
-  {
-    "id": "artist",
-    "title": "Pelukis",
-    "title_en": "Artist",
-    "description": "Ekspresikan dirimu lewat warna, bentuk, dan kreativitas.",
-    "description_en":
-        "Express yourself through colors, shapes, and creativity.",
-    "skills": [
-      {"name": "Kreativitas", "name_en": "Creativity", "icon": "🎨"},
-      {"name": "Motorik", "name_en": "Motor Skills", "icon": "🧩"},
-    ],
-    "bgImage": "assets/images/artist_trans.png",
-    "cardImage": "assets/images/penguin_artist.png",
-    "cardBg": AppColors.accentTint,
-  },
-  {
-    "id": "chef",
-    "title": "Koki",
-    "title_en": "Chef",
-    "description": "Belajar membuat makanan sambil mengenal tekstur dan rasa.",
-    "description_en":
-        "Learn to make food while getting to know textures and flavors.",
-    "skills": [
-      {"name": "Kognitif", "name_en": "Cognitive", "icon": "🧠"},
-      {"name": "Motorik", "name_en": "Motor Skills", "icon": "🧩"},
-    ],
-    "bgImage": "assets/images/chef_trans.png",
-    "cardImage": "assets/images/penguin_chef.png",
-    "cardBg": AppColors.primaryTint,
-  },
-  {
-    "id": "doctor",
-    "title": "Dokter",
-    "title_en": "Doctor",
-    "description":
-        "Jelajahi tubuh manusia dan belajar merawat orang lain tanpa gawai.",
-    "description_en":
-        "Explore the human body and learn how to care for others screen free.",
-    "skills": [
-      {"name": "Kognitif", "name_en": "Cognitive", "icon": "🧠"},
-      {"name": "Empati", "name_en": "Empathy", "icon": "💗"},
-    ],
-    "bgImage": "assets/images/doctor_trans.png",
-    "cardImage": "assets/images/penguin_doctor.png",
-    "cardBg": AppColors.successTint,
-  },
-  {
-    "id": "athlete",
-    "title": "Atlet",
-    "title_en": "Athlete",
-    "description": "Latih ketangkasan fisik dan sportivitasmu sejak dini.",
-    "description_en": "Train your physical agility and sportsmanship early on.",
-    "skills": [
-      {"name": "Motorik", "name_en": "Motoric", "icon": "🏃"},
-      {"name": "Kognitif", "name_en": "Cognitive", "icon": "🧠"},
-    ],
-    "bgImage": "assets/images/frost.png",
-    "cardImage": "assets/images/penguin_athlete.png",
-    "cardBg": const Color(0xFFFFF0E6),
-  },
-  {
-    "id": "teacher",
-    "title": "Guru",
-    "title_en": "Teacher",
-    "description": "Berbagi ilmu dan latih komunikasimu dengan gembira.",
-    "description_en": "Share knowledge and train your communication happily.",
-    "skills": [
-      {"name": "Literasi", "name_en": "Literacy", "icon": "📚"},
-      {"name": "Empati", "name_en": "Empathy", "icon": "💗"},
-    ],
-    "bgImage": "assets/images/frost.png",
-    "cardImage": "assets/images/penguin_teacher.png",
-    "cardBg": const Color(0xFFE6FAF0),
-  },
-];
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -819,8 +737,8 @@ class _HomePageState extends ConsumerState<HomePage> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: hPad),
           child: Row(
-            children: roleData.map((role) {
-              final title = lang == 'id' ? role["title"] : role["title_en"];
+            children: kRoleVisuals.map((role) {
+              final title = role.name(lang);
               return Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.md),
                 child: GestureDetector(
@@ -830,15 +748,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                     child: Container(
                       width: 140,
                       height: 190,
-                      color: role["cardBg"] as Color,
+                      color: role.tint,
                       child: Stack(
                         children: [
                           Positioned.fill(
                             child: Image.asset(
-                              role["cardImage"] as String,
+                              role.penguinIcon,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
-                                color: role["cardBg"] as Color,
+                                color: role.tint,
                                 child: const Center(
                                   child: Icon(Icons.stars_rounded, color: Colors.black12, size: 60),
                                 ),
@@ -868,7 +786,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             left: AppSpacing.md,
                             right: AppSpacing.md,
                             child: Text(
-                              title as String,
+                              title,
                               style: AppTextStyles.bodyBold(color: Colors.white),
                             ),
                           ),
@@ -1093,14 +1011,12 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   void _showRoleDetail(
     BuildContext context,
-    Map<String, dynamic> role,
+    RoleVisual role,
     Map<String, String> texts,
     String lang,
   ) {
-    final title = lang == 'id' ? role["title"] : role["title_en"];
-    final description = lang == 'id'
-        ? role["description"]
-        : role["description_en"];
+    final title = role.name(lang);
+    final description = role.description(lang);
 
     showModalBottomSheet(
       context: context,
@@ -1132,7 +1048,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 child: Opacity(
                   opacity: 0.5,
                   child: Image.asset(
-                    role["bgImage"] as String,
+                    role.bgImage,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(),
                   ),
@@ -1159,13 +1075,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      title as String,
+                      title,
                       style: AppTextStyles.h1(),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.sm + 4),
                     Text(
-                      description as String,
+                      description,
                       style: AppTextStyles.bodyLarge(
                         color: AppColors.primary.withValues(alpha: 0.8),
                       ).copyWith(fontWeight: FontWeight.w500),
@@ -1176,10 +1092,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       spacing: AppSpacing.sm + 4,
                       runSpacing: AppSpacing.sm + 4,
                       alignment: WrapAlignment.center,
-                      children: (role["skills"] as List<dynamic>).map((skill) {
-                        final skillName = lang == 'id'
-                            ? skill["name"]
-                            : skill["name_en"];
+                      children: role.skills.map((skill) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.md,
@@ -1193,9 +1106,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(skillName as String, style: AppTextStyles.bodyBold()),
+                              Text(skill.name(lang), style: AppTextStyles.bodyBold()),
                               const SizedBox(width: AppSpacing.sm),
-                              Text(skill["icon"] as String, style: const TextStyle(fontSize: 16)),
+                              Text(skill.icon, style: const TextStyle(fontSize: 16)),
                             ],
                           ),
                         );
@@ -1205,7 +1118,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        context.go('/missions?role=${role["id"]}');
+                        context.go('/missions?role=${role.id}');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accent,

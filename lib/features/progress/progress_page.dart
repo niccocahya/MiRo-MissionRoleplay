@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'dart:math' as math;
 
-import '../../shared/widgets/penguin_chat_bot.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/constants/role_visuals.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/responsive.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_state_views.dart';
 // IMPORT BARU UNTUK MEMBUKA JURNAL
 import '../missions/data/mission_model.dart';
 import '../missions/screens/mission_journal_screen.dart';
@@ -391,9 +396,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       context: context,
       barrierDismissible: false,
       useRootNavigator: true,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-      ),
+      builder: (_) => const AppLoading(),
     );
 
     try {
@@ -454,13 +457,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
 
     return childDataAsync.when(
       loading: () => const Scaffold(
-        backgroundColor: Color(0xFFF5F8FB),
-        body: Center(
-          child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-        ),
+        backgroundColor: AppColors.background,
+        body: AppLoading(),
       ),
-      error: (error, stack) =>
-          Scaffold(body: Center(child: Text("${texts['err_load']}$error"))),
+      error: (error, stack) => Scaffold(
+        backgroundColor: AppColors.background,
+        body: AppErrorView(message: "${texts['err_load']}$error"),
+      ),
       data: (data) {
         final String childName = data?['name'] ?? texts['default_child_name']!;
         final int currentStreak =
@@ -489,7 +492,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         }).toList();
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F8FB),
+          backgroundColor: AppColors.background,
           body: SafeArea(
             bottom: false,
             child: SingleChildScrollView(
@@ -503,11 +506,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   _buildRadarChart(texts, radarData, rawScores, maxIndex),
 
                   monthlyDaysAsync.when(
-                    loading: () => const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: CircularProgressIndicator(),
-                      ),
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(AppSpacing.lg),
+                      child: AppLoading(),
                     ),
                     error: (e, s) => const SizedBox(),
                     data: (activeDays) =>
@@ -540,7 +541,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           Text(
             "${texts['title']} $childName",
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontSize: 28,
               fontWeight: FontWeight.bold,
               height: 1.1,
@@ -550,7 +551,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           Text(
             texts['subtitle']!,
             style: TextStyle(
-              color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+              color: AppColors.primary.withValues(alpha: 0.6),
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -590,7 +591,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFF1A22F).withValues(alpha: 0.15),
+                      color: AppColors.gold.withValues(alpha: 0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -604,7 +605,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     Text(
                       "$streak",
                       style: const TextStyle(
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
                       ),
@@ -612,7 +613,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     Text(
                       texts['streak_label']!,
                       style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.7),
+                        color: AppColors.primary.withValues(alpha: 0.7),
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -627,14 +628,14 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFEBF4FA), Color(0xFFD9EAFA)],
+                    colors: [AppColors.primaryTint, Color(0xFFD9EAFA)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFA5CBEB).withValues(alpha: 0.3),
+                      color: AppColors.primaryLighter.withValues(alpha: 0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -648,7 +649,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     Text(
                       "${texts['level']} $level",
                       style: const TextStyle(
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                       ),
@@ -662,7 +663,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                           0xFF0A264F,
                         ).withValues(alpha: 0.1),
                         valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFFF1A22F),
+                          AppColors.gold,
                         ),
                         minHeight: 8,
                       ),
@@ -671,7 +672,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     Text(
                       "$currentXp / $maxXp XP",
                       style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+                        color: AppColors.primary.withValues(alpha: 0.6),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -789,7 +790,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Text(
                 texts['consistency']!,
                 style: const TextStyle(
-                  color: Color(0xFF0A264F),
+                  color: AppColors.primary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -800,13 +801,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEBF4FA),
+                  color: AppColors.primaryTint,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   monthName,
                   style: const TextStyle(
-                    color: Color(0xFF0A264F),
+                    color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -879,7 +880,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                       duration: const Duration(milliseconds: 300),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? const Color(0xFFE57B65)
+                            ? AppColors.accent
                             : Colors.grey.shade100,
                         shape: BoxShape.circle,
                         boxShadow: isActive
@@ -934,7 +935,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           Text(
             texts['mission_history']!,
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -974,23 +975,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           const SizedBox(height: 24),
 
           historyAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-            ),
-            error: (e, s) => Center(child: Text("Error: $e")),
+            loading: () => const AppLoading(),
+            error: (e, s) => AppErrorView(message: "${texts['err_load']}$e"),
             data: (historyData) {
               if (historyData.isEmpty) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Text(
-                      texts['empty_history']!,
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
+                return AppEmptyState(
+                  message: texts['empty_history']!,
+                  icon: Icons.history_toggle_off_rounded,
                 );
               }
               return ListView.separated(
@@ -1003,7 +994,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   final item = historyData[index];
                   return GestureDetector(
                     onTap: () => _openJournalFromHistory(item, texts),
-                    child: _buildHistoryCard(item, texts),
+                    child: _buildHistoryCard(item, texts, lang),
                   );
                 },
               );
@@ -1027,28 +1018,20 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           Text(
             texts['achievements']!,
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
           achievementsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-            ),
+            loading: () => const AppLoading(),
             error: (e, s) => const SizedBox(),
             data: (achievements) {
               if (achievements.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    texts['empty_achievements']!,
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
+                return AppEmptyState(
+                  message: texts['empty_achievements']!,
+                  icon: Icons.emoji_events_outlined,
                 );
               }
               return Wrap(
@@ -1072,50 +1055,31 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         ? (achievement['title_id'] ?? 'Pencapaian')
         : (achievement['title_en'] ?? 'Achievement');
 
-    Color bgColor = const Color(0xFFFDF1E8);
-    final role = achievement['role_id']?.toString();
-    if (role == 'chef') bgColor = const Color(0xFFEBF4FA);
-    if (role == 'doctor') bgColor = const Color(0xFFE8F2E6);
-    if (role == 'artist') bgColor = const Color(0xFFFDF1E8);
-    if (role == 'athlete') bgColor = const Color(0xFFFFF0E6);
-    if (role == 'teacher') bgColor = const Color(0xFFE6FAF0);
+    final role = roleVisualById(achievement['role_id']?.toString()) ?? kUnknownRoleVisual;
 
-    return Container(
-      width: (MediaQuery.of(context).size.width - 72) / 2,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Text(icon, style: const TextStyle(fontSize: 22)),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFF0A264F),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md - 2),
+      radius: AppRadius.md,
+      child: SizedBox(
+        width: (context.screenWidth - 72) / 2 - (AppSpacing.md - 2) * 2,
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm + 2),
+              decoration: BoxDecoration(color: role.tint, shape: BoxShape.circle),
+              child: Text(icon, style: const TextStyle(fontSize: 22)),
             ),
-          ),
-        ],
+            const SizedBox(width: AppSpacing.sm + 2),
+            Expanded(
+              child: Text(
+                title,
+                style: AppTextStyles.bodyBold(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1145,12 +1109,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           isExpanded: true,
           icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
-            color: Color(0xFF0A264F),
+            color: AppColors.primary,
           ),
           dropdownColor: Colors.white,
           borderRadius: BorderRadius.circular(16),
           style: const TextStyle(
-            color: Color(0xFF0A264F),
+            color: AppColors.primary,
             fontSize: 13,
             fontWeight: FontWeight.bold,
           ),
@@ -1169,8 +1133,8 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   Widget _buildHistoryCard(
     Map<String, dynamic> item,
     Map<String, String> texts,
+    String lang,
   ) {
-    final String roleId = item['role_id'] ?? 'unknown';
     final int xp = item['earned_xp'] ?? 0;
     final Map<String, dynamic> skills = item['earned_skills'] ?? {};
 
@@ -1180,31 +1144,8 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         ? DateFormat('dd MMM yyyy, HH:mm').format(dateTime)
         : dateStr;
 
-    String roleName = roleId;
-    String iconPath = 'assets/images/penguin_doctor.png';
-    Color cardColor = const Color(0xFFE8F2E6);
-
-    if (roleId == 'doctor') {
-      roleName = texts['role_doctor']!;
-      iconPath = 'assets/images/penguin_doctor.png';
-      cardColor = const Color(0xFFE8F2E6);
-    } else if (roleId == 'chef') {
-      roleName = texts['role_chef']!;
-      iconPath = 'assets/images/penguin_chef.png';
-      cardColor = const Color(0xFFEBF4FA);
-    } else if (roleId == 'artist') {
-      roleName = texts['role_artist']!;
-      iconPath = 'assets/images/penguin_artist.png';
-      cardColor = const Color(0xFFFDF1E8);
-    } else if (roleId == 'athlete') {
-      roleName = texts['role_athlete']!;
-      iconPath = 'assets/images/penguin_athlete.png';
-      cardColor = const Color(0xFFFFF0E6);
-    } else if (roleId == 'teacher') {
-      roleName = texts['role_teacher']!;
-      iconPath = 'assets/images/penguin_teacher.png';
-      cardColor = const Color(0xFFE6FAF0);
-    }
+    final role = roleVisualById(item['role_id']?.toString()) ?? kUnknownRoleVisual;
+    final String roleName = role.name(lang);
 
     String skillsGained = skills.keys
         .map((k) {
@@ -1212,63 +1153,38 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         })
         .join(', ');
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppCard(
       child: Row(
         children: [
           Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(16),
+              color: role.tint,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Image.asset(
-              iconPath,
+              role.penguinIcon,
               fit: BoxFit.contain,
               errorBuilder: (c, e, s) => const SizedBox(),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  roleName,
-                  style: const TextStyle(
-                    color: Color(0xFF0A264F),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                Text(roleName, style: AppTextStyles.bodyBold().copyWith(fontSize: 16)),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   formattedDate,
-                  style: TextStyle(
-                    color: const Color(0xFF0A264F).withValues(alpha: 0.5),
-                    fontSize: 11,
-                  ),
+                  style: AppTextStyles.caption(color: AppColors.primary.withValues(alpha: 0.5)),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 if (skillsGained.isNotEmpty)
                   Text(
                     "+ $skillsGained",
-                    style: const TextStyle(
-                      color: Color(0xFF22C55E),
-                      fontSize: 11,
+                    style: AppTextStyles.caption(color: AppColors.success).copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1276,18 +1192,14 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1A22F).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
+              color: AppColors.gold.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Text(
               "+$xp XP",
-              style: const TextStyle(
-                color: Color(0xFFF1A22F),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
+              style: AppTextStyles.caption(color: AppColors.gold).copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -1311,15 +1223,15 @@ class _ChartLabel extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF0A264F) : Colors.white,
+        color: isActive ? AppColors.primary : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: isActive
             ? null
-            : Border.all(color: const Color(0xFF0A264F).withValues(alpha: 0.1)),
+            : Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: const Color(0xFF0A264F).withValues(alpha: 0.3),
+                  color: AppColors.primary.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -1339,7 +1251,7 @@ class _ChartLabel extends StatelessWidget {
             style: TextStyle(
               color: isActive
                   ? Colors.white
-                  : const Color(0xFF0A264F).withValues(alpha: 0.7),
+                  : AppColors.primary.withValues(alpha: 0.7),
               fontSize: 9,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
@@ -1350,8 +1262,8 @@ class _ChartLabel extends StatelessWidget {
             "$score Pts",
             style: TextStyle(
               color: isActive
-                  ? const Color(0xFFE57B65)
-                  : const Color(0xFF0A264F),
+                  ? AppColors.accent
+                  : AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w900,
             ),
@@ -1372,11 +1284,11 @@ class RadarChartPainter extends CustomPainter {
     final radius = size.width / 2.5;
 
     final paintWebLine = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = AppColors.border
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     final paintAxisLine = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = AppColors.border
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
@@ -1429,28 +1341,28 @@ class RadarChartPainter extends CustomPainter {
     final paintDataFill = Paint()
       ..shader = RadialGradient(
         colors: [
-          const Color(0xFFF1A22F).withValues(alpha: 0.5),
-          const Color(0xFFE57B65).withValues(alpha: 0.2),
+          AppColors.gold.withValues(alpha: 0.5),
+          AppColors.accent.withValues(alpha: 0.2),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.fill;
     canvas.drawPath(dataPath, paintDataFill);
 
     final paintDataStroke = Paint()
-      ..color = const Color(0xFFE57B65)
+      ..color = AppColors.accent
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(dataPath, paintDataStroke);
 
     final paintDot = Paint()
-      ..color = const Color(0xFF0A264F)
+      ..color = AppColors.primary
       ..style = PaintingStyle.fill;
     for (var point in dataPoints) {
       canvas.drawCircle(
         point,
         6,
-        Paint()..color = const Color(0xFFE57B65).withValues(alpha: 0.3),
+        Paint()..color = AppColors.accent.withValues(alpha: 0.3),
       );
       canvas.drawCircle(point, 4, paintDot);
     }
