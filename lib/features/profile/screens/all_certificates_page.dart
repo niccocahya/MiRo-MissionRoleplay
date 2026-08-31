@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // PASTIKAN IMPORT INI SESUAI
 import 'certificate_detail_page.dart';
 import '../data/certificate_provider.dart';
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib panggil otak bahasa
 import '../../../core/theme/app_colors.dart';
@@ -134,9 +135,8 @@ class AllCertificatesPage extends ConsumerWidget {
                           child: GestureDetector(
                             onTap: () {
                               Navigator.of(context, rootNavigator: true).push(
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      CertificateDetailPage(certData: cert),
+                                appPageRoute(
+                                  CertificateDetailPage(certData: cert),
                                 ),
                               );
                             },

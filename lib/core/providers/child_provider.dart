@@ -33,9 +33,18 @@ class SelectedChildNotifier extends Notifier<String?> {
 final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
   final supabase = Supabase.instance.client;
 
-  // 🔥 KUNCI UTAMA: Riverpod sekarang akan me-restart provider ini OTOMATIS
-  // detik itu juga saat user Login atau Logout!
-  ref.watch(authStateProvider);
+  // 🔥 Restart provider ini HANYA kalau user yang login beneran ganti
+  // (login/logout/ganti akun) — bukan tiap event auth apapun.
+  //
+  // Sebelumnya `ref.watch(authStateProvider)` nonton SELURUH stream auth,
+  // termasuk event TOKEN_REFRESHED yang otomatis ditembak Supabase tiap
+  // token mau kedaluwarsa (biasanya ~1 jam sekali) walau user-nya sama
+  // persis. Tiap event itu bikin provider ini restart total dari nol: ambil
+  // ulang childId, query ulang, baru nyalain stream lagi — jadi data yang
+  // udah kebaca di layar sempat kosong/reload sendiri di tengah pemakaian.
+  // `.select()` bikin Riverpod cuma restart kalau nilai yang dipilih
+  // (id user) beneran berubah.
+  ref.watch(authStateProvider.select((s) => s.value?.session?.user.id));
 
   final user = supabase.auth.currentUser;
 
@@ -77,11 +86,8 @@ final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
     yield {
       ...initialData,
       'current_level': initialData['current_level'] ?? 1,
-      'total_xp': initialData['total_xp'] ?? initialData['xp'] ?? 0,
+      'total_xp': initialData['total_xp'] ?? 0,
       'current_streak': initialData['current_streak'] ?? 0,
-      'max_xp': initialData['max_xp'] ?? 100,
-      'weekly_progress': [],
-      'recent_achievements': [],
     };
   }
 
@@ -100,11 +106,8 @@ final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
         return {
           ...childData,
           'current_level': childData['current_level'] ?? 1,
-          'total_xp': childData['total_xp'] ?? childData['xp'] ?? 0,
+          'total_xp': childData['total_xp'] ?? 0,
           'current_streak': childData['current_streak'] ?? 0,
-          'max_xp': childData['max_xp'] ?? 100,
-          'weekly_progress': [],
-          'recent_achievements': [],
         };
       });
 });

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'; // Wajib buat baca lang
 import '../data/mission_model.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -140,8 +141,8 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => MissionJournalScreen(
+                              appPageRoute(
+                                MissionJournalScreen(
                                   mission: widget.mission,
                                   capturedPhotos: widget.capturedPhotos,
                                 ),

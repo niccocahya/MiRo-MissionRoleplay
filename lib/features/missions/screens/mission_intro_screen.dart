@@ -6,6 +6,7 @@ import '../../../shared/widgets/back_button.dart';
 import '../data/mission_model.dart';
 import 'mission_play_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/responsive.dart';
@@ -153,10 +154,7 @@ class MissionIntroScreen extends ConsumerWidget {
                       onPressed: () {
                         // KUNCI HILANGKAN NAVBAR DI HALAMAN SELANJUTNYA
                         Navigator.of(context, rootNavigator: true).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                MissionPlayScreen(mission: mission),
-                          ),
+                          appPageRoute(MissionPlayScreen(mission: mission)),
                         );
                       },
                       style: ElevatedButton.styleFrom(

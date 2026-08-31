@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
 import './data/certificate_provider.dart';
+import '../../core/router/app_page_transition.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -203,7 +204,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     Navigator.of(
       context,
       rootNavigator: true,
-    ).push(MaterialPageRoute(builder: (_) => screen));
+    ).push(appPageRoute(screen));
   }
 
   Future<void> _handleLogout(Map<String, String> texts) async {

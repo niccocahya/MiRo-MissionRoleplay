@@ -10,6 +10,7 @@ import '../data/role_model.dart';
 import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 
 // ==========================================
@@ -150,8 +151,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
 
         // Navigasi ke halaman jurnal
         Navigator.of(context, rootNavigator: true).push(
-          MaterialPageRoute(
-            builder: (context) => MissionJournalScreen(
+          appPageRoute(
+            MissionJournalScreen(
               mission: mission,
               capturedPhotos: photos,
               isViewOnly: true, // Flag agar tidak nambah poin lagi
@@ -289,8 +290,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
           final selectedRole = roles.firstWhere((r) => r.id == newRoleId);
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => MissionPathScreen(
+            appPageRoute(
+              MissionPathScreen(
                 roleId: selectedRole.id,
                 roleName: lang == 'id'
                     ? selectedRole.nameId
@@ -414,8 +415,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
         if (isCurrent) {
           // Buka Misi Baru
           Navigator.of(context, rootNavigator: true).push(
-            MaterialPageRoute(
-              builder: (context) => MissionIntroScreen(
+            appPageRoute(
+              MissionIntroScreen(
                 mission: mission,
                 roleName: widget.roleName,
               ),

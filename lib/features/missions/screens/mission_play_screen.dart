@@ -11,6 +11,7 @@ import '../../../shared/widgets/penguin_chat_bot.dart'; // Pastikan path ini ben
 import '../data/mission_model.dart';
 import 'mission_win_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/storage_upload_service.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -986,8 +987,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                   flutterTts.stop();
                                   Navigator.pushReplacement(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MissionWinScreen(
+                                    appPageRoute(
+                                      MissionWinScreen(
                                         mission: widget.mission,
                                         capturedPhotos: _stepPhotos.values
                                             .toList(),

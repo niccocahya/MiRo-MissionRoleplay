@@ -11,6 +11,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
+import '../../core/router/app_page_transition.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
 // IMPORT BARU UNTUK MEMBUKA JURNAL
@@ -419,8 +420,8 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
         Navigator.of(context, rootNavigator: true).push(
-          MaterialPageRoute(
-            builder: (_) => MissionJournalScreen(
+          appPageRoute(
+            MissionJournalScreen(
               mission: mission,
               capturedPhotos: photos,
               isViewOnly: true,

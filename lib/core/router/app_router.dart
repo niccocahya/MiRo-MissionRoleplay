@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 // Import widget custom navbar kita
 import '../../shared/widgets/custom_bottom_nav_bar.dart';
+import '../theme/app_colors.dart';
+import 'app_page_transition.dart';
 
 // Import semua halaman
 import '../../features/onboarding/onboarding_page.dart';
@@ -21,9 +23,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5F8FB,
-      ), // Warna latar belakang dasar aplikasi
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           // 1. Konten Halaman (Home, Missions, dll)
@@ -43,40 +43,54 @@ class ScaffoldWithNavBar extends StatelessWidget {
 }
 
 // ==================== ROUTER UTAMA ====================
+// Semua rute pakai transisi yang sama (lihat app_page_transition.dart) biar
+// pindah tab & pindah halaman berasa konsisten, bukan potongan kasar di
+// beberapa tempat dan slide di tempat lain.
 final GoRouter router = GoRouter(
   initialLocation: '/onboarding',
   routes: [
     GoRoute(
       path: '/onboarding',
-      builder: (context, state) => const OnboardingPage(),
+      pageBuilder: (context, state) =>
+          appPage(key: state.pageKey, child: const OnboardingPage()),
     ),
     GoRoute(
       path: '/identify',
-      builder: (context, state) => const IdentifyPage(),
+      pageBuilder: (context, state) =>
+          appPage(key: state.pageKey, child: const IdentifyPage()),
     ),
 
     // Rute Notifikasi diletakkan di luar ShellRoute agar menutupi Bottom Nav Bar saat dibuka
     GoRoute(
       path: '/notifications',
-      builder: (context, state) => const NotificationsPage(),
+      pageBuilder: (context, state) =>
+          appPage(key: state.pageKey, child: const NotificationsPage()),
     ),
 
     ShellRoute(
       builder: (context, state, child) => ScaffoldWithNavBar(child: child),
       routes: [
-        GoRoute(path: '/home', builder: (context, state) => const HomePage()),
+        GoRoute(
+          path: '/home',
+          pageBuilder: (context, state) =>
+              appPage(key: state.pageKey, child: const HomePage()),
+        ),
         GoRoute(
           path: '/missions',
-          builder: (context, state) =>
-              MissionsPage(roleId: state.uri.queryParameters['role']),
+          pageBuilder: (context, state) => appPage(
+            key: state.pageKey,
+            child: MissionsPage(roleId: state.uri.queryParameters['role']),
+          ),
         ),
         GoRoute(
           path: '/progress',
-          builder: (context, state) => const ProgressPage(),
+          pageBuilder: (context, state) =>
+              appPage(key: state.pageKey, child: const ProgressPage()),
         ),
         GoRoute(
           path: '/profile',
-          builder: (context, state) => const ProfilePage(),
+          pageBuilder: (context, state) =>
+              appPage(key: state.pageKey, child: const ProfilePage()),
         ),
       ],
     ),

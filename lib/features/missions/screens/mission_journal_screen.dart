@@ -14,6 +14,7 @@ import '../data/mission_model.dart';
 import 'mission_reflection_screen.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/constants/role_visuals.dart';
+import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 
@@ -630,8 +631,8 @@ Future<void> _downloadCollage() async {
                     } else {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => MissionReflectionScreen(
+                        appPageRoute(
+                          MissionReflectionScreen(
                             mission: widget.mission,
                             missionLogId: _generatedMissionLogId,
                           ),

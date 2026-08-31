@@ -946,7 +946,10 @@ class _HomePageState extends ConsumerState<HomePage> {
             )
           else
             SizedBox(
-              height: 80,
+              // Sebelumnya 80 — kartu ini overflow ~2px karena baris tanggal
+              // nggak dibatasi 1 baris (bisa wrap jadi 2 baris kalau format
+              // tanggalnya panjang) sementara tingginya udah dipatok pas.
+              height: 92,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
@@ -957,17 +960,17 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                   final unlockedAt = parseDateSafely(item['unlocked_at'] ?? '');
                   final formattedDate = unlockedAt != null
-                      ? DateFormat('dd MMM yyyy, HH:mm').format(unlockedAt)
+                      ? DateFormat('dd MMM yyyy').format(unlockedAt)
                       : '-';
 
                   final String badgeTitle = lang == 'id'
                       ? (item['title_id'] ?? 'Prestasi Baru')
                       : (item['title_en'] ?? 'New Achievement');
 
-                  return AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.sm + 4),
-                    child: SizedBox(
-                      width: 180 - (AppSpacing.sm + 4) * 2,
+                  return SizedBox(
+                    width: 180,
+                    child: AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.sm + 4),
                       child: Row(
                         children: [
                           Container(
@@ -985,6 +988,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   badgeTitle,
@@ -993,7 +997,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
-                                Text(formattedDate, style: AppTextStyles.caption()),
+                                Text(
+                                  formattedDate,
+                                  style: AppTextStyles.caption(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ],
                             ),
                           ),
