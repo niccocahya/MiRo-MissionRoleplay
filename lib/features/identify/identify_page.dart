@@ -11,6 +11,7 @@ import '../../data/repositories/supabase_repository.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/services/storage_upload_service.dart';
+import '../../core/theme/app_colors.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
 import '../../shared/widgets/penguin_chat_bot.dart';
@@ -211,7 +212,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: const Color(0xFFE57B65),
+        backgroundColor: AppColors.accent,
       ),
     );
   }
@@ -262,7 +263,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     final bool isWhiteBg = step % 2 != 0;
     final Color mainBgColor = isWhiteBg
         ? Colors.white
-        : const Color(0xFFA5CBEB);
+        : AppColors.primaryLighter;
 
     // 🔥 PENGAMANAN EKSTRA: Paksa hide terus-terusan selama halaman ini di-build!
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -345,7 +346,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             Container(
               color: Colors.black26,
               child: const Center(
-                child: CircularProgressIndicator(color: Color(0xFF0A264F)),
+                child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
         ],
@@ -384,7 +385,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : () => setState(() => step--),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE57B65),
+                  backgroundColor: AppColors.accent,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -411,7 +412,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                         ? () => _handleSubmit(texts)
                         : () => _handleNext(texts)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0A264F),
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
@@ -444,7 +445,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             texts['step1_title']!,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
               height: 1.2,
@@ -473,7 +474,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           Text(
             texts['step1_age']!,
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -499,7 +500,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               color: const Color(0xFFF0F4F8),
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF0A264F).withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 width: 4,
               ),
             ),
@@ -522,7 +523,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
-                color: Color(0xFFE57B65),
+                color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -553,19 +554,19 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               width: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSel ? const Color(0xFF0A264F) : Colors.transparent,
+                color: isSel ? AppColors.primary : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSel
-                      ? const Color(0xFF0A264F)
-                      : const Color(0xFF0A264F).withValues(alpha: 0.4),
+                      ? AppColors.primary
+                      : AppColors.primary.withValues(alpha: 0.4),
                 ),
               ),
               child: Text(
                 age.toString(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: isSel ? Colors.white : const Color(0xFF0A264F),
+                  color: isSel ? Colors.white : AppColors.primary,
                 ),
               ),
             ),
@@ -691,7 +692,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 40),
@@ -714,7 +715,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                   ),
                   decoration: BoxDecoration(
                     color: isSel
-                        ? const Color(0xFFF1A22F)
+                        ? AppColors.gold
                         : const Color(0xFFF4F7FA),
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -722,7 +723,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                     label,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isSel ? Colors.white : const Color(0xFF0A264F),
+                      color: isSel ? Colors.white : AppColors.primary,
                     ),
                   ),
                 ),
@@ -752,7 +753,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 32),
@@ -815,7 +816,7 @@ class _OptionCard extends StatelessWidget {
           color: bgColor,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: isSelected ? const Color(0xFFE57B65) : Colors.transparent,
+            color: isSelected ? AppColors.accent : Colors.transparent,
             width: 2,
           ),
         ),
@@ -840,8 +841,8 @@ class _OptionCard extends StatelessWidget {
                           ? FontWeight.bold
                           : FontWeight.w600,
                       color: isSelected
-                          ? const Color(0xFFE57B65)
-                          : const Color(0xFF0A264F),
+                          ? AppColors.accent
+                          : AppColors.primary,
                     ),
                   ),
                   if (subLabel != null) ...[
@@ -851,8 +852,8 @@ class _OptionCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         color: isSelected
-                            ? const Color(0xFFE57B65).withValues(alpha: 0.8)
-                            : const Color(0xFF0A264F).withValues(alpha: 0.6),
+                            ? AppColors.accent.withValues(alpha: 0.8)
+                            : AppColors.primary.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
@@ -860,7 +861,7 @@ class _OptionCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: Color(0xFFE57B65)),
+              const Icon(Icons.check_circle, color: AppColors.accent),
           ],
         ),
       ),
