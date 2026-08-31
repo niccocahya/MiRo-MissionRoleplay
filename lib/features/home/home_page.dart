@@ -671,7 +671,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 bottom: -20,
                 right: -10,
                 child: Image.asset(
-                  role.penguinIcon,
+                  // Pakai versi "_trans" (transparan) biar nyatu sama
+                  // background kartu, bukan penguinIcon yang background-nya
+                  // solid/nggak transparan.
+                  role.bgImage,
                   width: 180,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => const SizedBox(),
