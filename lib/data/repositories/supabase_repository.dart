@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,7 +73,7 @@ class SupabaseRepository {
       return childId;
     } catch (e) {
       // Log error secara detail untuk debugging
-      print("Error in submitOnboardingData: $e");
+      debugPrint("Error in submitOnboardingData: $e");
       throw Exception("Gagal menyimpan data: $e");
     }
   }

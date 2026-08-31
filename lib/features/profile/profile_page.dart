@@ -483,7 +483,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     title: Text(texts['notif_setting']!, style: AppTextStyles.bodyBold()),
                     trailing: Switch(
                       value: isNotifEnabled,
-                      activeColor: AppColors.accent,
+                      activeThumbColor: AppColors.accent,
                       onChanged: (val) =>
                           setModalState(() => isNotifEnabled = val),
                     ),

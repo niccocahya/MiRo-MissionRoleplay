@@ -6,6 +6,20 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ⚠️ PASTIKAN IMPORT PROVIDER ANAK INI BENAR SESUAI FOLDERMU
 import '../../core/providers/child_provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/responsive.dart';
+
+/// Sapaan berdasarkan jam saat ini. Sebelumnya if/else-chain ini ditulis
+/// ulang persis sama 2x di file ini (pas kirim pesan ke AI & pas buka
+/// jendela chat).
+String _timeGreeting() {
+  final hour = DateTime.now().hour;
+  if (hour >= 5 && hour < 11) return "Selamat Pagi";
+  if (hour >= 11 && hour < 15) return "Selamat Siang";
+  if (hour >= 15 && hour < 18) return "Selamat Sore";
+  return "Selamat Malam";
+}
 
 // ============================================================================
 // 👁️ GLOBAL VISIBILITY PROVIDER (Kontrol Mink sembunyi/muncul)
@@ -130,16 +144,7 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
       isLoading: true,
     );
 
-    final hour = DateTime.now().hour;
-    String timeGreeting = "Halo";
-    if (hour >= 5 && hour < 11)
-      timeGreeting = "Selamat Pagi";
-    else if (hour >= 11 && hour < 15)
-      timeGreeting = "Selamat Siang";
-    else if (hour >= 15 && hour < 18)
-      timeGreeting = "Selamat Sore";
-    else
-      timeGreeting = "Selamat Malam";
+    final String timeGreeting = _timeGreeting();
 
     final int level = childFullData['current_level'] ?? 1;
     final int xp = childFullData['total_xp'] ?? 0;
@@ -276,7 +281,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     }
 
     // --- Kalau isVisible == true, baru Mink boleh eksis ---
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = context.screenHeight;
     final chatState = ref.watch(chatbotProvider);
     final childData = ref.watch(childDataProvider).value ?? {};
     final String childName = childData['name'] ?? 'Anak Hebat';
@@ -349,9 +354,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF0A264F,
-                              ).withValues(alpha: 0.6),
+                              color: AppColors.primary.withValues(alpha: 0.6),
                               blurRadius: 20,
                               spreadRadius: 5,
                             ),
@@ -382,16 +385,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     Map<String, dynamic> childData,
     String? activeContext,
   ) {
-    final hour = DateTime.now().hour;
-    String timeGreeting = "Halo";
-    if (hour >= 5 && hour < 11)
-      timeGreeting = "Selamat Pagi";
-    else if (hour >= 11 && hour < 15)
-      timeGreeting = "Selamat Siang";
-    else if (hour >= 15 && hour < 18)
-      timeGreeting = "Selamat Sore";
-    else
-      timeGreeting = "Selamat Malam";
+    final String timeGreeting = _timeGreeting();
 
     final String botGreeting = activeContext != null
         ? "$timeGreeting Bunda! Ada yang bingung pas ngerjain misi ini? Tanya Mink aja! 🐧"
@@ -399,7 +393,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
 
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.75,
+        maxHeight: context.screenHeight * 0.75,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -444,7 +438,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                       ),
                     ),
                     Text(
@@ -452,7 +446,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF22C55E),
+                        color: AppColors.success,
                       ),
                     ),
                   ],
@@ -462,13 +456,13 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                   onPressed: () => setState(() => _isChatOpen = false),
                   icon: const Icon(
                     Icons.close_rounded,
-                    color: Color(0xFF0A264F),
+                    color: AppColors.primary,
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1, color: AppColors.border),
           Expanded(
             child: ListView(
               controller: _scrollController,
@@ -518,19 +512,19 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF0A264F),
+                color: AppColors.primary,
               ),
               decoration: InputDecoration(
                 hintText: "Tanya Mink di sini...",
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                 filled: true,
-                fillColor: const Color(0xFFF5F8FB),
+                fillColor: AppColors.background,
                 suffixIcon: GestureDetector(
                   onTap: () => _handleSend(childData, activeContext),
                   child: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF0A264F),
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -557,32 +551,64 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     );
   }
 
+  /// Pecah `**teks tebal**` markdown sederhana dari balasan AI jadi span
+  /// bold beneran. Sebelumnya tanda `**`-nya cuma dihapus mentah-mentah,
+  /// jadi instruksi "tebalkan teks penting" di system prompt nggak pernah
+  /// benar-benar kelihatan di layar.
+  List<TextSpan> _parseBoldSpans(String text, TextStyle baseStyle) {
+    final pattern = RegExp(r'\*\*(.+?)\*\*');
+    final spans = <TextSpan>[];
+    int cursor = 0;
+    for (final match in pattern.allMatches(text)) {
+      if (match.start > cursor) {
+        spans.add(TextSpan(text: text.substring(cursor, match.start)));
+      }
+      spans.add(
+        TextSpan(
+          text: match.group(1),
+          style: baseStyle.copyWith(fontWeight: FontWeight.bold),
+        ),
+      );
+      cursor = match.end;
+    }
+    if (cursor < text.length) {
+      spans.add(TextSpan(text: text.substring(cursor)));
+    }
+    return spans;
+  }
+
   Widget _buildChatBubble(String text, {required bool isUser}) {
-    String cleanText = text.replaceAll('**', '');
+    final baseStyle = TextStyle(
+      fontSize: 14,
+      height: 1.4,
+      fontWeight: isUser ? FontWeight.bold : FontWeight.w500,
+      color: isUser ? Colors.white : AppColors.primary,
+    );
+
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 4,
+        ),
         margin: EdgeInsets.only(
-          bottom: 12,
+          bottom: AppSpacing.sm + 4,
           left: isUser ? 40 : 0,
           right: isUser ? 0 : 40,
         ),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFFE57B65) : const Color(0xFFF5F8FB),
-          borderRadius: BorderRadius.circular(20).copyWith(
-            topLeft: Radius.circular(isUser ? 20 : 0),
-            topRight: Radius.circular(isUser ? 0 : 20),
+          color: isUser ? AppColors.accent : AppColors.background,
+          borderRadius: BorderRadius.circular(AppRadius.lg).copyWith(
+            topLeft: Radius.circular(isUser ? AppRadius.lg : 0),
+            topRight: Radius.circular(isUser ? 0 : AppRadius.lg),
           ),
-          border: isUser ? null : Border.all(color: const Color(0xFFE2E8F0)),
+          border: isUser ? null : Border.all(color: AppColors.border),
         ),
-        child: Text(
-          cleanText,
-          style: TextStyle(
-            fontSize: 14,
-            height: 1.4,
-            fontWeight: isUser ? FontWeight.bold : FontWeight.w500,
-            color: isUser ? Colors.white : const Color(0xFF0A264F),
+        child: RichText(
+          text: TextSpan(
+            style: baseStyle,
+            children: _parseBoldSpans(text, baseStyle),
           ),
         ),
       ),

@@ -1304,10 +1304,11 @@ class RadarChartPainter extends CustomPainter {
             center.dx + currentRadius * math.cos(angle * i + rotationOffset);
         double y =
             center.dy + currentRadius * math.sin(angle * i + rotationOffset);
-        if (i == 0)
+        if (i == 0) {
           path.moveTo(x, y);
-        else
+        } else {
           path.lineTo(x, y);
+        }
       }
       path.close();
       canvas.drawPath(path, paintWebLine);
@@ -1331,10 +1332,11 @@ class RadarChartPainter extends CustomPainter {
       double x = center.dx + dataRadius * math.cos(angle * i + rotationOffset);
       double y = center.dy + dataRadius * math.sin(angle * i + rotationOffset);
       dataPoints.add(Offset(x, y));
-      if (i == 0)
+      if (i == 0) {
         dataPath.moveTo(x, y);
-      else
+      } else {
         dataPath.lineTo(x, y);
+      }
     }
     dataPath.close();
 
