@@ -33,6 +33,7 @@ class RoleVisual {
     required this.penguinIcon,
     required this.bgImage,
     required this.tint,
+    required this.badgeColor,
   });
 
   final String id;
@@ -44,6 +45,7 @@ class RoleVisual {
   final String penguinIcon;
   final String bgImage;
   final Color tint;
+  final Color badgeColor;
 
   String name(String lang) => lang == 'id' ? nameId : nameEn;
   String description(String lang) => lang == 'id' ? descriptionId : descriptionEn;
@@ -63,6 +65,7 @@ const List<RoleVisual> kRoleVisuals = [
     penguinIcon: 'assets/images/penguin_artist.png',
     bgImage: 'assets/images/artist_trans.png',
     tint: AppColors.accentTint,
+    badgeColor: AppColors.accent,
   ),
   RoleVisual(
     id: 'chef',
@@ -78,6 +81,7 @@ const List<RoleVisual> kRoleVisuals = [
     penguinIcon: 'assets/images/penguin_chef.png',
     bgImage: 'assets/images/chef_trans.png',
     tint: AppColors.primaryTint,
+    badgeColor: Color(0xFF75AADB),
   ),
   RoleVisual(
     id: 'doctor',
@@ -94,6 +98,7 @@ const List<RoleVisual> kRoleVisuals = [
     penguinIcon: 'assets/images/penguin_doctor.png',
     bgImage: 'assets/images/doctor_trans.png',
     tint: AppColors.successTint,
+    badgeColor: Color(0xFF81C784),
   ),
   RoleVisual(
     id: 'athlete',
@@ -108,6 +113,7 @@ const List<RoleVisual> kRoleVisuals = [
     penguinIcon: 'assets/images/penguin_athlete.png',
     bgImage: 'assets/images/frost.png',
     tint: Color(0xFFFFF0E6),
+    badgeColor: Color(0xFFFFB74D),
   ),
   RoleVisual(
     id: 'teacher',
@@ -122,6 +128,7 @@ const List<RoleVisual> kRoleVisuals = [
     penguinIcon: 'assets/images/penguin_teacher.png',
     bgImage: 'assets/images/frost.png',
     tint: Color(0xFFE6FAF0),
+    badgeColor: Color(0xFF4DB6AC),
   ),
 ];
 
@@ -144,4 +151,5 @@ const RoleVisual kUnknownRoleVisual = RoleVisual(
   penguinIcon: 'assets/images/penguin_head.png',
   bgImage: 'assets/images/frost.png',
   tint: AppColors.primaryTint,
+  badgeColor: Color(0xFF90A4AE),
 );

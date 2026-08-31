@@ -10,11 +10,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:gal/gal.dart';
 
 // JALUR IMPORT
-import '../../../shared/widgets/penguin_chat_bot.dart';
 import '../data/mission_model.dart';
 import 'mission_reflection_screen.dart';
 import '../../../core/providers/language_provider.dart';
-import '../../../core/providers/child_provider.dart';
+import '../../../core/constants/role_visuals.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -363,9 +364,8 @@ Future<void> _downloadCollage() async {
       final file = await File('${tempDir.path}/miro_mission.png').create();
       await file.writeAsBytes(bytes);
       
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: texts['share_text']!,
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: texts['share_text']!),
       );
     }
   }
@@ -376,24 +376,11 @@ Future<void> _downloadCollage() async {
     final texts = _t[lang] ?? _t['en']!;
     final bool hasPhotos = widget.capturedPhotos.isNotEmpty;
 
-    Color badgeColor;
-    String role = widget.mission.roleId;
-    if (role == 'chef') {
-      badgeColor = const Color(0xFF75AADB);
-    } else if (role == 'doctor') {
-      badgeColor = const Color(0xFF81C784);
-    } else if (role == 'artist') {
-      badgeColor = const Color(0xFFE57B65);
-    } else if (role == 'athlete') {
-      badgeColor = const Color(0xFFFFB74D);
-    } else if (role == 'teacher') {
-      badgeColor = const Color(0xFF4DB6AC);
-    } else {
-      badgeColor = const Color(0xFF90A4AE);
-    }
+    final String role = widget.mission.roleId;
+    final Color badgeColor = (roleVisualById(role) ?? kUnknownRoleVisual).badgeColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -404,7 +391,7 @@ Future<void> _downloadCollage() async {
                 child: _isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
-                          color: Color(0xFF0A264F),
+                          color: AppColors.primary,
                         ),
                       )
                     : ListView(
@@ -415,7 +402,7 @@ Future<void> _downloadCollage() async {
                                 ? texts['journal_view']!
                                 : texts['journal_new']!,
                             style: const TextStyle(
-                              color: Color(0xFF0A264F),
+                              color: AppColors.primary,
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
                               height: 1.2,
@@ -448,13 +435,13 @@ Future<void> _downloadCollage() async {
                                     onPressed: _downloadCollage,
                                     icon: const Icon(
                                       Icons.download_rounded,
-                                      color: Color(0xFF0A264F),
+                                      color: AppColors.primary,
                                       size: 18,
                                     ),
                                     label: Text(
                                       texts['download']!,
                                       style: const TextStyle(
-                                        color: Color(0xFF0A264F),
+                                        color: AppColors.primary,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -463,7 +450,7 @@ Future<void> _downloadCollage() async {
                                         vertical: 14,
                                       ),
                                       side: const BorderSide(
-                                        color: Color(0xFF0A264F),
+                                        color: AppColors.primary,
                                         width: 1.5,
                                       ),
                                       shape: RoundedRectangleBorder(
@@ -489,7 +476,7 @@ Future<void> _downloadCollage() async {
                                       ),
                                     ),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF0A264F),
+                                      backgroundColor: AppColors.primary,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,
                                       ),
@@ -508,7 +495,7 @@ Future<void> _downloadCollage() async {
                           Text(
                             texts['skill_prog']!,
                             style: const TextStyle(
-                              color: Color(0xFF0A264F),
+                              color: AppColors.primary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -551,11 +538,9 @@ Future<void> _downloadCollage() async {
                                     Color(0xFFFFE8CC),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(AppRadius.sm + 10),
                                 border: Border.all(
-                                  color: const Color(
-                                    0xFFF1A22F,
-                                  ).withValues(alpha: 0.3),
+                                  color: AppColors.gold.withValues(alpha: 0.3),
                                   width: 2,
                                 ),
                                 boxShadow: const [
@@ -605,7 +590,7 @@ Future<void> _downloadCollage() async {
                                         Text(
                                           texts['new_badge']!,
                                           style: const TextStyle(
-                                            color: Color(0xFFE57B65),
+                                            color: AppColors.accent,
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             letterSpacing: 1,
@@ -619,7 +604,7 @@ Future<void> _downloadCollage() async {
                                               : _earnedAchievement!['title_en'] ??
                                                   '',
                                           style: const TextStyle(
-                                            color: Color(0xFF0A264F),
+                                            color: AppColors.primary,
                                             fontSize: 18,
                                             fontWeight: FontWeight.w900,
                                             height: 1.2,
@@ -655,7 +640,7 @@ Future<void> _downloadCollage() async {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE57B65),
+                    backgroundColor: AppColors.accent,
                     minimumSize: const Size(double.infinity, 60),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -942,7 +927,7 @@ Future<void> _downloadCollage() async {
                   Text(
                     skillName.toUpperCase(),
                     style: const TextStyle(
-                      color: Color(0xFF0A264F),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -951,7 +936,7 @@ Future<void> _downloadCollage() async {
                   Text(
                     "↑ +$reward",
                     style: const TextStyle(
-                      color: Color(0xFFE57B65),
+                      color: AppColors.accent,
                       fontWeight: FontWeight.w900,
                       fontSize: 14,
                     ),
@@ -961,7 +946,7 @@ Future<void> _downloadCollage() async {
               Text(
                 "Level $level",
                 style: const TextStyle(
-                  color: Color(0xFF0A264F),
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
                 ),
@@ -983,7 +968,7 @@ Future<void> _downloadCollage() async {
               child: Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFFF1A22F), Color(0xFFF5B555)],
+                    colors: [AppColors.gold, Color(0xFFF5B555)],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -994,7 +979,7 @@ Future<void> _downloadCollage() async {
           Text(
             textNeed,
             style: TextStyle(
-              color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+              color: AppColors.primary.withValues(alpha: 0.6),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

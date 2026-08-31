@@ -8,6 +8,7 @@ import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/constants/role_visuals.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -77,40 +78,36 @@ final allCertificatesProvider = FutureProvider<List<Map<String, dynamic>>>((
       String role = c['role_id'];
       List<dynamic> reqIds = c['required_achievement_ids'] ?? [];
 
-      // Tentukan warna tema dan terjemahan nama role
+      // Warna badge diambil dari role_visuals.dart (sumber tunggal), cuma
+      // gradient 2-stop & label "CILIK"/"LITTLE" ini yang spesifik buat
+      // tampilan kartu sertifikat, jadi tetap di sini.
+      final Color badgeColor = (roleVisualById(role) ?? kUnknownRoleVisual).badgeColor;
       List<Color> gradient;
-      Color badgeColor;
       String roleLabelId = "";
       String roleLabelEn = "";
 
       if (role == 'chef') {
-        gradient = [const Color(0xFFA5CBEB), const Color(0xFF75AADB)];
-        badgeColor = const Color(0xFF75AADB);
+        gradient = [const Color(0xFFA5CBEB), badgeColor];
         roleLabelId = "KOKI CILIK";
         roleLabelEn = "LITTLE CHEF";
       } else if (role == 'doctor') {
-        gradient = [const Color(0xFFB9E4C9), const Color(0xFF81C784)];
-        badgeColor = const Color(0xFF81C784);
+        gradient = [const Color(0xFFB9E4C9), badgeColor];
         roleLabelId = "DOKTER CILIK";
         roleLabelEn = "LITTLE DOCTOR";
       } else if (role == 'artist') {
-        gradient = [AppColors.gold, AppColors.accent];
-        badgeColor = AppColors.accent;
+        gradient = [AppColors.gold, badgeColor];
         roleLabelId = "PELUKIS CILIK";
         roleLabelEn = "LITTLE ARTIST";
       } else if (role == 'athlete') {
-        gradient = [const Color(0xFFFFCC80), const Color(0xFFFFB74D)];
-        badgeColor = const Color(0xFFFFB74D);
+        gradient = [const Color(0xFFFFCC80), badgeColor];
         roleLabelId = "ATLET CILIK";
         roleLabelEn = "LITTLE ATHLETE";
       } else if (role == 'teacher') {
-        gradient = [const Color(0xFF80CBC4), const Color(0xFF4DB6AC)];
-        badgeColor = const Color(0xFF4DB6AC);
+        gradient = [const Color(0xFF80CBC4), badgeColor];
         roleLabelId = "GURU CILIK";
         roleLabelEn = "LITTLE TEACHER";
       } else {
-        gradient = [const Color(0xFFB0BEC5), const Color(0xFF90A4AE)];
-        badgeColor = const Color(0xFF90A4AE);
+        gradient = [const Color(0xFFB0BEC5), badgeColor];
         roleLabelId = role.toUpperCase();
         roleLabelEn = role.toUpperCase();
       }
