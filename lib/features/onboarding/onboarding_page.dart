@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../shared/widgets/onboarding_progress_bar.dart';
+import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
@@ -370,7 +370,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget _buildLanguageScreen(String lang, Map<String, String> texts) {
     return Column(
       children: [
-        const OnboardingProgressBar(currentStep: 1),
+        const StepProgressBar(currentStep: 1, totalSteps: 3),
         const SizedBox(height: 64),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -505,7 +505,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const OnboardingProgressBar(currentStep: 2),
+              const StepProgressBar(currentStep: 2, totalSteps: 3),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -604,7 +604,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget _buildLoginScreen(Map<String, String> texts) {
     return Column(
       children: [
-        const OnboardingProgressBar(currentStep: 3),
+        const StepProgressBar(currentStep: 3, totalSteps: 3),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -668,7 +668,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget _buildRegisterScreen(Map<String, String> texts) {
     return Column(
       children: [
-        const OnboardingProgressBar(currentStep: 3),
+        const StepProgressBar(currentStep: 3, totalSteps: 3),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

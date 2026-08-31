@@ -67,7 +67,8 @@ final GoRouter router = GoRouter(
         GoRoute(path: '/home', builder: (context, state) => const HomePage()),
         GoRoute(
           path: '/missions',
-          builder: (context, state) => const MissionsPage(),
+          builder: (context, state) =>
+              MissionsPage(roleId: state.uri.queryParameters['role']),
         ),
         GoRoute(
           path: '/progress',

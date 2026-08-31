@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Import router dan provider bahasa
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
+import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
 import 'shared/widgets/penguin_chat_bot.dart'; // Sesuaikan path ini!
@@ -33,19 +34,14 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final String lang = ref.watch(languageProvider);
+    // Di-watch (bukan cuma dibaca) supaya seluruh tree rebuild pas bahasa
+    // diganti — banyak widget anak pilih field *_id / *_en berdasarkan ini.
+    ref.watch(languageProvider);
 
     return MaterialApp.router(
       title: 'MiRO',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0A264F),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        fontFamily: 'Poppins',
-      ),
+      theme: AppTheme.light,
       routerConfig: router,
 
       // ========================================================

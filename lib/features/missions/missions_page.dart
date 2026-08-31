@@ -1,73 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// JALUR IMPORT
 import 'data/mission_provider.dart';
 import 'screens/mission_path_screen.dart';
-import '../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
+import '../../core/providers/language_provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/app_state_views.dart';
 
+/// Halaman peta misi per-role. [roleId] datang dari query param `?role=`
+/// (dipasang dari kartu role di Home) — sebelumnya diabaikan sepenuhnya,
+/// jadi tap kartu role manapun di Home selalu nyasar ke role pertama yang
+/// kebetulan urutan pertama di database, bukan role yang benar-benar dipilih.
 class MissionsPage extends ConsumerWidget {
-  const MissionsPage({super.key});
+  const MissionsPage({super.key, this.roleId});
+
+  final String? roleId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Tarik Bahasa Asli dari Database/Lokal
     final lang = ref.watch(languageProvider);
-
-    // 2. Tarik Data Misi dari Database
     final missionsAsync = ref.watch(missionsProvider);
-
-    // Dictionary Papan Nama Role (Dinamis)
-    final Map<String, Map<String, String>> roleTitles = {
-      'en': {
-        'chef': 'Chef',
-        'doctor': 'Doctor',
-        'artist': 'Artist',
-        'athlete': 'Athlete',
-        'teacher': 'Teacher',
-      },
-      'id': {
-        'chef': 'Koki',
-        'doctor': 'Dokter',
-        'artist': 'Pelukis',
-        'athlete': 'Atlet',
-        'teacher': 'Guru',
-      },
-    };
+    final rolesAsync = ref.watch(rolesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       body: missionsAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: Color(0xFF0A264F)),
-        ),
-        error: (err, stack) => Center(
-          child: Text(
-            lang == 'id' ? "Masalah koneksi: $err" : "Connection error: $err",
-          ),
+        loading: () => const AppLoading(),
+        error: (err, stack) => AppErrorView(
+          message: lang == 'id' ? "Masalah koneksi: $err" : "Connection error: $err",
         ),
         data: (missions) {
           if (missions.isEmpty) {
-            return Center(
-              child: Text(
-                lang == 'id'
-                    ? "Data misi tidak ditemukan"
-                    : "Mission data not found",
-              ),
+            return AppEmptyState(
+              message: lang == 'id'
+                  ? "Data misi tidak ditemukan"
+                  : "Mission data not found",
             );
           }
 
-          // Ambil data misi pertama untuk membaca roleId-nya
-          final firstMission = missions.first;
-          final String roleId = firstMission.roleId;
+          // Pakai role dari query param kalau ada & valid; kalau nggak,
+          // fallback ke role pertama yang punya misi (perilaku lama).
+          final availableRoleIds = missions.map((m) => m.roleId).toSet();
+          final resolvedRoleId =
+              (roleId != null && availableRoleIds.contains(roleId))
+              ? roleId!
+              : missions.first.roleId;
 
-          // BUG FIXED: Pakai String mutlak sebagai fallback agar Dart tidak nangis
-          final String roleName =
-              roleTitles[lang]?[roleId] ??
-              (lang == 'id' ? 'Penjelajah' : 'Explorer');
+          final roleName = rolesAsync.maybeWhen(
+            data: (roles) {
+              final match = roles.where((r) => r.id == resolvedRoleId);
+              if (match.isEmpty) return null;
+              final role = match.first;
+              return lang == 'id' ? role.nameId : role.nameEn;
+            },
+            orElse: () => null,
+          );
 
-          // LANGSUNG RENDER PATH SCREEN DENGAN DATA DINAMIS
-          return MissionPathScreen(roleId: roleId, roleName: roleName);
+          return MissionPathScreen(
+            roleId: resolvedRoleId,
+            roleName: roleName ?? (lang == 'id' ? 'Penjelajah' : 'Explorer'),
+          );
         },
       ),
     );

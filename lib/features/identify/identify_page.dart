@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p; // Tambahan untuk deteksi ekstensi file
 
-import '../../shared/widgets/identify_progress_bar.dart';
+import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../data/repositories/supabase_repository.dart';
 import '../../core/providers/language_provider.dart';
@@ -334,7 +334,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           SafeArea(
             child: Column(
               children: [
-                IdentifyProgressBar(currentStep: step, totalSteps: 5),
+                StepProgressBar(currentStep: step, totalSteps: 5),
                 const SizedBox(height: 24),
                 Align(
                   alignment: Alignment.centerLeft,
