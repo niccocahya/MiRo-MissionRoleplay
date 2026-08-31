@@ -10,6 +10,7 @@ import '../data/role_model.dart';
 import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
+import '../../../core/theme/app_colors.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP HALAMAN PATH)
@@ -112,7 +113,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       builder: (_) => const PopScope(
         canPop: false, // Cegah ditutup pakai tombol back HP
         child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF0A264F)),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       ),
     );
@@ -140,11 +141,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             .select('image_url')
             .eq('mission_log_id', logRes['id']);
 
-        if (journalRes != null) {
-          photos = (journalRes as List)
-              .map((e) => e['image_url'].toString())
-              .toList();
-        }
+        photos = journalRes.map((e) => e['image_url'].toString()).toList();
       }
 
       if (mounted) {
@@ -200,7 +197,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                 child: _isLoadingProgress
                     ? const Center(
                         child: CircularProgressIndicator(
-                          color: Color(0xFF0A264F),
+                          color: AppColors.primary,
                         ),
                       )
                     : missionsAsync.when(
@@ -238,7 +235,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF0A264F), Color(0xFF153E7E)],
+          colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -275,7 +272,12 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     List<RoleModel> roles,
     String lang,
   ) {
-    final currentRole = roles.firstWhere((r) => r.id == widget.roleId);
+    // Fallback ke role pertama kalau roleId nggak ketemu di daftar (mencegah
+    // crash firstWhere kalau ada mismatch data antara missions_master & roles_master).
+    final currentRole = roles.firstWhere(
+      (r) => r.id == widget.roleId,
+      orElse: () => roles.first,
+    );
     final displayName = lang == 'id' ? currentRole.nameId : currentRole.nameEn;
 
     return PopupMenuButton<String>(
@@ -308,7 +310,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0A264F),
+                color: AppColors.primary,
               ),
             ),
           );
@@ -443,9 +445,9 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: isCurrent
-                  ? const Color(0xFFD46A55).withValues(alpha: 0.5)
+                  ? AppColors.accentDark.withValues(alpha: 0.5)
                   : isCompleted
-                  ? const Color(0xFF4CAF50).withValues(alpha: 0.4)
+                  ? AppColors.success.withValues(alpha: 0.4)
                   : Colors.grey.shade300.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
@@ -458,7 +460,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               gradient: isCurrent
                   ? const RadialGradient(
                       center: Alignment(-0.3, -0.3),
-                      colors: [Color(0xFFF58B7A), Color(0xFFD46A55)],
+                      colors: [Color(0xFFF58B7A), AppColors.accentDark],
                     )
                   : isCompleted
                   ? const RadialGradient(
@@ -475,8 +477,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                   ? [
                       BoxShadow(
                         color: isCurrent
-                            ? const Color(0xFFD46A55).withValues(alpha: 0.6)
-                            : const Color(0xFF4CAF50).withValues(alpha: 0.6),
+                            ? AppColors.accentDark.withValues(alpha: 0.6)
+                            : AppColors.success.withValues(alpha: 0.6),
                         blurRadius: 15,
                         spreadRadius: 2,
                       ),
@@ -524,7 +526,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0A264F),
+                  color: AppColors.primary,
                   letterSpacing: 0.3,
                 ),
               ),
@@ -552,7 +554,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       bottom: bottom,
       child: Icon(
         Icons.cloud,
-        color: const Color(0xFF0A264F).withValues(alpha: 0.06),
+        color: AppColors.primary.withValues(alpha: 0.06),
         size: size,
       ),
     );
@@ -563,14 +565,14 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFF1A22F), Color(0xFFE08600)],
+          colors: [AppColors.gold, Color(0xFFE08600)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFF1A22F).withValues(alpha: 0.5),
+            color: AppColors.gold.withValues(alpha: 0.5),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
