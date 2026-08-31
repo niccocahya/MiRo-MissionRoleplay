@@ -17,3 +17,21 @@ final notificationsProvider = FutureProvider<List<Map<String, dynamic>>>((
 
   return List<Map<String, dynamic>>.from(response);
 });
+
+/// Tandai satu notifikasi sudah dibaca. Sebelumnya kolom `is_read` cuma
+/// pernah DIBACA dari database, nggak pernah ditulis balik dari app —
+/// jadi titik biru "belum dibaca" nempel selamanya walau notifnya udah
+/// dibuka.
+final markNotificationReadProvider = Provider(
+  (ref) => (String notifId) async {
+    try {
+      await Supabase.instance.client
+          .from('notifications')
+          .update({'is_read': true})
+          .eq('id', notifId);
+      ref.invalidate(notificationsProvider);
+    } catch (_) {
+      // Nggak fatal — kalau gagal, notifikasi cuma tetap kelihatan "belum dibaca".
+    }
+  },
+);

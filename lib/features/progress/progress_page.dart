@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/child_stats_provider.dart';
 import '../../core/constants/role_visuals.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -96,20 +97,8 @@ final streakProvider = StreamProvider.family<int, String>((ref, childId) {
       });
 });
 
-// ==========================================
-// PROVIDER 1: MENGAMBIL STATS ANAK (KOGNITIF, MOTORIK, DLL) - REALTIME
-// ==========================================
-final childStatsProvider = StreamProvider.family<Map<String, dynamic>, String>((
-  ref,
-  childId,
-) {
-  if (childId.isEmpty) return Stream.value({});
-  return Supabase.instance.client
-      .from('child_stats')
-      .stream(primaryKey: ['child_id'])
-      .eq('child_id', childId)
-      .map((event) => event.isNotEmpty ? event.first : {});
-});
+// childStatsProvider sekarang di core/providers/child_stats_provider.dart
+// (dipakai bareng home_page.dart buat rekomendasi misi).
 
 // ==========================================
 // PROVIDER 2: KALENDER BULAN INI (Hanya menyimpan tanggal yang selesai)

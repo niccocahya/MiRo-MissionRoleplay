@@ -55,7 +55,14 @@ class NotificationsPage extends ConsumerWidget {
                 padding: const EdgeInsets.fromLTRB(24, 120, 24, 16),
                 itemCount: notifications.length,
                 itemBuilder: (context, index) {
-                  return _buildNotificationCard(notifications[index], lang);
+                  final notif = notifications[index];
+                  final bool isRead = notif['is_read'] ?? false;
+                  return GestureDetector(
+                    onTap: isRead
+                        ? null
+                        : () => ref.read(markNotificationReadProvider)(notif['id']),
+                    child: _buildNotificationCard(notif, lang),
+                  );
                 },
               );
             },

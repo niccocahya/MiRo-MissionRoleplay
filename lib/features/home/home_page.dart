@@ -6,7 +6,10 @@ import 'package:intl/intl.dart';
 
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/child_stats_provider.dart';
 import '../../core/constants/role_visuals.dart';
+import '../missions/data/mission_provider.dart';
+import '../missions/data/mission_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -201,8 +204,6 @@ const Map<String, Map<String, String>> _t = {
     'little_explorer': "Little Explorer",
     'motivation': "You're doing great!",
     'today_rec': "TODAY'S MISSION RECOMMENDATION",
-    'mission_title': "Cooking\nTogether",
-    'mission_desc': "A fun way to play and learn together",
     'btn_start_mission': "Start Mission",
     'choose_role': "Choose role\ntoday",
     'choose_role_desc': "Each role trains different skills",
@@ -220,8 +221,6 @@ const Map<String, Map<String, String>> _t = {
     'little_explorer': "Penjelajah Kecil",
     'motivation': "Kamu melakukan yang terbaik!",
     'today_rec': "REKOMENDASI MISI HARI INI",
-    'mission_title': "Memasak\nBersama",
-    'mission_desc': "Cara yang menyenangkan untuk bermain dan belajar bersama",
     'btn_start_mission': "Mulai Misi",
     'choose_role': "Pilih peran\nhari ini",
     'choose_role_desc': "Setiap peran melatih keahlian berbeda",
@@ -325,6 +324,17 @@ class _HomePageState extends ConsumerState<HomePage> {
         );
         final achievementsAsync = ref.watch(childAchievementsProvider(childId));
 
+        // Rekomendasi misi: pilih role berdasarkan skill anak yang PALING
+        // RENDAH saat ini (sebelumnya kartu ini statis, selalu nampilin
+        // "Memasak Bersama" / role Koki buat semua anak apapun datanya).
+        final statsAsync = ref.watch(childStatsProvider(childId));
+        final String recommendedRoleId = recommendedRoleFromStats(
+          statsAsync.value ?? {},
+        );
+        final recommendedMissionsAsync = ref.watch(
+          missionsByRoleProvider(recommendedRoleId),
+        );
+
         return Scaffold(
           backgroundColor: AppColors.background,
           body: SafeArea(
@@ -345,7 +355,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                       childCurrentXp,
                       childMaxXp,
                     ),
-                    _buildTodayMissionCard(context, texts),
+                    _buildTodayMissionCard(
+                      context,
+                      texts,
+                      lang,
+                      recommendedRoleId,
+                      recommendedMissionsAsync.value,
+                    ),
                     _buildChooseRole(context, texts, lang),
 
                     progressAsync.when(
@@ -606,7 +622,25 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget _buildTodayMissionCard(
     BuildContext context,
     Map<String, String> texts,
+    String lang,
+    String recommendedRoleId,
+    List<MissionModel>? recommendedMissions,
   ) {
+    // Rekomendasi asli berdasarkan skill anak yang paling perlu dilatih —
+    // dulu kartu ini selalu nampilin "Memasak Bersama" (role Koki) buat
+    // SEMUA anak, apapun datanya.
+    final role = roleVisualById(recommendedRoleId) ?? kUnknownRoleVisual;
+    final MissionModel? mission = (recommendedMissions == null || recommendedMissions.isEmpty)
+        ? null
+        : recommendedMissions.first;
+
+    final String missionTitle = mission == null
+        ? role.name(lang)
+        : (lang == 'id' ? mission.titleId : mission.titleEn);
+    final String missionDesc = mission == null
+        ? role.description(lang)
+        : (lang == 'id' ? mission.descriptionId : mission.descriptionEn);
+
     final hPad = context.pageHPadding;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.md),
@@ -637,9 +671,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                 bottom: -20,
                 right: -10,
                 child: Image.asset(
-                  'assets/images/penguin_cooking1.png',
+                  role.penguinIcon,
                   width: 180,
                   fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const SizedBox(),
                 ),
               ),
               Padding(
@@ -656,15 +691,22 @@ class _HomePageState extends ConsumerState<HomePage> {
                         ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      Text(texts['mission_title']!, style: AppTextStyles.h1()),
+                      Text(
+                        missionTitle,
+                        style: AppTextStyles.h1(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        texts['mission_desc']!,
+                        missionDesc,
                         style: AppTextStyles.body(color: AppColors.primary.withValues(alpha: 0.7)),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       ElevatedButton(
-                        onPressed: () => context.go('/missions?role=chef'),
+                        onPressed: () => context.go('/missions?role=$recommendedRoleId'),
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,

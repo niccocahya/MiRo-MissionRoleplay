@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -127,7 +128,56 @@ class ChatbotState {
 
 class ChatbotNotifier extends Notifier<ChatbotState> {
   @override
-  ChatbotState build() => ChatbotState(messages: []);
+  ChatbotState build() {
+    // Muat histori chat dari tabel `ai_chats` — sebelumnya tabel ini ada di
+    // database tapi nggak pernah dipakai sama sekali, jadi histori chat
+    // Mink selalu hilang tiap app ditutup/dibuka lagi.
+    _loadHistory();
+    return ChatbotState(messages: []);
+  }
+
+  Future<void> _loadHistory() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final rows = await Supabase.instance.client
+          .from('ai_chats')
+          .select('role, message')
+          .eq('parent_id', user.id)
+          .order('created_at', ascending: true)
+          .limit(50);
+
+      final history = rows
+          .map<Map<String, String>>(
+            (r) => {
+              'role': r['role']?.toString() ?? 'assistant',
+              'content': r['message']?.toString() ?? '',
+            },
+          )
+          .toList();
+
+      if (history.isNotEmpty) {
+        state = state.copyWith(messages: history);
+      }
+    } catch (e) {
+      debugPrint("Gagal memuat histori chat Mink: $e");
+    }
+  }
+
+  Future<void> _saveMessage(String role, String content) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await Supabase.instance.client.from('ai_chats').insert({
+        'parent_id': user.id,
+        'role': role,
+        'message': content,
+      });
+    } catch (e) {
+      debugPrint("Gagal simpan chat Mink: $e");
+    }
+  }
 
   Future<void> sendMessage(
     String userMessage, {
@@ -143,6 +193,7 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
       ],
       isLoading: true,
     );
+    unawaited(_saveMessage('user', userMessage));
 
     final String timeGreeting = _timeGreeting();
 
@@ -189,6 +240,7 @@ ${missionContext != null ? "INFORMASI MISI YANG SEDANG DIKERJAKAN:\n$missionCont
       ],
       isLoading: false,
     );
+    unawaited(_saveMessage('assistant', aiResponse));
   }
 }
 
