@@ -9,13 +9,21 @@ import 'core/providers/language_provider.dart';
 // IMPORT WIDGET PINGUIN GLOBAL
 import 'shared/widgets/penguin_chat_bot.dart'; // Sesuaikan path ini!
 
+// Diisi lewat --dart-define-from-file=env.json (lihat env.example.json).
+// Jangan taruh key beneran langsung di source lagi ya.
+const String _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const String _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: 'https://kbfitbaxifwzhonmcsnx.supabase.co',
-    anonKey: 'sb_publishable_bH8q8P2_jZbQTFVtJMB9LQ_TEIioVYM',
+  assert(
+    _supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty,
+    'SUPABASE_URL / SUPABASE_ANON_KEY belum di-set. '
+    'Jalankan dengan --dart-define-from-file=env.json (copy dari env.example.json).',
   );
+
+  await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
   runApp(const ProviderScope(child: MyApp()));
 }

@@ -56,3 +56,6 @@ flutter_0*.png
 .env
 .env.*
 !.env.example
+
+# Real secrets file for --dart-define-from-file (copy from env.example.json)
+env.json

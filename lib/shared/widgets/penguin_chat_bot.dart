@@ -46,8 +46,10 @@ final currentMissionContextProvider =
 // 🧠 BAGIAN 1: SERVICE GROQ (Tukang Antar Surat ke Server AI)
 // ============================================================================
 class GroqService {
-  static const String _apiKey =
-      'REDACTED_ROTATED_GROQ_KEY'; // ⚠️ Ingat masukin API key Groq kamu lagi nanti ya
+  // Diisi lewat --dart-define-from-file=env.json (lihat env.example.json).
+  // Key lama yang sempat hardcode di sini sudah HARUS di-revoke di
+  // console.groq.com/keys karena sempat ada di source code.
+  static const String _apiKey = String.fromEnvironment('GROQ_API_KEY');
   static const String _endpoint =
       'https://api.groq.com/openai/v1/chat/completions';
 
