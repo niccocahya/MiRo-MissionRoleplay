@@ -6,8 +6,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // PASTIKAN PATH IMPORT INI SESUAI DENGAN STRUKTUR FOLDER KAMU
 import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
-import '../../../core/providers/language_provider.dart';
-import '../../../core/providers/child_provider.dart';
+import '../../core/providers/language_provider.dart';
+import '../../core/providers/child_provider.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/responsive.dart';
+import '../../shared/widgets/app_bottom_sheet.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_state_views.dart';
 
 // ==========================================
 // PROVIDER REAL-TIME 1: MENGHITUNG TOTAL MISI SELESAI
@@ -87,8 +94,8 @@ final allCertificatesProvider = FutureProvider<List<Map<String, dynamic>>>((
         roleLabelId = "DOKTER CILIK";
         roleLabelEn = "LITTLE DOCTOR";
       } else if (role == 'artist') {
-        gradient = [const Color(0xFFF1A22F), const Color(0xFFE57B65)];
-        badgeColor = const Color(0xFFE57B65);
+        gradient = [AppColors.gold, AppColors.accent];
+        badgeColor = AppColors.accent;
         roleLabelId = "PELUKIS CILIK";
         roleLabelEn = "LITTLE ARTIST";
       } else if (role == 'athlete') {
@@ -294,9 +301,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: Color(0xFFE57B65)),
-      ),
+      builder: (_) => const AppLoading(),
     );
 
     try {
@@ -311,7 +316,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("${texts['err_logout']}$e"),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.danger,
           ),
         );
       }
@@ -339,8 +344,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
             Future<void> saveProfile() async {
               if (parentController.text.trim().isEmpty ||
-                  childController.text.trim().isEmpty)
+                  childController.text.trim().isEmpty) {
                 return;
+              }
 
               setModalState(() => isLoading = true);
 
@@ -365,7 +371,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(texts['update_success']!),
-                      backgroundColor: const Color(0xFF22C55E),
+                      backgroundColor: AppColors.success,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -376,7 +382,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text("${texts['err_save']}$e"),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.danger,
                     ),
                   );
                 }
@@ -387,106 +393,51 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom,
               ),
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+              child: AppBottomSheet(
+                title: texts['edit_profile_title']!,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 50,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      texts['edit_profile_title']!,
-                      style: const TextStyle(
-                        color: Color(0xFF0A264F),
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
                     Text(
                       texts['parent_name_label']!,
-                      style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.7),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.bodyBold(
+                        color: AppColors.primary.withValues(alpha: 0.7),
+                      ).copyWith(fontSize: 12),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: parentController,
                       style: const TextStyle(
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFF5F8FB),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                      ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.md + 4),
                     Text(
                       texts['child_name_label']!,
-                      style: TextStyle(
-                        color: const Color(0xFF0A264F).withValues(alpha: 0.7),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.bodyBold(
+                        color: AppColors.primary.withValues(alpha: 0.7),
+                      ).copyWith(fontSize: 12),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: childController,
                       style: const TextStyle(
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFF5F8FB),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 16,
-                        ),
-                      ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: isLoading ? null : saveProfile,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE57B65),
-                          disabledBackgroundColor: const Color(
-                            0xFFE57B65,
-                          ).withValues(alpha: 0.5),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.5),
+                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           elevation: 2,
                         ),
@@ -499,14 +450,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   strokeWidth: 3,
                                 ),
                               )
-                            : Text(
-                                texts['btn_save']!,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            : Text(texts['btn_save']!, style: AppTextStyles.button().copyWith(fontSize: 16)),
                       ),
                     ),
                   ],
@@ -528,57 +472,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+        return AppBottomSheet(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                texts['child_detail_title']!,
-                style: const TextStyle(
-                  color: Color(0xFF0A264F),
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
               const CircleAvatar(
                 radius: 40,
-                backgroundColor: Color(0xFFFDF1E8),
+                backgroundColor: AppColors.accentTint,
                 child: Text("👦🏻", style: TextStyle(fontSize: 40)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 childData['name'] ?? texts['default_child']!,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0A264F),
-                ),
+                style: AppTextStyles.h1().copyWith(fontSize: 24),
               ),
               Text(
                 "${childData['age'] ?? '-'} ${texts['age']}",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+                style: AppTextStyles.bodyLarge(
+                  color: AppColors.primary.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -595,7 +509,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   _buildMiniStatBox("✨", "XP", "${childData['total_xp'] ?? 0}"),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
             ],
           ),
         );
@@ -607,30 +521,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.sm + 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F8FB),
+            color: AppColors.background,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.grey.shade200),
           ),
           child: Text(icon, style: const TextStyle(fontSize: 24)),
         ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0A264F),
-          ),
-        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(value, style: AppTextStyles.bodyBold().copyWith(fontSize: 16)),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 10,
-            color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.caption(
+            color: AppColors.primary.withValues(alpha: 0.6),
+          ).copyWith(fontWeight: FontWeight.bold, fontSize: 10),
         ),
       ],
     );
@@ -646,61 +551,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+            return AppBottomSheet(
+              title: texts['menu_settings']!,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 50,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    texts['menu_settings']!,
-                    style: const TextStyle(
-                      color: Color(0xFF0A264F),
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
                   // Setting Notifikasi
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEBF4FA),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.primaryTint,
+                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
                       child: const Icon(
                         Icons.notifications_active_rounded,
-                        color: Color(0xFF0A264F),
+                        color: AppColors.primary,
                       ),
                     ),
-                    title: Text(
-                      texts['notif_setting']!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0A264F),
-                      ),
-                    ),
+                    title: Text(texts['notif_setting']!, style: AppTextStyles.bodyBold()),
                     trailing: Switch(
                       value: isNotifEnabled,
-                      activeColor: const Color(0xFFE57B65),
+                      activeColor: AppColors.accent,
                       onChanged: (val) =>
                           setModalState(() => isNotifEnabled = val),
                     ),
@@ -711,34 +585,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFDF1E8),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.accentTint,
+                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
-                      child: const Icon(
-                        Icons.language_rounded,
-                        color: Color(0xFFF1A22F),
-                      ),
+                      child: const Icon(Icons.language_rounded, color: AppColors.gold),
                     ),
-                    title: Text(
-                      texts['lang_setting']!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0A264F),
-                      ),
-                    ),
+                    title: Text(texts['lang_setting']!, style: AppTextStyles.bodyBold()),
                     trailing: DropdownButton<String>(
                       value: currentLang,
                       underline: const SizedBox(),
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down,
-                        color: Color(0xFF0A264F),
-                      ),
-                      style: const TextStyle(
-                        color: Color(0xFF0A264F),
-                        fontWeight: FontWeight.bold,
-                      ),
+                      icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                      style: AppTextStyles.bodyBold(),
                       items: const [
                         DropdownMenuItem(value: 'id', child: Text("🇮🇩 IND")),
                         DropdownMenuItem(value: 'en', child: Text("🇬🇧 ENG")),
@@ -767,62 +626,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        contentPadding: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+        contentPadding: const EdgeInsets.all(AppSpacing.lg),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFFEBF4FA),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.support_agent_rounded,
-                size: 40,
-                color: Color(0xFF0A264F),
-              ),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: const BoxDecoration(color: AppColors.primaryTint, shape: BoxShape.circle),
+              child: const Icon(Icons.support_agent_rounded, size: 40, color: AppColors.primary),
             ),
-            const SizedBox(height: 16),
-            Text(
-              texts['menu_help']!,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF0A264F),
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
+            Text(texts['menu_help']!, style: AppTextStyles.h2()),
+            const SizedBox(height: AppSpacing.sm + 4),
             Text(
               texts['help_desc']!,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: const Color(0xFF0A264F).withValues(alpha: 0.7),
-              ),
+              style: AppTextStyles.body().copyWith(fontSize: 13),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(ctx),
-              icon: const Icon(
-                Icons.mail_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-              label: const Text(
-                "cs@miroapp.com",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              icon: const Icon(Icons.mail_rounded, color: Colors.white, size: 18),
+              label: Text("cs@miroapp.com", style: AppTextStyles.button()),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0A264F),
+                backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
               ),
             ),
           ],
@@ -848,7 +678,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final childData = childDataAsync.value ?? {};
     final String childId = childData['id'] ?? '';
     final String childName = childData['name'] ?? texts['default_child']!;
-    final int totalXp = childData['total_xp'] ?? childData['xp'] ?? 0;
+    final int totalXp = childData['total_xp'] ?? 0;
     final int childLevel = _calculateLevel(totalXp);
 
     final currentUser = Supabase.instance.client.auth.currentUser;
@@ -860,9 +690,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final totalMissionsAsync = ref.watch(
       totalMissionsCompletedProvider(childId),
     );
-    final unlockedAchievementsAsync = ref.watch(
-      unlockedAchievementsCountProvider(childId),
-    );
 
     // MENARIK DATA SERTIFIKAT LANGSUNG DARI DATABASE
     final allCertsAsync = ref.watch(allCertificatesProvider);
@@ -870,125 +697,117 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final int totalMissions = totalMissionsAsync.value ?? 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F8FB),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 120),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeaderProfile(texts, parentName, childName, childId),
-              _buildSubscriptionSection(texts, parentName),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        texts['certificate_title']!,
-                        style: const TextStyle(
-                          color: Color(0xFF0A264F),
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+          child: ResponsiveCenter(
+            maxWidth: 640,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeaderProfile(context, texts, parentName, childName, childId),
+                _buildSubscriptionSection(context, texts, parentName),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
+                        child: Text(texts['certificate_title']!, style: AppTextStyles.h1().copyWith(fontSize: 22)),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
 
-                    // ===============================================
-                    // CAROUSEL SERTIFIKAT (UI BARU: BISA DI-SWIPE)
-                    // ===============================================
-                    allCertsAsync.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (e, s) => const SizedBox(),
-                      data: (certs) {
-                        if (certs.isEmpty) return const SizedBox();
+                      // ===============================================
+                      // CAROUSEL SERTIFIKAT (UI BARU: BISA DI-SWIPE)
+                      // ===============================================
+                      allCertsAsync.when(
+                        loading: () => const Padding(
+                          padding: EdgeInsets.all(AppSpacing.lg),
+                          child: AppLoading(),
+                        ),
+                        error: (e, s) => const SizedBox(),
+                        data: (certs) {
+                          if (certs.isEmpty) return const SizedBox();
 
-                        return SizedBox(
-                          height: 190, // Beri sedikit extra height untuk shadow
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: certs.length,
-                            // Tambahkan padding awal dan akhir agar estetik
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            itemBuilder: (context, index) {
-                              final cert = certs[index];
+                          return SizedBox(
+                            height: 190, // Beri sedikit extra height untuk shadow
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: certs.length,
+                              // Tambahkan padding awal dan akhir agar estetik
+                              padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
+                              itemBuilder: (context, index) {
+                                final cert = certs[index];
 
-                              return Consumer(
-                                builder: (context, ref, child) {
-                                  final String roleId = cert['role_id'] ?? '';
-                                  final certProgressAsync = ref.watch(
-                                    certificateProgressProvider(childId),
-                                  );
+                                return Consumer(
+                                  builder: (context, ref, child) {
+                                    final String roleId = cert['role_id'] ?? '';
+                                    final certProgressAsync = ref.watch(
+                                      certificateProgressProvider(childId),
+                                    );
 
-                                  final int unlockedBadges =
-                                      certProgressAsync.value?[roleId] ?? 0;
+                                    final int unlockedBadges =
+                                        certProgressAsync.value?[roleId] ?? 0;
 
-                                  return Padding(
-                                    // Spasi antar sertifikat
-                                    padding: const EdgeInsets.only(right: 16),
-                                    child: GestureDetector(
-                                      onTap: () => _navigateToFullscreen(
-                                        CertificateDetailPage(certData: cert),
+                                    return Padding(
+                                      // Spasi antar sertifikat
+                                      padding: const EdgeInsets.only(right: AppSpacing.md),
+                                      child: GestureDetector(
+                                        onTap: () => _navigateToFullscreen(
+                                          CertificateDetailPage(certData: cert),
+                                        ),
+                                        child: _buildEstetikAchievementCard(
+                                          context,
+                                          texts,
+                                          cert,
+                                          unlockedBadges,
+                                          lang, // MELEMPAR BAHASA AKTIF
+                                        ),
                                       ),
-                                      child: _buildEstetikAchievementCard(
-                                        texts,
-                                        cert,
-                                        unlockedBadges,
-                                        lang, // MELEMPAR BAHASA AKTIF
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
 
-                    const SizedBox(height: 20),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () =>
-                            _navigateToFullscreen(const AllCertificatesPage()),
-                        child: Container(
-                          padding: const EdgeInsets.only(bottom: 2),
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Color(0xFF0A264F),
-                                width: 2,
+                      const SizedBox(height: AppSpacing.md + 4),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () =>
+                              _navigateToFullscreen(const AllCertificatesPage()),
+                          child: Container(
+                            padding: const EdgeInsets.only(bottom: 2),
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: AppColors.primary, width: 2),
                               ),
                             ),
-                          ),
-                          child: Text(
-                            texts['view_all_cert']!,
-                            style: const TextStyle(
-                              color: Color(0xFF0A264F),
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
+                            child: Text(
+                              texts['view_all_cert']!,
+                              style: AppTextStyles.bodyBold().copyWith(fontSize: 13),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              _buildQuickStats(texts, totalMissions, totalXp, childLevel),
+                _buildQuickStats(context, texts, totalMissions, totalXp, childLevel),
 
-              _buildMenuList(texts, childData, lang),
+                _buildMenuList(context, texts, childData, lang),
 
-              _buildLogoutButton(texts),
-              const SizedBox(height: 40),
-            ],
+                _buildLogoutButton(context, texts),
+                const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
+              ],
+            ),
           ),
         ),
       ),
@@ -996,13 +815,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildHeaderProfile(
+    BuildContext context,
     Map<String, String> texts,
     String parentName,
     String childName,
     String childId,
   ) {
+    final hPad = context.pageHPadding;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.xl, hPad, AppSpacing.lg),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1013,29 +834,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               children: [
                 Text(
                   "${texts['parent_prefix']} $parentName",
-                  style: const TextStyle(
-                    color: Color(0xFF0A264F),
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
-                  ),
+                  style: AppTextStyles.h1().copyWith(letterSpacing: -0.5),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   "${texts['parent_greeting']} $childName",
-                  style: TextStyle(
-                    color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.bodyBold(
+                    color: AppColors.primary.withValues(alpha: 0.6),
+                  ).copyWith(fontSize: 14),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm + 4),
                 _buildEditButton(texts, parentName, childName, childId),
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           _buildAvatarStack(),
         ],
       ),
@@ -1051,29 +865,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return GestureDetector(
       onTap: () => _showEditProfileModal(texts, parentName, childName, childId),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.xs + 2),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.sm + 10),
           border: Border.all(color: Colors.grey.shade200),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 2,
-              offset: Offset(0, 1),
-            ),
-          ],
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.edit, color: Color(0xFF0A264F), size: 12),
-            const SizedBox(width: 6),
+            const Icon(Icons.edit, color: AppColors.primary, size: 12),
+            const SizedBox(width: AppSpacing.xs + 2),
             Text(
               texts['edit_profile']!,
-              style: const TextStyle(
-                color: Color(0xFF0A264F),
-                fontSize: 10,
+              style: AppTextStyles.caption(color: AppColors.primary).copyWith(
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
               ),
@@ -1085,50 +891,37 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildAvatarStack() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFDF1E8),
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: const Text("👩🏻", style: TextStyle(fontSize: 36)),
-        ),
-      ],
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        color: AppColors.accentTint,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
+      ),
+      alignment: Alignment.center,
+      child: const Text("👩🏻", style: TextStyle(fontSize: 36)),
     );
   }
 
   Widget _buildSubscriptionSection(
+    BuildContext context,
     Map<String, String> texts,
     String parentName,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             texts['your_plan']!,
-            style: TextStyle(
-              color: const Color(0xFF0A264F).withValues(alpha: 0.7),
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.5,
-            ),
+            style: AppTextStyles.bodyBold(
+              color: AppColors.primary.withValues(alpha: 0.7),
+            ).copyWith(fontSize: 11, letterSpacing: 1.5),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Container(
             width: double.infinity,
             height: 150,
@@ -1136,26 +929,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF4b4b4b),
-                  Color(0xFF6e6e6e),
-                  Color(0xFFa3a3a3),
-                ],
+                colors: [Color(0xFF4b4b4b), Color(0xFF6e6e6e), Color(0xFFa3a3a3)],
               ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))],
             ),
             child: Stack(
               children: [
                 Positioned(
-                  top: 16,
-                  right: 20,
+                  top: AppSpacing.md,
+                  right: AppSpacing.md + 4,
                   child: Text(
                     "MIRO",
                     style: TextStyle(
@@ -1179,7 +962,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1188,45 +971,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFDF1E8),
+                          color: AppColors.accentTint,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
-                          "👩🏻",
-                          style: TextStyle(fontSize: 20),
-                        ),
+                        child: const Text("👩🏻", style: TextStyle(fontSize: 20)),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         "${texts['parent_prefix']} $parentName",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: AppTextStyles.h3(color: Colors.white).copyWith(fontSize: 18),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       Row(
                         children: [
                           Text(
                             texts['free_user']!,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 12,
-                            ),
+                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            size: 10,
-                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.7), size: 10),
                         ],
                       ),
                     ],
@@ -1235,40 +1002,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
-                  const Icon(
-                    Icons.verified,
-                    color: Color(0xFF0A264F),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    texts['monthly_plan']!,
-                    style: const TextStyle(
-                      color: Color(0xFF0A264F),
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const Icon(Icons.verified, color: AppColors.primary, size: 16),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(texts['monthly_plan']!, style: AppTextStyles.bodyBold()),
                 ],
               ),
               Text(
                 texts['plan_desc']!,
                 textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: const Color(0xFF0A264F).withValues(alpha: 0.6),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: AppTextStyles.caption(
+                  color: AppColors.primary.withValues(alpha: 0.6),
+                ).copyWith(fontWeight: FontWeight.w500),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
@@ -1276,36 +1030,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF0A264F),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
                     elevation: 2,
                   ),
-                  child: Text(
-                    texts['plan_detail']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm + 4),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0A264F),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
                     elevation: 4,
                   ),
-                  child: Text(
-                    texts['upgrade_plan']!,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -1319,14 +1063,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // KARTU ACHIEVEMENT ESTETIK UNTUK CAROUSEL PROFILE
   // =====================================================
   Widget _buildEstetikAchievementCard(
+    BuildContext context,
     Map<String, String> texts,
     Map<String, dynamic> cert,
     int dbUnlockedBadges,
     String lang,
   ) {
-    final screenWidth = MediaQuery.of(context).size.width;
     // Lebar kartu statis agar konsisten saat di-scroll
-    final cardWidth = screenWidth * 0.8;
+    final cardWidth = context.screenWidth * 0.8;
 
     final previewBadges = (cert['badges'] as List).take(3).toList();
     final totalBadges = (cert['badges'] as List).length;
@@ -1351,221 +1095,176 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return SizedBox(
       height: 180,
       width: cardWidth,
-      child: Stack(
-        children: [
-          Container(
-            width: cardWidth,
-            height: 180,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors:
-                    cert['gradient'] ??
-                    [const Color(0xFF0A264F), const Color(0xFF163C73)],
+      child: Container(
+        width: cardWidth,
+        height: 180,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: cert['gradient'] ?? [AppColors.primary, AppColors.primaryLight],
+          ),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            // GAMBAR PINGUIN BACKGROUND (TRANSPARAN DI KANAN BAWAH)
+            Positioned(
+              bottom: -10,
+              right: -10,
+              child: Opacity(
+                opacity: 0.2, // Super transparan jadi watermark
+                child: Image.asset(
+                  cert['characterImg'],
+                  width: 140,
+                  fit: BoxFit.contain,
+                  errorBuilder: (c, e, s) => const SizedBox(),
+                ),
               ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
-              children: [
-                // GAMBAR PINGUIN BACKGROUND (TRANSPARAN DI KANAN BAWAH)
-                Positioned(
-                  bottom: -10,
-                  right: -10,
-                  child: Opacity(
-                    opacity: 0.2, // Super transparan jadi watermark
-                    child: Image.asset(
-                      cert['characterImg'],
-                      width: 140,
-                      fit: BoxFit.contain,
-                      errorBuilder: (c, e, s) => const SizedBox(),
+
+            // FOTO ANAK KANAN ATAS
+            Positioned(
+              top: AppSpacing.md,
+              right: AppSpacing.md,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.accentTint,
+                  borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                ),
+                alignment: Alignment.center,
+                child: const Text("👦🏻", style: TextStyle(fontSize: 24)),
+              ),
+            ),
+
+            // KONTEN TEKS & BADGE
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Kategori Role Dinamis
+                  Text(
+                    roleLabel,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      shadows: const [Shadow(color: Colors.black45, blurRadius: 2)],
                     ),
                   ),
-                ),
+                  const SizedBox(height: AppSpacing.xs),
 
-                // FOTO ANAK KANAN ATAS
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFDF1E8),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white, width: 2),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
+                  // Judul Sertifikat Dinamis
+                  SizedBox(
+                    width: cardWidth * 0.6,
+                    child: Text(
+                      cardTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                        shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    alignment: Alignment.center,
-                    child: const Text("👦🏻", style: TextStyle(fontSize: 24)),
                   ),
-                ),
 
-                // KONTEN TEKS & BADGE
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const Spacer(),
+
+                  // Teks "0/3 Selesai" Dinamis
+                  Text(
+                    statusText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs + 2),
+
+                  // BARISAN BADGE DI KIRI BAWAH
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      // Kategori Role Dinamis
-                      Text(
-                        roleLabel,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                          shadows: const [
-                            Shadow(color: Colors.black45, blurRadius: 2),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                      ...previewBadges.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var badge = entry.value;
+                        bool isUnlocked = index < displayUnlocked;
 
-                      // Judul Sertifikat Dinamis
-                      SizedBox(
-                        width: cardWidth * 0.6,
-                        child: Text(
-                          cardTitle,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                            shadows: [
-                              Shadow(color: Colors.black45, blurRadius: 4),
-                            ],
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      // Teks "0/3 Selesai" Dinamis
-                      Text(
-                        statusText,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(color: Colors.black45, blurRadius: 4),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // BARISAN BADGE DI KIRI BAWAH
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          ...previewBadges.asMap().entries.map((entry) {
-                            int index = entry.key;
-                            var badge = entry.value;
-                            bool isUnlocked = index < displayUnlocked;
-
-                            return Container(
-                              margin: const EdgeInsets.only(right: 8),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isUnlocked
-                                      ? Colors.white.withValues(alpha: 0.8)
-                                      : Colors.white.withValues(alpha: 0.2),
-                                ),
-                                color: isUnlocked
-                                    ? Colors.white.withValues(alpha: 0.2)
-                                    : Colors.white.withValues(alpha: 0.05),
-                              ),
-                              alignment: Alignment.center,
-                              child: isUnlocked
-                                  ? Text(
-                                      badge['emoji'] ?? '🏅',
-                                      style: const TextStyle(fontSize: 16),
-                                    )
-                                  : const Icon(
-                                      Icons.lock,
-                                      size: 16,
-                                      color: Colors.white38,
-                                    ),
-                            );
-                          }),
-                          if (totalBadges > previewBadges.length)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4, bottom: 8),
-                              child: Text(
-                                "...",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black45,
-                                      blurRadius: 4,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                        return Container(
+                          margin: const EdgeInsets.only(right: AppSpacing.sm),
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isUnlocked
+                                  ? Colors.white.withValues(alpha: 0.8)
+                                  : Colors.white.withValues(alpha: 0.2),
                             ),
-                        ],
-                      ),
+                            color: isUnlocked
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.white.withValues(alpha: 0.05),
+                          ),
+                          alignment: Alignment.center,
+                          child: isUnlocked
+                              ? Text(badge['emoji'] ?? '🏅', style: const TextStyle(fontSize: 16))
+                              : const Icon(Icons.lock, size: 16, color: Colors.white38),
+                        );
+                      }),
+                      if (totalBadges > previewBadges.length)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 4, bottom: 8),
+                          child: Text(
+                            "...",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuickStats(
+    BuildContext context,
     Map<String, String> texts,
     int totalMissions,
     int totalXp,
     int level,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: context.pageHPadding, vertical: AppSpacing.sm + 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            texts['quick_stats']!,
-            style: const TextStyle(
-              color: Color(0xFF0A264F),
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
+          Text(texts['quick_stats']!, style: AppTextStyles.h1().copyWith(fontSize: 22)),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              _buildStatCard(
-                totalMissions.toString(),
-                texts['total_missions']!,
-              ),
-              const SizedBox(width: 16),
+              _buildStatCard(totalMissions.toString(), texts['total_missions']!),
+              const SizedBox(width: AppSpacing.md),
               _buildStatCard(totalXp.toString(), texts['total_exp']!),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               _buildStatCard(level.toString(), texts['level']!),
             ],
           ),
@@ -1576,55 +1275,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   Widget _buildStatCard(String value, String label) {
     return Expanded(
-      child: Container(
-        height: 100,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.shade100),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: Color(0xFFE57B65),
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
+      child: AppCard(
+        padding: const EdgeInsets.all(AppSpacing.sm + 4),
+        child: SizedBox(
+          height: 100 - (AppSpacing.sm + 4) * 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                value,
+                style: AppTextStyles.h1(color: AppColors.accent).copyWith(fontSize: 28),
               ),
-            ),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF0A264F),
-                fontSize: 8,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.caption(color: AppColors.primary).copyWith(
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildMenuList(
+    BuildContext context,
     Map<String, String> texts,
     Map<String, dynamic> childData,
     String currentLang,
   ) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(context.pageHPadding),
       child: Column(
         children: [
           _buildMenuItem(
@@ -1653,26 +1338,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: const Color(0xFFEBF4FA),
-            borderRadius: BorderRadius.circular(10),
+            color: AppColors.primaryTint,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          child: Icon(icon, color: const Color(0xFF0A264F), size: 20),
+          child: Icon(icon, color: AppColors.primary, size: 20),
         ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF0A264F),
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text(title, style: AppTextStyles.bodyBold().copyWith(fontSize: 15)),
         trailing: Icon(
           Icons.arrow_forward_ios_rounded,
-          color: const Color(0xFF0A264F).withValues(alpha: 0.5),
+          color: AppColors.primary.withValues(alpha: 0.5),
           size: 16,
         ),
         onTap: onTap,
@@ -1680,27 +1358,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildLogoutButton(Map<String, String> texts) {
+  Widget _buildLogoutButton(BuildContext context, Map<String, String> texts) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
       child: ElevatedButton(
         onPressed: () => _handleLogout(texts),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFE57B65),
           minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
           elevation: 4,
         ),
-        child: Text(
-          texts['logout']!,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        child: Text(texts['logout']!, style: AppTextStyles.button().copyWith(fontSize: 18)),
       ),
     );
   }
