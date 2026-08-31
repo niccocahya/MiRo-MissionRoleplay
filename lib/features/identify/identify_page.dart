@@ -4,13 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p; // Tambahan untuk deteksi ekstensi file
 
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../data/repositories/supabase_repository.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/services/storage_upload_service.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
 import '../../shared/widgets/penguin_chat_bot.dart';
@@ -151,7 +151,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
         .eq('parent_id', user.id)
         .maybeSingle();
     if (data != null && mounted) {
-      ref.read(selectedChildIdProvider.notifier).state = data['id'];
+      ref.read(selectedChildIdProvider.notifier).setId(data['id']);
       context.go('/home');
     }
   }
@@ -224,24 +224,13 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
 
     setState(() => isLoading = true);
     try {
-      final supabase = Supabase.instance.client;
       String? uploadedPhotoUrl;
 
       // 1. Cek apakah Bunda milih foto. Kalau iya, upload ke bucket 'user_photo'
       if (_imageFile != null) {
-        final user = supabase.auth.currentUser;
-        final fileExt = p.extension(_imageFile!.path);
-        // Bikin nama file unik: IDParent_Timestamp.jpg
-        final fileName =
-            "${user?.id ?? 'child'}_${DateTime.now().millisecondsSinceEpoch}$fileExt";
-
-        // Upload ke bucket baru Bos!
-        await supabase.storage.from('user_photo').upload(fileName, _imageFile!);
-
-        // Ambil Public URL-nya
-        uploadedPhotoUrl = supabase.storage
-            .from('user_photo')
-            .getPublicUrl(fileName);
+        uploadedPhotoUrl = await StorageUploadService.uploadProfilePhoto(
+          _imageFile!,
+        );
       }
 
       // 2. Setor semua data (termasuk link foto) ke Repository
@@ -257,7 +246,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             avatarUrl: uploadedPhotoUrl,
           );
 
-      ref.read(selectedChildIdProvider.notifier).state = childId;
+      ref.read(selectedChildIdProvider.notifier).setId(childId);
       if (mounted) context.go('/home');
     } catch (e) {
       if (mounted) _showError('${texts['err_submit']}${e.toString()}');

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:path/path.dart' as p;
 import 'package:cached_network_image/cached_network_image.dart';
 
 // JALUR IMPORT
@@ -12,6 +11,8 @@ import '../../../shared/widgets/penguin_chat_bot.dart'; // Pastikan path ini ben
 import '../data/mission_model.dart';
 import 'mission_win_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/services/storage_upload_service.dart';
+import '../../../core/theme/app_colors.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -266,20 +267,11 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
 
     try {
       final file = File(photo.path);
-      final fileExt = p.extension(photo.path);
-
-      // 🔥 PERBAIKAN DI SINI: Pakai kurung kurawal ${stepIndex}
-      final fileName =
-          "mission_${widget.mission.id}_step_${stepIndex}_${DateTime.now().millisecondsSinceEpoch}$fileExt";
-      final path = 'USER_JOURNAL/$fileName';
-
-      await Supabase.instance.client.storage
-          .from('mission-assets')
-          .upload(path, file);
-
-      final publicUrl = Supabase.instance.client.storage
-          .from('mission-assets')
-          .getPublicUrl(path);
+      final publicUrl = await StorageUploadService.uploadMissionStepPhoto(
+        missionId: widget.mission.id,
+        stepIndex: stepIndex,
+        file: file,
+      );
 
       setState(() {
         _stepPhotos[stepIndex] = publicUrl;
@@ -339,7 +331,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFF5F8FB), Color(0xFFE2EAF4)],
+              colors: [AppColors.background, Color(0xFFE2EAF4)],
             ),
           ),
           child: SafeArea(
@@ -356,7 +348,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                       Text(
                         texts['how_to_play']!,
                         style: const TextStyle(
-                          color: Color(0xFF0A264F),
+                          color: AppColors.primary,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
@@ -372,15 +364,13 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                               height: 8,
                               decoration: BoxDecoration(
                                 color: isCompleted || isActive
-                                    ? const Color(0xFF0A264F)
+                                    ? AppColors.primary
                                     : Colors.grey.shade300,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: isActive
                                     ? [
                                         BoxShadow(
-                                          color: const Color(
-                                            0xFF0A264F,
-                                          ).withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(alpha: 0.3),
                                           blurRadius: 6,
                                           offset: const Offset(0, 2),
                                         ),
@@ -430,8 +420,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                             gradient: isOpen
                                 ? const LinearGradient(
                                     colors: [
-                                      Color(0xFF0A264F),
-                                      Color(0xFF153E7E),
+                                      AppColors.primary,
+                                      AppColors.primaryLight,
                                     ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
@@ -439,9 +429,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                 : null,
                             color: isOpen
                                 ? null
-                                : const Color(
-                                    0xFFF1A22F,
-                                  ).withValues(alpha: 0.1),
+                                : AppColors.gold.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(30),
                             boxShadow: isOpen
                                 ? const [
@@ -490,7 +478,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                             style: TextStyle(
                                               color: isOpen
                                                   ? Colors.white
-                                                  : const Color(0xFF0A264F),
+                                                  : AppColors.primary,
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -500,9 +488,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                       if (!isOpen)
                                         Icon(
                                           Icons.keyboard_arrow_down,
-                                          color: const Color(
-                                            0xFF0A264F,
-                                          ).withValues(alpha: 0.4),
+                                          color: AppColors.primary.withValues(alpha: 0.4),
                                         ),
                                     ],
                                   ),
@@ -536,7 +522,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                   child: Text(
                                                     '${subIdx + 1}',
                                                     style: const TextStyle(
-                                                      color: Color(0xFF0A264F),
+                                                      color: AppColors.primary,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
@@ -923,7 +909,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                 (isCurrent &&
                                                     isLastSubStep &&
                                                     !isUploading)
-                                                ? const Color(0xFFE57B65)
+                                                ? AppColors.accent
                                                 : Colors.white.withValues(
                                                     alpha: 0.2,
                                                   ),
@@ -976,7 +962,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE57B65),
+                            backgroundColor: AppColors.accent,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
@@ -1012,7 +998,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: allStepsDone
-                                ? const Color(0xFF0A264F)
+                                ? AppColors.primary
                                 : Colors.grey.shade300,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
