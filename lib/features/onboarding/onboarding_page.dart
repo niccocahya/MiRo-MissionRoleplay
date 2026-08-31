@@ -1,0 +1,972 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../shared/widgets/onboarding_progress_bar.dart';
+import '../../shared/widgets/back_button.dart';
+
+// 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
+import '../../shared/widgets/penguin_chat_bot.dart';
+
+// ==========================================
+// 1. DICTIONARY (KAMUS BAHASA) - ENGLISH DEFAULT
+// ==========================================
+const Map<String, Map<String, String>> _t = {
+  'en': {
+    'splash_desc': 'Exciting adventures\nwithout screen time',
+    'splash_tap': 'Tap anywhere to continue',
+    'lang_title': 'Choose\nlanguage',
+    'lang_desc': 'You can change this anytime',
+    'btn_next': 'Next',
+    'start_welcome': 'Welcome to MiRO',
+    'start_title': 'Start your little\none\'s journey',
+    'btn_login': 'Login',
+    'btn_register': 'Register',
+    'login_welcome': 'Welcome back!',
+    'login_desc': 'Let\'s continue your journey',
+    'reg_title': 'Create your account',
+    'reg_desc': 'Start the learning journey today',
+    'email_label': 'Email',
+    'pass_label': 'Password',
+    'name_label': 'Full Name',
+    'conf_pass_label': 'Confirm Password',
+    'btn_google': 'Continue with Google',
+    'switch_reg': 'Don\'t have an account? Sign Up',
+    'switch_login': 'Already have an account? Login',
+    'email_hint': '(type your email)',
+    'name_hint': '(type your full name)',
+  },
+  'id': {
+    'splash_desc': 'Petualangan seru\ntanpa layar gawai',
+    'splash_tap': 'Ketuk di mana saja untuk lanjut',
+    'lang_title': 'Pilih\nbahasa',
+    'lang_desc': 'Kamu bisa mengubahnya kapan saja',
+    'btn_next': 'Lanjut',
+    'start_welcome': 'Selamat datang di MiRO',
+    'start_title': 'Mulai perjalanan\nbelajar si kecil',
+    'btn_login': 'Masuk',
+    'btn_register': 'Daftar',
+    'login_welcome': 'Selamat datang kembali!',
+    'login_desc': 'Mari lanjutkan perjalananmu',
+    'reg_title': 'Buat akun barumu',
+    'reg_desc': 'Mulai perjalanan belajar si kecil hari ini',
+    'email_label': 'Email',
+    'pass_label': 'Kata Sandi',
+    'name_label': 'Nama Lengkap',
+    'conf_pass_label': 'Konfirmasi kata sandi',
+    'btn_google': 'Lanjutkan dengan Google',
+    'switch_reg': 'Belum punya akun? Buat Akun Baru',
+    'switch_login': 'Sudah punya akun? Masuk',
+    'email_hint': '(ketik email kamu)',
+    'name_hint': '(ketik nama lengkapmu)',
+  },
+};
+
+enum OnboardingStep { splash, language, startJourney, login, register }
+
+// ==========================================
+// 2. PROVIDERS (MODERN RIVERPOD 2.0+ / 3.0+)
+// ==========================================
+
+final onboardingStepProvider =
+    NotifierProvider<OnboardingStepNotifier, OnboardingStep>(() {
+  return OnboardingStepNotifier();
+});
+
+class OnboardingStepNotifier extends Notifier<OnboardingStep> {
+  @override
+  OnboardingStep build() {
+    return OnboardingStep.splash; // Initial state
+  }
+
+  void setStep(OnboardingStep step) {
+    state = step;
+  }
+}
+
+final selectedLanguageProvider = NotifierProvider<LanguageNotifier, String>(() {
+  return LanguageNotifier();
+});
+
+class LanguageNotifier extends Notifier<String> {
+  bool _hasManuallySelected = false;
+
+  @override
+  String build() {
+    _init();
+    return 'en'; // Initial state sementara
+  }
+
+  Future<void> _init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedLang = prefs.getString('lang');
+
+    // Hanya timpa state JIKA user belum mengeklik tombol bahasa di layar
+    if (savedLang != null && !_hasManuallySelected) {
+      state = savedLang;
+    }
+  }
+
+  Future<void> setLang(String code) async {
+    _hasManuallySelected = true;
+    state = code;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lang', code);
+  }
+}
+
+class OnboardingPage extends ConsumerStatefulWidget {
+  const OnboardingPage({super.key});
+  @override
+  ConsumerState<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends ConsumerState<OnboardingPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(showChatbotGlobalProvider.notifier).hide();
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  // ==========================================
+  // 3. AUTH LOGIC (RLS & DATABASE SYNC)
+  // ==========================================
+  Future<void> _handleRegister() async {
+    if (_passwordController.text != _confirmController.text) {
+      _showMsg("Passwords do not match!");
+      return;
+    }
+    setState(() => _isLoading = true);
+    try {
+      final supabase = Supabase.instance.client;
+      final AuthResponse res = await supabase.auth.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (res.user != null) {
+        await supabase.from('parents').insert({
+          'id': res.user!.id,
+          'email': _emailController.text.trim(),
+          'full_name': _nameController.text.trim(),
+          'language_code': ref.read(selectedLanguageProvider),
+        });
+        if (mounted) context.go('/identify');
+      }
+    } catch (e) {
+      _showMsg(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      final supabase = Supabase.instance.client;
+      final res = await supabase.auth.signInWithPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (res.user != null) {
+        // UPDATE database pakai bahasa yang baru user pilih!
+        await supabase.from('parents').update({
+          'language_code': ref.read(selectedLanguageProvider),
+        }).eq('id', res.user!.id);
+
+        final child =
+            await supabase.from('children').select().limit(1).maybeSingle();
+
+        if (mounted) {
+          child == null ? context.go('/identify') : context.go('/home');
+        }
+      }
+    } catch (e) {
+      _showMsg("Invalid login credentials");
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showMsg(String m) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+
+  @override
+  Widget build(BuildContext context) {
+    final step = ref.watch(onboardingStepProvider);
+    final lang = ref.watch(selectedLanguageProvider);
+
+    // 🔥 PERBAIKAN 1: SAFE FALLBACK AGAR TIDAK CRASH JIKA BAHASA ERROR
+    final texts = _t[lang] ?? _t['en']!;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.read(showChatbotGlobalProvider)) {
+        ref.read(showChatbotGlobalProvider.notifier).hide();
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          // Background (Menjaga Styling Aslimu)
+          if (step == OnboardingStep.splash)
+            Container(color: const Color(0xFF0A264F))
+          else
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFA5CBEB),
+                    Color(0xFFD3E3F2),
+                    Color(0xFFE9DFCE),
+                  ],
+                ),
+              ),
+            ),
+
+          if (step != OnboardingStep.splash)
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/snow.png',
+                fit: BoxFit.cover,
+                opacity: const AlwaysStoppedAnimation(0.65),
+                // 🔥 PERBAIKAN 2: CEGAH GREY BOX JIKA GAMBAR GAGAL LOAD
+                errorBuilder: (context, error, stackTrace) => const SizedBox(),
+              ),
+            ),
+
+          SafeArea(child: _buildScreen(step, lang, texts)),
+
+          if (_isLoading)
+            Container(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScreen(
+    OnboardingStep step,
+    String lang,
+    Map<String, String> texts,
+  ) {
+    switch (step) {
+      case OnboardingStep.splash:
+        return _buildSplashScreen(texts);
+      case OnboardingStep.language:
+        return _buildLanguageScreen(lang, texts);
+      case OnboardingStep.startJourney:
+        return _buildStartJourneyScreen(texts);
+      case OnboardingStep.login:
+        return _buildLoginScreen(texts);
+      case OnboardingStep.register:
+        return _buildRegisterScreen(texts);
+    }
+  }
+
+  // ==================== SPLASH SCREEN ====================
+  Widget _buildSplashScreen(Map<String, String> texts) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => ref
+          .read(onboardingStepProvider.notifier)
+          .setStep(OnboardingStep.language),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: 48,
+            left: 40,
+            child: Image.asset(
+              'assets/images/logo_splash1.png',
+              width: 70,
+              errorBuilder: (c, e, s) => const SizedBox(),
+            ),
+          ),
+          Positioned(
+            top: 150,
+            left: 40,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "MiRO",
+                  style: TextStyle(
+                    fontSize: 64,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.05,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  texts['splash_desc']!,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.white70,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Row(
+                  children: const [
+                    _Dot(active: true),
+                    SizedBox(width: 10),
+                    _Dot(active: false),
+                    SizedBox(width: 10),
+                    _Dot(active: false),
+                  ],
+                ),
+                const SizedBox(height: 40),
+                Text(
+                  texts['splash_tap']!,
+                  style: const TextStyle(color: Colors.white60, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            right: -120,
+            child: Image.asset(
+              'assets/images/penguin_splash1.png',
+              width: 480,
+              fit: BoxFit.contain,
+              errorBuilder: (c, e, s) => const SizedBox(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==================== LANGUAGE SCREEN ====================
+  Widget _buildLanguageScreen(String lang, Map<String, String> texts) {
+    return Column(
+      children: [
+        const OnboardingProgressBar(currentStep: 1),
+        const SizedBox(height: 64),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texts['lang_title']!,
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A264F),
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  texts['lang_desc']!,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: const Color(0xFF0A264F).withOpacity(
+                        0.6), // 🔥 PERBAIKAN 3: GUNAKAN withOpacity
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFB5C9DF).withOpacity(0.5), // 🔥 PERBAIKAN 3
+              borderRadius: BorderRadius.circular(28),
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                _languageOption("Bahasa Indonesia", "id", lang),
+                const SizedBox(height: 12),
+                _languageOption("English", "en", lang),
+              ],
+            ),
+          ),
+        ),
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
+          child: ElevatedButton(
+            onPressed: () => ref
+                .read(onboardingStepProvider.notifier)
+                .setStep(OnboardingStep.startJourney),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0A264F),
+              minimumSize: const Size(double.infinity, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: Text(
+              texts['btn_next']!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _languageOption(String title, String value, String current) {
+    final isSelected = current == value;
+    return GestureDetector(
+      onTap: () => ref.read(selectedLanguageProvider.notifier).setLang(value),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.65), // 🔥 PERBAIKAN 3
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0A264F),
+              ),
+            ),
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFFE57B65) : Colors.grey,
+                  width: 2.5,
+                ),
+              ),
+              child: isSelected
+                  ? const Center(
+                      child: CircleAvatar(
+                        radius: 6,
+                        backgroundColor: Color(0xFFE57B65),
+                      ),
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== START JOURNEY SCREEN ====================
+  Widget _buildStartJourneyScreen(Map<String, String> texts) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const OnboardingProgressBar(currentStep: 2),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: CustomBackButton(
+                  onPressed: () => ref
+                      .read(onboardingStepProvider.notifier)
+                      .setStep(OnboardingStep.language),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 120,
+          right: -130,
+          child: Image.asset(
+            'assets/images/penguin_splash2.png',
+            width: 480,
+            fit: BoxFit.contain,
+            errorBuilder: (c, e, s) => const SizedBox(),
+          ),
+        ),
+        Positioned(
+          bottom: 40,
+          left: 32,
+          right: 32,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                texts['start_welcome']!,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                  color: Color(0xFF0A264F),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                texts['start_title']!,
+                style: const TextStyle(
+                  fontSize: 38,
+                  fontWeight: FontWeight.bold,
+                  height: 1.15,
+                  color: Color(0xFF0A264F),
+                ),
+              ),
+              const SizedBox(height: 40),
+              Row(
+                children: [
+                  Expanded(
+                    child: _authChoiceBtn(
+                      texts['btn_login']!,
+                      const Color(0xFFE57B65),
+                      () => ref
+                          .read(onboardingStepProvider.notifier)
+                          .setStep(OnboardingStep.login),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _authChoiceBtn(
+                      texts['btn_register']!,
+                      const Color(0xFF0A264F),
+                      () => ref
+                          .read(onboardingStepProvider.notifier)
+                          .setStep(OnboardingStep.register),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _authChoiceBtn(String label, Color color, VoidCallback onTap) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 18, color: Colors.white),
+      ),
+    );
+  }
+
+  // ==================== LOGIN SCREEN ====================
+  Widget _buildLoginScreen(Map<String, String> texts) {
+    return Column(
+      children: [
+        const OnboardingProgressBar(currentStep: 3),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: CustomBackButton(
+              onPressed: () => ref
+                  .read(onboardingStepProvider.notifier)
+                  .setStep(OnboardingStep.startJourney),
+            ),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  texts['login_welcome']!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF0A264F),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  texts['login_desc']!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color(0xFF0A264F).withOpacity(0.6),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                _CustomTextField(
+                  label: texts['email_label']!,
+                  icon: Icons.email_outlined,
+                  placeholder: texts['email_hint']!,
+                  controller: _emailController,
+                ),
+                const SizedBox(height: 20),
+                _CustomTextField(
+                  label: texts['pass_label']!,
+                  icon: Icons.lock_outline,
+                  placeholder: "********",
+                  isPassword: true,
+                  controller: _passwordController,
+                ),
+              ],
+            ),
+          ),
+        ),
+        _buildStickyBottom(texts: texts, isReg: false, onPrimary: _handleLogin),
+      ],
+    );
+  }
+
+  // ==================== REGISTER SCREEN ====================
+  Widget _buildRegisterScreen(Map<String, String> texts) {
+    return Column(
+      children: [
+        const OnboardingProgressBar(currentStep: 3),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: CustomBackButton(
+              onPressed: () => ref
+                  .read(onboardingStepProvider.notifier)
+                  .setStep(OnboardingStep.startJourney),
+            ),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  texts['reg_title']!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF0A264F),
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  texts['reg_desc']!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: const Color(0xFF0A264F).withOpacity(0.6),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _CustomTextField(
+                  label: texts['name_label']!,
+                  icon: Icons.person_outline,
+                  placeholder: texts['name_hint']!,
+                  controller: _nameController,
+                ),
+                const SizedBox(height: 16),
+                _CustomTextField(
+                  label: texts['email_label']!,
+                  icon: Icons.email_outlined,
+                  placeholder: texts['email_hint']!,
+                  controller: _emailController,
+                ),
+                const SizedBox(height: 16),
+                _CustomTextField(
+                  label: texts['pass_label']!,
+                  icon: Icons.lock_outline,
+                  placeholder: "********",
+                  isPassword: true,
+                  controller: _passwordController,
+                ),
+                const SizedBox(height: 16),
+                _CustomTextField(
+                  label: texts['conf_pass_label']!,
+                  icon: Icons.lock_outline,
+                  placeholder: "********",
+                  isPassword: true,
+                  controller: _confirmController,
+                ),
+              ],
+            ),
+          ),
+        ),
+        _buildStickyBottom(
+          texts: texts,
+          isReg: true,
+          onPrimary: _handleRegister,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStickyBottom({
+    required Map<String, String> texts,
+    required bool isReg,
+    required VoidCallback onPrimary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(32, 16, 32, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton(
+            onPressed: onPrimary,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0A264F),
+              minimumSize: const Size(double.infinity, 56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: Text(
+              isReg ? texts['btn_register']! : texts['btn_login']!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              const Expanded(
+                child: Divider(color: Color(0xFF0A264F), thickness: 1),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  isReg ? "or Sign up with" : "or Login with",
+                  style: TextStyle(
+                    color: const Color(0xFF0A264F).withOpacity(0.6),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const Expanded(
+                child: Divider(color: Color(0xFF0A264F), thickness: 1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _googleBtn(texts['btn_google']!),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                isReg
+                    ? texts['switch_login']!.split('?')[0] + "? "
+                    : texts['switch_reg']!.split('?')[0] + "? ",
+                style: const TextStyle(color: Color(0xFF0A264F), fontSize: 13),
+              ),
+              GestureDetector(
+                onTap: () => ref.read(onboardingStepProvider.notifier).setStep(
+                      isReg ? OnboardingStep.login : OnboardingStep.register,
+                    ),
+                child: Text(
+                  isReg ? texts['btn_login']! : texts['btn_register']!,
+                  style: const TextStyle(
+                    color: Color(0xFFE57B65),
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _googleBtn(String label) {
+    return ElevatedButton.icon(
+      onPressed: () {}, // Integrasi Google OAuth nantinya
+      icon: Image.asset(
+        'assets/images/google.png',
+        width: 24,
+        errorBuilder: (c, e, s) => const SizedBox(width: 24, height: 24),
+      ),
+      label: Text(
+        label,
+        style: const TextStyle(
+          color: Color(0xFF0A264F),
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        minimumSize: const Size(double.infinity, 56),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final bool active;
+  const _Dot({required this.active});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 9,
+      height: 9,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: active ? Colors.white : Colors.white.withOpacity(0.25),
+      ),
+    );
+  }
+}
+
+class _CustomTextField extends StatefulWidget {
+  final String label;
+  final IconData icon;
+  final String placeholder;
+  final bool isPassword;
+  final TextEditingController controller;
+
+  const _CustomTextField({
+    required this.label,
+    required this.icon,
+    required this.placeholder,
+    required this.controller,
+    this.isPassword = false,
+  });
+
+  @override
+  State<_CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<_CustomTextField> {
+  bool _obscureText = true;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 8),
+          child: Row(
+            children: [
+              Icon(widget.icon, size: 16, color: const Color(0xFF0A264F)),
+              const SizedBox(width: 8),
+              Text(
+                widget.label,
+                style: const TextStyle(
+                  color: Color(0xFF0A264F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        TextField(
+          controller: widget.controller,
+          obscureText: widget.isPassword ? _obscureText : false,
+          style: const TextStyle(color: Color(0xFF0A264F)),
+          decoration: InputDecoration(
+            hintText: widget.placeholder,
+            hintStyle: TextStyle(
+              color: const Color(0xFF0A264F).withOpacity(0.4),
+              fontSize: 14,
+            ),
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.5), // 🔥 PERBAIKAN 3
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(
+                color: const Color(0xFF0A264F).withOpacity(0.3),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: BorderSide(
+                color: const Color(0xFF0A264F).withOpacity(0.3),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
+              borderSide: const BorderSide(
+                color: Color(0xFF0A264F),
+                width: 1.5,
+              ),
+            ),
+            suffixIcon: widget.isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _obscureText
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: const Color(0xFF0A264F).withOpacity(0.6),
+                      size: 20,
+                    ),
+                    onPressed: () =>
+                        setState(() => _obscureText = !_obscureText),
+                  )
+                : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
