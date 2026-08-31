@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // JALUR IMPORT
 import '../data/mission_model.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS BAHASA)
@@ -117,28 +119,28 @@ class _MissionReflectionScreenState
         : texts['skill_label']!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 texts['title']!,
                 style: const TextStyle(
-                  color: Color(0xFF0A264F),
+                  color: AppColors.primary,
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // KARTU RINGKASAN MISI (Glassmorphism Style)
               _buildMissionSummaryCard(primarySkill, lang),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
 
               // INPUT PERASAAN
               _buildFeelingSelector(
@@ -146,14 +148,14 @@ class _MissionReflectionScreenState
                 parentFeeling,
                 (val) => setState(() => parentFeeling = val),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               _buildFeelingSelector(
                 texts['child_feeling']!,
                 childFeeling,
                 (val) => setState(() => childFeeling = val),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
 
               // INPUT CATATAN REFLEKSI
               Expanded(
@@ -163,45 +165,43 @@ class _MissionReflectionScreenState
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
                   style: const TextStyle(
-                    color: Color(0xFF0A264F),
+                    color: AppColors.primary,
                     fontSize: 14,
                   ),
                   decoration: InputDecoration(
                     hintText: texts['hint_notes']!,
                     hintStyle: TextStyle(
-                      color: const Color(0xFF0A264F).withValues(alpha: 0.4),
+                      color: AppColors.primary.withValues(alpha: 0.4),
                     ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.all(20),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                       borderSide: BorderSide(color: Colors.grey.shade200),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                       borderSide: BorderSide(color: Colors.grey.shade200),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: const BorderSide(color: Color(0xFF0A264F)),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      borderSide: const BorderSide(color: AppColors.primary),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // TOMBOL SIMPAN (Dengan Loading State)
               ElevatedButton(
                 onPressed: _isSaving ? null : _saveReflection,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE57B65),
-                  disabledBackgroundColor: const Color(
-                    0xFFE57B65,
-                  ).withValues(alpha: 0.7),
+                  backgroundColor: AppColors.accent,
+                  disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.7),
                   minimumSize: const Size(double.infinity, 60),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                   ),
                   elevation: 4,
                 ),
@@ -223,7 +223,7 @@ class _MissionReflectionScreenState
                         ),
                       ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
             ],
           ),
         ),
@@ -237,14 +237,14 @@ class _MissionReflectionScreenState
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A264F), Color(0xFF153E7E)],
+          colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0A264F).withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -260,11 +260,11 @@ class _MissionReflectionScreenState
             ),
             child: const Icon(
               Icons.star_rounded,
-              color: Color(0xFFF1A22F),
+              color: AppColors.gold,
               size: 32,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +310,7 @@ class _MissionReflectionScreenState
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF0A264F),
+            color: AppColors.primary,
             fontSize: 12,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -321,7 +321,7 @@ class _MissionReflectionScreenState
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
@@ -341,15 +341,18 @@ class _MissionReflectionScreenState
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeOutBack,
                   transformAlignment: Alignment.center,
-                  transform: Matrix4.identity()..scale(isSelected ? 1.3 : 1.0),
+                  transform: Matrix4.identity()..scaleByDouble(
+                    isSelected ? 1.3 : 1.0,
+                    isSelected ? 1.3 : 1.0,
+                    1.0,
+                    1.0,
+                  ),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: const Color(
-                                0xFFE57B65,
-                              ).withValues(alpha: 0.3),
+                              color: AppColors.accent.withValues(alpha: 0.3),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),

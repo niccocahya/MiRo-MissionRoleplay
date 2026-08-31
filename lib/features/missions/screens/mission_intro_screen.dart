@@ -6,6 +6,9 @@ import '../../../shared/widgets/back_button.dart';
 import '../data/mission_model.dart';
 import 'mission_play_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/responsive.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -31,7 +34,7 @@ class MissionIntroScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const Color bgColor = Color(0xFFF8F9FC);
+    const Color bgColor = AppColors.background;
 
     // TARIK BAHASA AKTIF DARI PROVIDER
     final lang = ref.watch(languageProvider);
@@ -76,15 +79,13 @@ class MissionIntroScreen extends ConsumerWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE57B65,
-                            ).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20),
+                            color: AppColors.accent.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(AppRadius.sm + 10),
                           ),
                           child: Text(
                             (roleName ?? mission.roleId).toUpperCase(),
                             style: const TextStyle(
-                              color: Color(0xFFD46A55),
+                              color: AppColors.accentDark,
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 2.0,
@@ -97,7 +98,7 @@ class MissionIntroScreen extends ConsumerWidget {
                         Text(
                           lang == 'id' ? mission.titleId : mission.titleEn,
                           style: const TextStyle(
-                            color: Color(0xFF0A264F),
+                            color: AppColors.primary,
                             fontSize: 40,
                             fontWeight: FontWeight.w900,
                             height: 1.15,
@@ -112,9 +113,7 @@ class MissionIntroScreen extends ConsumerWidget {
                               ? mission.descriptionId
                               : mission.descriptionEn,
                           style: TextStyle(
-                            color: const Color(
-                              0xFF0A264F,
-                            ).withValues(alpha: 0.75),
+                            color: AppColors.primary.withValues(alpha: 0.75),
                             fontSize: 16,
                             height: 1.5,
                             fontWeight: FontWeight.w500,
@@ -144,7 +143,7 @@ class MissionIntroScreen extends ConsumerWidget {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFFD46A55).withValues(alpha: 0.4),
+                          color: AppColors.accentDark.withValues(alpha: 0.4),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -171,7 +170,7 @@ class MissionIntroScreen extends ConsumerWidget {
                       child: Ink(
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFF58B7A), Color(0xFFD46A55)],
+                            colors: [Color(0xFFF58B7A), AppColors.accentDark],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -224,7 +223,7 @@ class MissionIntroScreen extends ConsumerWidget {
     String assetPath = 'assets/images/penguin_$roleId.png';
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.45,
+      height: context.screenHeight * 0.45,
       child: Stack(
         children: [
           Positioned(
@@ -306,7 +305,7 @@ class MissionIntroScreen extends ConsumerWidget {
         Text(
           texts['prep_tools']!,
           style: TextStyle(
-            color: const Color(0xFF0A264F).withValues(alpha: 0.6),
+            color: AppColors.primary.withValues(alpha: 0.6),
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -330,14 +329,14 @@ class MissionIntroScreen extends ConsumerWidget {
                   ),
                 ],
                 border: Border.all(
-                  color: const Color(0xFFA5CBEB).withValues(alpha: 0.3),
+                  color: AppColors.primaryLighter.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
               child: Text(
                 material.toString(),
                 style: const TextStyle(
-                  color: Color(0xFF0A264F),
+                  color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -367,7 +366,7 @@ class MissionIntroScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 18, color: const Color(0xFFE57B65)),
+            Icon(icon, size: 18, color: AppColors.accent),
             const SizedBox(width: 6),
           ],
           if (emoji != null) ...[
@@ -377,7 +376,7 @@ class MissionIntroScreen extends ConsumerWidget {
           Text(
             text,
             style: const TextStyle(
-              color: Color(0xFF0A264F),
+              color: AppColors.primary,
               fontWeight: FontWeight.w800,
               fontSize: 13,
             ),

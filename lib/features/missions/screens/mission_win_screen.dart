@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'; // Wajib buat baca lang
 import '../data/mission_model.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 // ==========================================
 // 1. DICTIONARY KAMUS BAHASA
@@ -71,7 +74,7 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
     return Scaffold(
       body: Container(
         width: double.infinity,
-        color: const Color(0xFF92C4E8),
+        color: const Color(0xFF92C4E8), // biru khusus layar "misi selesai"
         child: Stack(
           children: [
             Positioned.fill(
@@ -119,26 +122,20 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
                       children: [
                         Text(
                           texts['title']!,
-                          style: TextStyle(
-                            color: const Color(
-                              0xFF0A264F,
-                            ).withValues(alpha: 0.7),
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontSize: 14,
-                          ),
+                          style: AppTextStyles.bodyBold(
+                            color: AppColors.primary.withValues(alpha: 0.7),
+                          ).copyWith(letterSpacing: 2, fontSize: 14),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           texts['subtitle']!,
-                          style: const TextStyle(
-                            color: Color(0xFF0A264F),
+                          style: AppTextStyles.h1().copyWith(
                             fontSize: 40,
                             fontWeight: FontWeight.w900,
                             height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacement(
@@ -152,22 +149,18 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0A264F),
+                            backgroundColor: AppColors.primary,
                             minimumSize: const Size(double.infinity, 60),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                             ),
                           ),
                           child: Text(
                             texts['btn_progress']!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTextStyles.button().copyWith(fontSize: 18),
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
                       ],
                     ),
                   ),
