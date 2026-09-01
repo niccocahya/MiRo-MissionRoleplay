@@ -200,6 +200,10 @@ const Map<String, Map<String, String>> _t = {
     'q_no_data': "No questionnaire data yet.",
     'err_logout': "Failed to log out: ",
     'err_save': "Failed to save: ",
+    'switch_child_title': "Switch Child",
+    'add_child': "+ Add Child",
+    'err_load_children': "Failed to load children: ",
+    'current_child_badge': "Active",
   },
   'id': {
     'parent_prefix': "Ibu/Bapak",
@@ -278,6 +282,10 @@ const Map<String, Map<String, String>> _t = {
     'q_no_data': "Belum ada data kuisioner.",
     'err_logout': "Gagal logout: ",
     'err_save': "Gagal menyimpan: ",
+    'switch_child_title': "Ganti Anak",
+    'add_child': "+ Tambah Anak",
+    'err_load_children': "Gagal memuat daftar anak: ",
+    'current_child_badge': "Aktif",
   },
 };
 
@@ -305,6 +313,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     try {
       await Supabase.instance.client.auth.signOut();
+      // Kalau nggak dibersihkan, device yang dipakai gonta-ganti akun
+      // bisa "nyangkut" ke id anak akun sebelumnya begitu akun baru login.
+      await ref.read(selectedChildIdProvider.notifier).clear();
       if (mounted) {
         Navigator.pop(context);
         context.go('/');
@@ -1368,7 +1379,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          _buildAvatarStack(childId, avatarUrl),
+          _buildAvatarStack(texts, childId, avatarUrl),
         ],
       ),
     );
@@ -1409,11 +1420,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   // Sebelumnya avatar di sini selalu emoji statis, nggak pernah nampilin
-  // foto asli walau `children.avatar_url` udah keisi pas onboarding — dan
-  // nggak ada cara ganti foto lagi setelah itu.
-  Widget _buildAvatarStack(String childId, String? avatarUrl) {
+  // foto asli walau `children.avatar_url` udah keisi pas onboarding.
+  //
+  // Tap avatar sekarang buka switcher ganti-anak (bukan langsung ganti
+  // foto) — ganti foto dipindah ke dalam switcher-nya sendiri, di baris
+  // anak yang lagi aktif (lihat `_ChildSwitcherTile`).
+  Widget _buildAvatarStack(
+    Map<String, String> texts,
+    String childId,
+    String? avatarUrl,
+  ) {
     return GestureDetector(
-      onTap: () => _changeAvatar(childId),
+      onTap: () => _showChildSwitcherModal(texts),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -1455,6 +1473,173 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Sheet ganti-anak — sebelumnya nggak ada UI sama sekali buat lihat
+  /// lebih dari 1 anak atau pindah di antara mereka; `childDataProvider`
+  /// selalu diam-diam milih "anak yang paling baru dibuat". Daftar anak
+  /// dari `childrenListProvider`, + tombol tambah anak yang masuk ke
+  /// alur onboarding-anak yang sama (`IdentifyPage(isAddingChild: true)`),
+  /// yang sebelumnya cuma bisa diakses sekali seumur hidup akun.
+  void _showChildSwitcherModal(Map<String, String> texts) {
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return AppBottomSheet(
+          title: texts['switch_child_title']!,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final childrenAsync = ref.watch(childrenListProvider);
+              final currentId = ref.watch(selectedChildIdProvider);
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  childrenAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (e, s) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      child: Text(
+                        "${texts['err_load_children']}$e",
+                        style: AppTextStyles.body(color: AppColors.danger),
+                      ),
+                    ),
+                    data: (children) => Column(
+                      children: [
+                        for (final c in children)
+                          _buildChildSwitcherTile(
+                            texts,
+                            c,
+                            isSelected: c['id'] == currentId,
+                            onTap: () {
+                              ref
+                                  .read(selectedChildIdProvider.notifier)
+                                  .setId(c['id'] as String);
+                              Navigator.pop(ctx);
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  AppButton(
+                    label: texts['add_child']!,
+                    variant: AppButtonVariant.outline,
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.push('/identify?mode=add');
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildChildSwitcherTile(
+    Map<String, String> texts,
+    Map<String, dynamic> child, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final String name = child['name'] ?? texts['default_child']!;
+    final String? avatarUrl = child['avatar_url'] as String?;
+    final int level = _calculateLevel(child['total_xp'] ?? 0);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: AppCard(
+        onTap: onTap,
+        padding: const EdgeInsets.all(AppSpacing.sm + 4),
+        color: isSelected ? AppColors.accentTint : AppColors.surface,
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentTint,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.antiAlias,
+                  child: (avatarUrl == null || avatarUrl.isEmpty)
+                      ? const Text("👦🏻", style: TextStyle(fontSize: 24))
+                      : ClipOval(
+                          child: Image.network(
+                            avatarUrl,
+                            width: 48,
+                            height: 48,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                const Text("👦🏻", style: TextStyle(fontSize: 24)),
+                          ),
+                        ),
+                ),
+                // Ganti foto cuma dari baris anak yang lagi aktif — buat
+                // anak lain, pindah dulu baru bisa ganti fotonya.
+                if (isSelected)
+                  Positioned(
+                    bottom: -2,
+                    right: -2,
+                    child: GestureDetector(
+                      onTap: () => _changeAvatar(child['id'] as String),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 1.5),
+                        ),
+                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 10),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: AppSpacing.sm + 4),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: AppTextStyles.bodyBold()),
+                  Text(
+                    "Lvl $level",
+                    style: AppTextStyles.caption(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  texts['current_child_badge']!,
+                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

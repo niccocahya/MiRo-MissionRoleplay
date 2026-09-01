@@ -12,6 +12,7 @@ import 'package:gal/gal.dart';
 // JALUR IMPORT
 import '../data/mission_model.dart';
 import 'mission_reflection_screen.dart';
+import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/constants/role_visuals.dart';
 import '../../../core/router/app_page_transition.dart';
@@ -168,15 +169,15 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   Future<void> _syncToDatabase(String? earnedAchievementId) async {
     try {
       final supabase = Supabase.instance.client;
-      final parentId = supabase.auth.currentUser?.id;
-      if (parentId == null) return;
 
-      final childDb = await supabase
-          .from('children')
-          .select('id, total_xp')
-          .eq('parent_id', parentId)
-          .maybeSingle();
-
+      // Sebelumnya di sini nge-query `children` sendiri pakai
+      // `eq('parent_id', parentId).maybeSingle()` buat nentuin siapa yang
+      // dapat XP/progres dari misi ini — kalau parent-nya punya lebih dari
+      // 1 anak, `.maybeSingle()` bakal ERROR (baris cocok > 1), dan kalaupun
+      // nggak error, ini beresiko ngasih XP ke anak yang SALAH. Sekarang
+      // pakai `childDataProvider`, sumber kebenaran anak yang lagi aktif
+      // dipilih (sama yang dipakai Home/Progress/Profile).
+      final childDb = await ref.read(childDataProvider.future);
       if (childDb == null) return;
 
       final String childId = childDb['id'];

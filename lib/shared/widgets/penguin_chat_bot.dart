@@ -127,24 +127,46 @@ class ChatbotState {
 }
 
 class ChatbotNotifier extends Notifier<ChatbotState> {
+  String? _childId;
+
   @override
   ChatbotState build() {
     // Muat histori chat dari tabel `ai_chats` — sebelumnya tabel ini ada di
     // database tapi nggak pernah dipakai sama sekali, jadi histori chat
     // Mink selalu hilang tiap app ditutup/dibuka lagi.
+    //
+    // Percakapan Mink di-scope per ANAK (bukan cuma per parent) — konteks
+    // yang dikasih ke Mink tiap giliran chat (level/XP/skill radar) emang
+    // udah spesifik 1 anak, jadi histori-nya juga harus ngikutin anak yang
+    // lagi aktif dipilih, bukan numpuk campur kalau ada >1 anak.
+    ref.listen(selectedChildIdProvider, (prev, next) {
+      if (next != prev) {
+        _childId = next;
+        _loadHistory();
+      }
+    });
+    _childId = ref.read(selectedChildIdProvider);
     _loadHistory();
     return ChatbotState(messages: []);
   }
 
   Future<void> _loadHistory() async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
+    if (user == null || _childId == null) {
+      state = ChatbotState(messages: []);
+      return;
+    }
+
+    // Kosongin dulu biar nggak sekilas nampilin histori anak sebelumnya
+    // pas lagi ganti anak.
+    state = ChatbotState(messages: []);
 
     try {
       final rows = await Supabase.instance.client
           .from('ai_chats')
           .select('role, message')
           .eq('parent_id', user.id)
+          .eq('child_id', _childId!)
           .order('created_at', ascending: true)
           .limit(50);
 
@@ -166,16 +188,19 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
   }
 
   /// Hapus histori chat — lokal & di database. Sebelumnya nggak ada cara
-  /// ngosongin chat sama sekali, numpuk terus.
+  /// ngosongin chat sama sekali, numpuk terus. Cuma hapus punya anak yang
+  /// lagi aktif, bukan punya semua anak.
   Future<void> clearHistory() async {
     state = ChatbotState(messages: []);
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
     try {
-      await Supabase.instance.client
+      var query = Supabase.instance.client
           .from('ai_chats')
           .delete()
           .eq('parent_id', user.id);
+      if (_childId != null) query = query.eq('child_id', _childId!);
+      await query;
     } catch (e) {
       debugPrint("Gagal hapus histori chat Mink: $e");
     }
@@ -187,6 +212,7 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     try {
       await Supabase.instance.client.from('ai_chats').insert({
         'parent_id': user.id,
+        'child_id': _childId,
         'role': role,
         'message': content,
       });

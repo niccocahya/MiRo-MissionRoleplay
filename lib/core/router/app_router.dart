@@ -56,8 +56,12 @@ final GoRouter router = GoRouter(
     ),
     GoRoute(
       path: '/identify',
-      pageBuilder: (context, state) =>
-          appPage(key: state.pageKey, child: const IdentifyPage()),
+      pageBuilder: (context, state) => appPage(
+        key: state.pageKey,
+        child: IdentifyPage(
+          isAddingChild: state.uri.queryParameters['mode'] == 'add',
+        ),
+      ),
     ),
 
     // Rute Notifikasi diletakkan di luar ShellRoute agar menutupi Bottom Nav Bar saat dibuka

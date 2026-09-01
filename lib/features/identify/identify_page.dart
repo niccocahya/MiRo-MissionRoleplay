@@ -107,7 +107,13 @@ const Map<String, Map<String, String>> _t = {
 };
 
 class IdentifyPage extends ConsumerStatefulWidget {
-  const IdentifyPage({super.key});
+  const IdentifyPage({super.key, this.isAddingChild = false});
+
+  /// True kalau parent SENGAJA nambah anak lagi dari Profile (bukan
+  /// alur onboarding pertama kali) — kalau true, jangan auto-redirect
+  /// ke /home walau parent ini udah punya anak lain.
+  final bool isAddingChild;
+
   @override
   ConsumerState<IdentifyPage> createState() => _IdentifyPageState();
 }
@@ -143,16 +149,25 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
   }
 
   Future<void> _checkExistingChild() async {
+    // Parent yang sengaja mau nambah anak lagi TIDAK boleh diredirect
+    // balik ke /home walau dia udah punya anak lain.
+    if (widget.isAddingChild) return;
+
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;
     if (user == null) return;
+
+    // List + limit(1), BUKAN `.maybeSingle()` — `.maybeSingle()` error
+    // kalau baris yang cocok lebih dari 1, dan itu bakal kejadian begitu
+    // parent ini punya lebih dari 1 anak.
     final data = await supabase
         .from('children')
         .select()
         .eq('parent_id', user.id)
-        .maybeSingle();
-    if (data != null && mounted) {
-      ref.read(selectedChildIdProvider.notifier).setId(data['id']);
+        .order('created_at', ascending: false)
+        .limit(1);
+    if (data.isNotEmpty && mounted) {
+      ref.read(selectedChildIdProvider.notifier).setId(data.first['id']);
       context.go('/home');
     }
   }

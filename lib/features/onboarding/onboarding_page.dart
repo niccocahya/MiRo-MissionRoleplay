@@ -203,11 +203,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           'language_code': ref.read(selectedLanguageProvider),
         }).eq('id', res.user!.id);
 
-        final child =
-            await supabase.from('children').select().limit(1).maybeSingle();
+        // Cek anak milik parent INI (dulu query ini nggak difilter
+        // `parent_id` sama sekali — cek "ada anak di seluruh tabel" bukan
+        // "anak milik akun ini". Juga pakai list+limit, bukan
+        // `.maybeSingle()`, biar nggak error kalau parent ini udah punya
+        // lebih dari 1 anak.)
+        final children = await supabase
+            .from('children')
+            .select('id')
+            .eq('parent_id', res.user!.id)
+            .limit(1);
 
         if (mounted) {
-          child == null ? context.go('/identify') : context.go('/home');
+          children.isEmpty ? context.go('/identify') : context.go('/home');
         }
       }
     } catch (e) {

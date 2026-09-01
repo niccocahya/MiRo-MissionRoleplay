@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ==========================================
@@ -18,17 +19,65 @@ final selectedChildIdProvider =
   return SelectedChildNotifier();
 });
 
+/// Anak yang lagi aktif dipilih — buat mendukung multi-anak per akun.
+///
+/// Sebelumnya ini cuma in-memory (`state = id`), jadi tiap app di-restart
+/// selalu balik ke "anak yang paling baru dibuat" (lihat fallback di
+/// `childDataProvider`), bukan anak yang terakhir beneran dilihat orang
+/// tua. Sekarang dipersist ke SharedPreferences, ngikutin pola yang sama
+/// kaya `TextSizeNotifier`/`NotificationPrefsNotifier`.
 class SelectedChildNotifier extends Notifier<String?> {
-  @override
-  String? build() => null;
+  static const _key = 'selected_child_id';
 
-  void setId(String id) {
+  @override
+  String? build() {
+    _load();
+    return null;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_key);
+    if (saved != null) state = saved;
+  }
+
+  Future<void> setId(String id) async {
     state = id;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_key, id);
+  }
+
+  /// Dipanggil pas logout, atau kalau id yang ke-persist ternyata udah
+  /// nggak valid lagi (anak dihapus, atau device dipakai gonta-ganti
+  /// akun) — biar nggak nyangkut ke id anak yang salah.
+  Future<void> clear() async {
+    state = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_key);
   }
 }
 
 // ==========================================
-// 2. PROVIDER UTAMA ANAK - REALTIME (Profil, XP, Level, Streak)
+// 2. PROVIDER DAFTAR SEMUA ANAK MILIK PARENT INI — REALTIME
+// ==========================================
+/// Dulu nggak ada cara buat tau "parent ini punya anak berapa" — setiap
+/// tempat yang butuh data anak langsung nembak 1 anak lewat
+/// `childDataProvider`. Dibutuhkan buat UI ganti-anak (child switcher).
+final childrenListProvider =
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
+  ref.watch(authStateProvider.select((s) => s.value?.session?.user.id));
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user == null) return Stream.value([]);
+
+  return Supabase.instance.client
+      .from('children')
+      .stream(primaryKey: ['id'])
+      .eq('parent_id', user.id)
+      .order('created_at');
+});
+
+// ==========================================
+// 3. PROVIDER UTAMA ANAK - REALTIME (Profil, XP, Level, Streak)
 // ==========================================
 final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
   final supabase = Supabase.instance.client;
@@ -54,10 +103,10 @@ final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
     return;
   }
 
-  String? childId = ref.watch(selectedChildIdProvider);
-
-  // 1. Jika childId belum dipilih, ambil anak pertama/terbaru dari database
-  if (childId == null) {
+  // Cari anak paling baru dibuat milik parent ini — dipakai baik buat
+  // "belum ada anak yang dipilih" MAUPUN buat "anak yang dipilih ternyata
+  // udah nggak ada/nggak valid lagi" (lihat pemakaian di bawah).
+  Future<String?> resolveMostRecentChildId() async {
     final childList = await supabase
         .from('children')
         .select('id')
@@ -65,22 +114,47 @@ final childDataProvider = StreamProvider<Map<String, dynamic>?>((ref) async* {
         .order('created_at', ascending: false)
         .limit(1);
 
-    if (childList.isNotEmpty) {
-      childId = childList.first['id'] as String;
+    if (childList.isEmpty) return null;
+    final resolvedId = childList.first['id'] as String;
+    Future.microtask(() {
+      ref.read(selectedChildIdProvider.notifier).setId(resolvedId);
+    });
+    return resolvedId;
+  }
 
-      // Kasih tau seluruh aplikasi ID yang baru ketemu
-      Future.microtask(() {
-        ref.read(selectedChildIdProvider.notifier).setId(childId!);
-      });
-    } else {
+  String? childId = ref.watch(selectedChildIdProvider);
+
+  // 1. Kalau belum ada anak yang dipilih (baik karena benar-benar belum
+  //    pernah, atau baru dimuat dari SharedPreferences), cari yang
+  //    paling baru dibuat.
+  if (childId == null) {
+    childId = await resolveMostRecentChildId();
+    if (childId == null) {
       yield null;
       return;
     }
   }
 
   // 2. Ambil data awal pakai SELECT biasa biar INSTAN muncul di layar!
-  final initialData =
+  var initialData =
       await supabase.from('children').select().eq('id', childId).maybeSingle();
+
+  // Id yang lagi dipilih (misalnya dari SharedPreferences device lama,
+  // atau anaknya udah dihapus) ternyata nggak match baris manapun —
+  // jangan macet nampilin layar kosong, cari ulang anak paling baru.
+  if (initialData == null) {
+    await ref.read(selectedChildIdProvider.notifier).clear();
+    childId = await resolveMostRecentChildId();
+    if (childId == null) {
+      yield null;
+      return;
+    }
+    initialData = await supabase
+        .from('children')
+        .select()
+        .eq('id', childId)
+        .maybeSingle();
+  }
 
   if (initialData != null) {
     yield {

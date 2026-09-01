@@ -9,6 +9,7 @@ import '../data/mission_model.dart';
 import '../data/role_model.dart';
 import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
+import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/favorite_missions_service.dart';
@@ -59,39 +60,37 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
   }
 
   // FUNGSI UNTUK MENGAMBIL LEVEL YANG TERBUKA DARI DATABASE
+  //
+  // Sebelumnya ini nge-query `children` sendiri pakai `eq('parent_id',
+  // parentId).limit(1)` — ngambil "anak pertama milik parent ini" tanpa
+  // peduli anak mana yang lagi aktif dipilih. Kalau parent punya lebih
+  // dari 1 anak, peta misi ini bisa nunjukin progres anak yang SALAH.
+  // Sekarang pakai `childDataProvider`, sumber kebenaran yang sama yang
+  // dipakai Home/Progress/Profile.
   Future<void> _fetchChildProgress() async {
     try {
-      final supabase = Supabase.instance.client;
-      final parentId = supabase.auth.currentUser?.id;
-      if (parentId == null) return;
+      final childData = await ref.read(childDataProvider.future);
+      final resolvedChildId = childData?['id'] as String?;
+      if (resolvedChildId == null) {
+        if (mounted) setState(() => _isLoadingProgress = false);
+        return;
+      }
+      _childId = resolvedChildId;
 
-      // 1. Ambil ID anak
-      final childResponse = await supabase
-          .from('children')
-          .select('id')
-          .eq('parent_id', parentId)
-          .limit(1)
+      final progressResponse = await Supabase.instance.client
+          .from('child_role_progress')
+          .select('unlocked_level')
+          .eq('child_id', _childId)
+          .eq('role_id', widget.roleId)
           .maybeSingle();
 
-      if (childResponse != null) {
-        _childId = childResponse['id'];
-
-        // 2. Ambil level misi yang sudah terbuka
-        final progressResponse = await supabase
-            .from('child_role_progress')
-            .select('unlocked_level')
-            .eq('child_id', _childId)
-            .eq('role_id', widget.roleId)
-            .maybeSingle();
-
-        if (mounted) {
-          setState(() {
-            _unlockedLevel = progressResponse != null
-                ? (progressResponse['unlocked_level'] ?? 1)
-                : 1;
-            _isLoadingProgress = false;
-          });
-        }
+      if (mounted) {
+        setState(() {
+          _unlockedLevel = progressResponse != null
+              ? (progressResponse['unlocked_level'] ?? 1)
+              : 1;
+          _isLoadingProgress = false;
+        });
       }
     } catch (e) {
       debugPrint("Gagal mengambil progres: $e");

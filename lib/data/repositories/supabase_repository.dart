@@ -77,20 +77,4 @@ class SupabaseRepository {
       throw Exception("Gagal menyimpan data: $e");
     }
   }
-
-  /// Fungsi tambahan: Cek apakah user sudah punya data anak
-  Future<Map<String, dynamic>?> checkExistingChild() async {
-    try {
-      final user = _client.auth.currentUser;
-      if (user == null) return null;
-
-      return await _client
-          .from('children')
-          .select()
-          .eq('parent_id', user.id)
-          .maybeSingle();
-    } catch (e) {
-      return null;
-    }
-  }
 }
