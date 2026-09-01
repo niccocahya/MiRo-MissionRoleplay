@@ -4,7 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
-enum AppButtonVariant { primary, secondary, outline }
+enum AppButtonVariant { primary, secondary, outline, danger }
 
 /// Tombol standar app. Ganti semua `ElevatedButton`/`GestureDetector` custom
 /// yang nulis ulang gradient+radius+shadow di tiap layar.
@@ -52,6 +52,10 @@ class AppButton extends StatelessWidget {
         background = Colors.transparent;
         foreground = AppColors.primary;
         border = Border.all(color: AppColors.primary, width: 1.5);
+        break;
+      case AppButtonVariant.danger:
+        background = AppColors.danger;
+        foreground = Colors.white;
         break;
     }
 

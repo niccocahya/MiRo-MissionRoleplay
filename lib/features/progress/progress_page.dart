@@ -10,6 +10,8 @@ import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/services/report_pdf_service.dart';
+import '../../core/providers/skill_trend_provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/role_visuals.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -192,6 +194,9 @@ const Map<String, Map<String, String>> _t = {
     'missions_count': "Missions",
     'default_child_name': "Child",
     'export_pdf': "Export as PDF",
+    'skill_trend_title': "Growth Trend",
+    'skill_trend_empty': "Complete at least 2 missions to see this skill's trend.",
+    'skill_trend_unit': "pts",
     // Role Names
     'role_chef': "Chef",
     'role_doctor': "Doctor",
@@ -225,6 +230,9 @@ const Map<String, Map<String, String>> _t = {
     'missions_count': "Misi",
     'default_child_name': "Anak",
     'export_pdf': "Ekspor PDF",
+    'skill_trend_title': "Tren Perkembangan",
+    'skill_trend_empty': "Selesaikan minimal 2 misi buat lihat tren skill ini.",
+    'skill_trend_unit': "poin",
     // Role Names
     'role_chef': "Koki",
     'role_doctor': "Dokter",
@@ -279,6 +287,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   String _selectedTimeFilter = 'minggu';
   String _selectedRoleFilter = 'semua';
   bool _isExportingPdf = false;
+  String? _selectedTrendSkill;
 
   Map<String, int> _calculateLevelData(int totalXp) {
     int level = 1;
@@ -444,6 +453,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     final realtimeStreakAsync = ref.watch(streakProvider(childId));
     final statsAsync = ref.watch(childStatsProvider(childId));
     final monthlyDaysAsync = ref.watch(monthlyConsistencyProvider(childId));
+    final trendAsync = ref.watch(skillTrendProvider(childId));
 
     final historyParams = "$childId|$_selectedTimeFilter|$_selectedRoleFilter";
     final historyAsync = ref.watch(missionHistoryProvider(historyParams));
@@ -499,6 +509,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                   _buildHeader(texts, childName),
                   _buildStreakAndLevelSection(currentStreak, totalXp, texts),
                   _buildRadarChart(texts, radarData, rawScores, maxIndex),
+                  _buildSkillTrendSection(texts, trendAsync, maxIndex),
 
                   monthlyDaysAsync.when(
                     loading: () => const Padding(
@@ -758,6 +769,180 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               rawScores[4].toInt(),
               isActive: topIndex == 4,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const List<String> _trendSkillKeys = [
+    'cognitive',
+    'empathy',
+    'creativity',
+    'literacy',
+    'motoric',
+  ];
+
+  /// Tren skor skill dari waktu ke waktu — `child_stats` cuma nyimpen
+  /// snapshot skor SAAT INI, jadi sebelumnya nggak ada cara buat orang tua
+  /// lihat perkembangan itu naik dari mana ke mana. Dihitung dari
+  /// `skillTrendProvider` (kumulatif `earned_skills` tiap misi selesai,
+  /// diurutkan berdasarkan tanggal — nggak perlu skema baru).
+  Widget _buildSkillTrendSection(
+    Map<String, String> texts,
+    AsyncValue<List<SkillTrendPoint>> trendAsync,
+    int defaultSkillIndex,
+  ) {
+    // Default skill yang ditampilkan = skill paling menonjol di radar chart,
+    // tapi cuma di-set sekali (kalau parent belum pernah ganti pilihan)
+    // biar nggak reset ke default tiap kali data lain berubah.
+    _selectedTrendSkill ??= _trendSkillKeys[defaultSkillIndex];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            texts['skill_trend_title']!,
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 34,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: _trendSkillKeys.map((key) {
+                final selected = _selectedTrendSkill == key;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedTrendSkill = key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected ? AppColors.accent : Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: selected ? AppColors.accent : AppColors.border,
+                        ),
+                      ),
+                      child: Text(
+                        texts[key]!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: selected ? Colors.white : AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          trendAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: AppLoading(),
+            ),
+            error: (e, s) => const SizedBox(),
+            data: (points) {
+              if (points.length < 2) {
+                return AppEmptyState(
+                  message: texts['skill_trend_empty']!,
+                  icon: Icons.show_chart_rounded,
+                );
+              }
+
+              final skill = _selectedTrendSkill!;
+              final spots = points
+                  .asMap()
+                  .entries
+                  .map((e) => FlSpot(e.key.toDouble(), e.value.cumulative[skill] ?? 0))
+                  .toList();
+              final double maxY = spots
+                  .map((s) => s.y)
+                  .reduce((a, b) => a > b ? a : b);
+              final double interval = (points.length / 4).clamp(1, 999).roundToDouble();
+
+              return AppCard(
+                child: SizedBox(
+                  height: 180,
+                  child: LineChart(
+                    LineChartData(
+                      minY: 0,
+                      maxY: maxY <= 0 ? 10 : maxY * 1.2,
+                      gridData: const FlGridData(show: true, drawVerticalLine: false),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 32,
+                            getTitlesWidget: (value, meta) => Text(
+                              value.toInt().toString(),
+                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                            ),
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 24,
+                            interval: interval,
+                            getTitlesWidget: (value, meta) {
+                              final idx = value.round();
+                              if (idx < 0 || idx >= points.length) return const SizedBox();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  DateFormat('d/M').format(points[idx].date),
+                                  style: const TextStyle(fontSize: 9, color: AppColors.textMuted),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      lineTouchData: LineTouchData(
+                        touchTooltipData: LineTouchTooltipData(
+                          getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
+                            return LineTooltipItem(
+                              '${s.y.toInt()} ${texts['skill_trend_unit']}',
+                              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: spots,
+                          isCurved: true,
+                          color: AppColors.accent,
+                          barWidth: 3,
+                          dotData: FlDotData(show: points.length <= 12),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: AppColors.accent.withValues(alpha: 0.12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

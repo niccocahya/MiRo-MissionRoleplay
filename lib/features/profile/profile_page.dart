@@ -16,6 +16,8 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
+import '../../core/services/account_deletion_service.dart';
+import '../../core/services/data_export_service.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../help/help_center_page.dart';
 import '../legal/legal_page.dart';
@@ -167,6 +169,20 @@ const Map<String, Map<String, String>> _t = {
     'err_update': "Failed to update: ",
     'err_password_mismatch': "Passwords don't match.",
     'err_password_short': "Password must be at least 6 characters.",
+    'danger_zone': "Danger Zone",
+    'download_data': "Download My Data",
+    'download_data_desc': "Get a copy of everything saved under your account, as a JSON file.",
+    'download_success': "Export ready — check your share sheet.",
+    'delete_account': "Delete Account",
+    'delete_account_desc': "Permanently deletes your account and all your children's data. This cannot be undone.",
+    'delete_confirm_title': "Delete your account?",
+    'delete_confirm_desc':
+        "This permanently deletes your account, all children's profiles, mission history, photos, and chat history. This cannot be undone.",
+    'delete_confirm_hint': "Type DELETE to confirm",
+    'delete_confirm_word': "DELETE",
+    'btn_delete': "Delete Permanently",
+    'account_deleted': "Your account has been deleted.",
+    'err_delete': "Failed to delete account: ",
     'about_setting': "About",
     'app_version': "App Version",
     'terms_of_service': "Terms of Service",
@@ -231,6 +247,20 @@ const Map<String, Map<String, String>> _t = {
     'err_update': "Gagal memperbarui: ",
     'err_password_mismatch': "Password tidak cocok.",
     'err_password_short': "Password minimal 6 karakter.",
+    'danger_zone': "Zona Berbahaya",
+    'download_data': "Unduh Data Saya",
+    'download_data_desc': "Dapatkan salinan semua data di akunmu dalam bentuk file JSON.",
+    'download_success': "Ekspor siap — cek menu bagikan yang muncul.",
+    'delete_account': "Hapus Akun",
+    'delete_account_desc': "Menghapus akun dan semua data anak secara permanen. Nggak bisa dibatalin.",
+    'delete_confirm_title': "Hapus akun kamu?",
+    'delete_confirm_desc':
+        "Ini bakal hapus akun, semua profil anak, riwayat misi, foto, dan riwayat chat secara PERMANEN. Nggak bisa dibatalin.",
+    'delete_confirm_hint': "Ketik HAPUS buat konfirmasi",
+    'delete_confirm_word': "HAPUS",
+    'btn_delete': "Hapus Permanen",
+    'account_deleted': "Akun kamu sudah dihapus.",
+    'err_delete': "Gagal menghapus akun: ",
     'about_setting': "Tentang",
     'app_version': "Versi Aplikasi",
     'terms_of_service': "Syarat & Ketentuan",
@@ -816,6 +846,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       applicationVersion: kAppVersion,
                     ),
                   ),
+                  const Divider(),
+
+                  // Zona Berbahaya — unduh data & hapus akun. Privacy
+                  // Policy udah janji ini bisa "kapan saja", tapi
+                  // sebelumnya cuma bisa lewat email manual ke CS.
+                  Text(
+                    texts['danger_zone']!.toUpperCase(),
+                    style: AppTextStyles.caption(color: AppColors.danger).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.download_rounded, size: 20, color: AppColors.primary),
+                    title: Text(texts['download_data']!, style: AppTextStyles.body()),
+                    subtitle: Text(
+                      texts['download_data_desc']!,
+                      style: AppTextStyles.caption(color: AppColors.textSecondary),
+                    ),
+                    onTap: () => _handleDownloadData(texts),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.delete_forever_rounded, size: 20, color: AppColors.danger),
+                    title: Text(
+                      texts['delete_account']!,
+                      style: AppTextStyles.body().copyWith(color: AppColors.danger, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      texts['delete_account_desc']!,
+                      style: AppTextStyles.caption(color: AppColors.textSecondary),
+                    ),
+                    onTap: () => _showDeleteAccountModal(texts),
+                  ),
                 ],
               ),
             );
@@ -995,6 +1060,107 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     label: texts['btn_update']!,
                     isLoading: isSaving,
                     onPressed: submit,
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Ekspor semua data akun jadi 1 file JSON lalu buka share sheet OS.
+  Future<void> _handleDownloadData(Map<String, String> texts) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const AppLoading(),
+    );
+    try {
+      await DataExportService.exportAndShare();
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(texts['download_success']!)));
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("${texts['err_update']}$e")));
+    }
+  }
+
+  /// Konfirmasi hapus akun — minta ketik "HAPUS"/"DELETE" dulu (bukan cuma
+  /// tombol Ya/Tidak) karena ini operasi yang beneran nggak bisa
+  /// dibatalin: hapus akun, semua anak, riwayat misi, foto, chat.
+  void _showDeleteAccountModal(Map<String, String> texts) {
+    final confirmController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        bool isDeleting = false;
+        String confirmText = '';
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final bool canDelete =
+                confirmText.trim().toUpperCase() == texts['delete_confirm_word'];
+
+            Future<void> confirmDelete() async {
+              setState(() => isDeleting = true);
+              try {
+                await AccountDeletionService.deleteAccount();
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                if (!mounted) return;
+                context.go('/');
+                ScaffoldMessenger.of(
+                  this.context,
+                ).showSnackBar(SnackBar(content: Text(texts['account_deleted']!)));
+              } catch (e) {
+                setState(() => isDeleting = false);
+                if (!mounted) return;
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text("${texts['err_delete']}$e")),
+                );
+              }
+            }
+
+            return AppBottomSheet(
+              title: texts['delete_confirm_title']!,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    texts['delete_confirm_desc']!,
+                    style: AppTextStyles.body(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TextField(
+                    controller: confirmController,
+                    onChanged: (v) => setState(() => confirmText = v),
+                    decoration: InputDecoration(
+                      labelText: texts['delete_confirm_hint'],
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: texts['btn_delete']!,
+                    variant: AppButtonVariant.danger,
+                    isLoading: isDeleting,
+                    onPressed: canDelete ? confirmDelete : null,
                   ),
                 ],
               ),
