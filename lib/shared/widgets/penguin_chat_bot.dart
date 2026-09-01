@@ -165,6 +165,22 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     }
   }
 
+  /// Hapus histori chat — lokal & di database. Sebelumnya nggak ada cara
+  /// ngosongin chat sama sekali, numpuk terus.
+  Future<void> clearHistory() async {
+    state = ChatbotState(messages: []);
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await Supabase.instance.client
+          .from('ai_chats')
+          .delete()
+          .eq('parent_id', user.id);
+    } catch (e) {
+      debugPrint("Gagal hapus histori chat Mink: $e");
+    }
+  }
+
   Future<void> _saveMessage(String role, String content) async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) return;
@@ -277,6 +293,31 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
         );
       }
     });
+  }
+
+  Future<void> _confirmClearHistory(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus histori chat?'),
+        content: const Text(
+          'Semua percakapan sama Mink bakal dihapus. Nggak bisa dibatalin.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) {
+      await ref.read(chatbotProvider.notifier).clearHistory();
+    }
   }
 
   Future<void> _handleSend(
@@ -504,6 +545,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                   ],
                 ),
                 const Spacer(),
+                if (chatState.messages.isNotEmpty)
+                  IconButton(
+                    tooltip: 'Hapus histori chat',
+                    onPressed: () => _confirmClearHistory(context),
+                    icon: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 IconButton(
                   onPressed: () => setState(() => _isChatOpen = false),
                   icon: const Icon(

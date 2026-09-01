@@ -17,6 +17,7 @@ import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_bottom_sheet.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
+import '../../shared/widgets/coming_soon_badge.dart';
 
 // ==========================================
 // PROVIDER REAL-TIME 1: MENGHITUNG TOTAL MISI SELESAI
@@ -933,33 +934,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
+          // Belum ada sistem paket/pembayaran beneran, jadi 2 tombol ini
+          // ditandain jelas belum bisa dipencet — sebelumnya keliatan aktif
+          // tapi diem aja pas ditekan.
           Row(
             children: [
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                    elevation: 2,
+                child: ComingSoonBadge(
+                  child: ElevatedButton(
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                      elevation: 2,
+                    ),
+                    child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm + 4),
               Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                    elevation: 4,
+                child: ComingSoonBadge(
+                  child: ElevatedButton(
+                    onPressed: null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                      elevation: 4,
+                    ),
+                    child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

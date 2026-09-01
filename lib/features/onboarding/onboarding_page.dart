@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
+import '../../shared/widgets/coming_soon_badge.dart';
 import '../../core/theme/app_colors.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
@@ -834,27 +835,32 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Widget _googleBtn(String label) {
-    return ElevatedButton.icon(
-      onPressed: () {}, // Integrasi Google OAuth nantinya
-      icon: Image.asset(
-        'assets/images/google.png',
-        width: 24,
-        errorBuilder: (c, e, s) => const SizedBox(width: 24, height: 24),
-      ),
-      label: Text(
-        label,
-        style: const TextStyle(
-          color: AppColors.primary,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
+    // Belum ada integrasi Google OAuth beneran — dulu tombol ini keliatan
+    // aktif tapi diem aja pas dipencet. Sekarang jelas ditandain belum jadi.
+    return ComingSoonBadge(
+      child: ElevatedButton.icon(
+        onPressed: null,
+        icon: Image.asset(
+          'assets/images/google.png',
+          width: 24,
+          errorBuilder: (c, e, s) => const SizedBox(width: 24, height: 24),
         ),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        minimumSize: const Size(double.infinity, 56),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-          side: BorderSide(color: Colors.grey.shade300),
+        label: Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          disabledBackgroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 56),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+            side: BorderSide(color: Colors.grey.shade300),
+          ),
         ),
       ),
     );

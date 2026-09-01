@@ -18,11 +18,23 @@ const Map<String, Map<String, String>> _t = {
     'empty_title': "No Notifications Yet",
     'empty_desc':
         "When you have new updates or reminders, they'll appear here.",
+    'mark_all_read': "Mark all as read",
+    'clear_all': "Clear all",
+    'confirm_clear_title': "Clear all notifications?",
+    'confirm_clear_desc': "This can't be undone.",
+    'cancel': "Cancel",
+    'delete': "Delete",
   },
   'id': {
     'title': "Notifikasi",
     'empty_title': "Belum Ada Notifikasi",
     'empty_desc': "Pembaruan atau pengingat baru akan muncul di sini.",
+    'mark_all_read': "Tandai semua dibaca",
+    'clear_all': "Hapus semua",
+    'confirm_clear_title': "Hapus semua notifikasi?",
+    'confirm_clear_desc': "Nggak bisa dibatalin kalau udah dihapus.",
+    'cancel': "Batal",
+    'delete': "Hapus",
   },
 };
 
@@ -86,6 +98,61 @@ class NotificationsPage extends ConsumerWidget {
 
           // ==================== CUSTOM BACK BUTTON MILIKMU ====================
           CustomBackButton(onPressed: () => context.pop()),
+
+          // ==================== MENU: TANDAI SEMUA / HAPUS SEMUA ====================
+          if (notifsAsync.value?.isNotEmpty ?? false)
+            Positioned(
+              top: 60,
+              right: 24,
+              child: SafeArea(
+                child: PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_horiz_rounded, color: AppColors.primary),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  onSelected: (value) async {
+                    if (value == 'mark_all') {
+                      await ref.read(markAllNotificationsReadProvider)();
+                    } else if (value == 'clear_all') {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(texts['confirm_clear_title']!),
+                          content: Text(texts['confirm_clear_desc']!),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: Text(texts['cancel']!),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: Text(
+                                texts['delete']!,
+                                style: const TextStyle(color: AppColors.danger),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirmed ?? false) {
+                        await ref.read(clearAllNotificationsProvider)();
+                      }
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'mark_all',
+                      child: Text(texts['mark_all_read']!),
+                    ),
+                    PopupMenuItem(
+                      value: 'clear_all',
+                      child: Text(
+                        texts['clear_all']!,
+                        style: const TextStyle(color: AppColors.danger),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

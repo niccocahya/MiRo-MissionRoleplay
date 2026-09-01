@@ -35,3 +35,41 @@ final markNotificationReadProvider = Provider(
     }
   },
 );
+
+/// Jumlah notifikasi yang belum dibaca — dulu ikon lonceng cuma nampilin
+/// titik oranye kosong, nggak pernah nunjukin ada berapa banyak.
+final unreadNotificationCountProvider = Provider<int>((ref) {
+  final notifs = ref.watch(notificationsProvider).value ?? [];
+  return notifs.where((n) => n['is_read'] != true).length;
+});
+
+/// Tandai SEMUA notifikasi sudah dibaca sekaligus.
+final markAllNotificationsReadProvider = Provider(
+  (ref) => () async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await Supabase.instance.client
+          .from('notifications')
+          .update({'is_read': true})
+          .eq('parent_id', user.id)
+          .eq('is_read', false);
+      ref.invalidate(notificationsProvider);
+    } catch (_) {}
+  },
+);
+
+/// Hapus SEMUA notifikasi milik parent yang login.
+final clearAllNotificationsProvider = Provider(
+  (ref) => () async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    try {
+      await Supabase.instance.client
+          .from('notifications')
+          .delete()
+          .eq('parent_id', user.id);
+      ref.invalidate(notificationsProvider);
+    } catch (_) {}
+  },
+);

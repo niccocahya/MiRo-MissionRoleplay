@@ -7,6 +7,9 @@ import 'package:intl/intl.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
+import '../../core/providers/notification_provider.dart';
+import '../../core/router/app_page_transition.dart';
+import '../profile/screens/all_certificates_page.dart';
 import '../../core/constants/role_visuals.dart';
 import '../missions/data/mission_provider.dart';
 import '../missions/data/mission_model.dart';
@@ -205,6 +208,8 @@ const Map<String, Map<String, String>> _t = {
     'motivation': "You're doing great!",
     'today_rec': "TODAY'S MISSION RECOMMENDATION",
     'btn_start_mission': "Start Mission",
+    'qa_certificates': "All Certificates",
+    'qa_progress': "Full Progress",
     'choose_role': "Choose role\ntoday",
     'choose_role_desc': "Each role trains different skills",
     'weekly_prog': "Weekly Progress",
@@ -222,6 +227,8 @@ const Map<String, Map<String, String>> _t = {
     'motivation': "Kamu melakukan yang terbaik!",
     'today_rec': "REKOMENDASI MISI HARI INI",
     'btn_start_mission': "Mulai Misi",
+    'qa_certificates': "Semua Sertifikat",
+    'qa_progress': "Progress Lengkap",
     'choose_role': "Pilih peran\nhari ini",
     'choose_role_desc': "Setiap peran melatih keahlian berbeda",
     'weekly_prog': "Kemajuan Mingguan",
@@ -355,6 +362,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       childCurrentXp,
                       childMaxXp,
                     ),
+                    _buildQuickActions(context, texts),
                     _buildTodayMissionCard(
                       context,
                       texts,
@@ -430,44 +438,134 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          GestureDetector(
-            onTap: () => context.push('/notifications'),
-            child: Stack(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.border),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.notifications_none_rounded,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 10,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.accent,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 1.5),
+          Builder(
+            builder: (context) {
+              // Sebelumnya titik oranye kosong nempel terus tanpa nunjukin
+              // ada berapa notif yang belum dibaca.
+              final unread = ref.watch(unreadNotificationCountProvider);
+              return GestureDetector(
+                onTap: () => context.push('/notifications'),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.border),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.notifications_none_rounded,
+                        color: AppColors.primary,
+                        size: 24,
+                      ),
                     ),
-                  ),
+                    if (unread > 0)
+                      Positioned(
+                        top: -2,
+                        right: -2,
+                        child: Container(
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            unread > 9 ? '9+' : '$unread',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Jalan pintas ke halaman yang sering dicek orang tua — sebelumnya
+  /// harus scroll manual atau lewat tab Profil buat sampai ke sini.
+  Widget _buildQuickActions(BuildContext context, Map<String, String> texts) {
+    final hPad = context.pageHPadding;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: AppSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(
+            child: _quickActionChip(
+              icon: Icons.emoji_events_rounded,
+              label: texts['qa_certificates']!,
+              onTap: () => Navigator.of(
+                context,
+                rootNavigator: true,
+              ).push(appPageRoute(const AllCertificatesPage())),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm + 4),
+          Expanded(
+            child: _quickActionChip(
+              icon: Icons.bar_chart_rounded,
+              label: texts['qa_progress']!,
+              onTap: () => context.go('/progress'),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _quickActionChip({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + 4,
+            vertical: AppSpacing.sm + 2,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: AppColors.accent),
+              const SizedBox(width: AppSpacing.xs + 2),
+              Flexible(
+                child: Text(
+                  label,
+                  style: AppTextStyles.bodyBold(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
