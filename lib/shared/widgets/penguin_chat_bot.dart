@@ -363,6 +363,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     _scrollToBottom();
   }
 
+  Future<void> _handleQuickReply(
+    String text,
+    Map<String, dynamic> childFullData,
+    String? activeContext,
+  ) async {
+    _chatController.text = text;
+    await _handleSend(childFullData, activeContext);
+  }
+
   @override
   Widget build(BuildContext context) {
     // 🔥 SAKLAR GAIB MINK! BACA PERINTAH DARI PROVIDER
@@ -596,6 +605,64 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               ],
             ),
           ),
+          // Chip balasan cepat — sebelumnya orang tua selalu harus ngetik
+          // sendiri dari nol tiap buka chat, padahal pertanyaan pertama
+          // hampir selalu salah satu dari beberapa hal yang sama.
+          // Cuma muncul di percakapan yang masih kosong biar nggak ganggu
+          // pas udah lagi ngobrol.
+          if (chatState.messages.isEmpty && !chatState.isLoading)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: SizedBox(
+                height: 34,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  children: (activeContext != null
+                          ? const [
+                              "Apa langkah pertamanya?",
+                              "Bahan apa aja yang perlu disiapkan?",
+                              "Kenapa misi ini penting?",
+                            ]
+                          : const [
+                              "Rekomendasi misi hari ini",
+                              "Gimana cara kerja XP & level?",
+                              "Ceritain progres anakku",
+                            ])
+                      .map(
+                        (q) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: GestureDetector(
+                            onTap: () =>
+                                _handleQuickReply(q, childData, activeContext),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryTint,
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Text(
+                                q,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

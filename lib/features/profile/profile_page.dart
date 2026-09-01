@@ -16,6 +16,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/services/storage_upload_service.dart';
+import '../help/help_center_page.dart';
 import '../legal/legal_page.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -167,8 +168,6 @@ const Map<String, Map<String, String>> _t = {
     'q_no_data': "No questionnaire data yet.",
     'err_logout': "Failed to log out: ",
     'err_save': "Failed to save: ",
-    'help_desc':
-        "The MiRO CS team is ready to help you anytime. Please contact us via Email or WhatsApp.",
   },
   'id': {
     'parent_prefix': "Ibu/Bapak",
@@ -219,8 +218,6 @@ const Map<String, Map<String, String>> _t = {
     'q_no_data': "Belum ada data kuisioner.",
     'err_logout': "Gagal logout: ",
     'err_save': "Gagal menyimpan: ",
-    'help_desc':
-        "Tim CS MiRO siap membantu Bunda & Ayah kapan saja. Silakan hubungi kami via Email atau WhatsApp.",
   },
 };
 
@@ -760,46 +757,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       },
-    );
-  }
-
-  void _showHelpCenterDialog(Map<String, String> texts) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-        contentPadding: const EdgeInsets.all(AppSpacing.lg),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: const BoxDecoration(color: AppColors.primaryTint, shape: BoxShape.circle),
-              child: const Icon(Icons.support_agent_rounded, size: 40, color: AppColors.primary),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(texts['menu_help']!, style: AppTextStyles.h2()),
-            const SizedBox(height: AppSpacing.sm + 4),
-            Text(
-              texts['help_desc']!,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body().copyWith(fontSize: 13),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(ctx),
-              icon: const Icon(Icons.mail_rounded, color: Colors.white, size: 18),
-              label: Text("cs@miroapp.com", style: AppTextStyles.button()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                minimumSize: const Size(double.infinity, 48),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -1545,7 +1502,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           _buildMenuItem(
             texts['menu_help']!,
             Icons.help_outline_rounded,
-            () => _showHelpCenterDialog(texts),
+            () => Navigator.of(
+              context,
+              rootNavigator: true,
+            ).push(appPageRoute(const HelpCenterPage())),
           ),
         ],
       ),
