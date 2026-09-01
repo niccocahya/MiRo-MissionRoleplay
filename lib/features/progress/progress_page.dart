@@ -9,6 +9,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/services/report_pdf_service.dart';
 import '../../core/constants/role_visuals.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -190,6 +191,7 @@ const Map<String, Map<String, String>> _t = {
     'err_load': "Error loading data: ",
     'missions_count': "Missions",
     'default_child_name': "Child",
+    'export_pdf': "Export as PDF",
     // Role Names
     'role_chef': "Chef",
     'role_doctor': "Doctor",
@@ -222,6 +224,7 @@ const Map<String, Map<String, String>> _t = {
     'err_load': "Error memuat data: ",
     'missions_count': "Misi",
     'default_child_name': "Anak",
+    'export_pdf': "Ekspor PDF",
     // Role Names
     'role_chef': "Koki",
     'role_doctor': "Dokter",
@@ -275,6 +278,7 @@ class ProgressPage extends ConsumerStatefulWidget {
 class _ProgressPageState extends ConsumerState<ProgressPage> {
   String _selectedTimeFilter = 'minggu';
   String _selectedRoleFilter = 'semua';
+  bool _isExportingPdf = false;
 
   Map<String, int> _calculateLevelData(int totalXp) {
     int level = 1;
@@ -304,6 +308,79 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       'currentXp': currentLevelXp,
       'maxXp': nextLevelRequiredXp,
     };
+  }
+
+  /// Ekspor laporan PDF — sebelumnya nggak ada cara buat orang tua nyimpen/
+  /// nge-print/ngirim rangkuman progres anaknya ke luar app (misal buat
+  /// ditunjukin ke guru/psikolog anak). Datanya persis riwayat & filter
+  /// yang lagi aktif di layar (default filter "Minggu Ini" jadi otomatis
+  /// ini bisa dipakai sebagai ringkasan mingguan tanpa fitur terpisah).
+  Future<void> _exportReport(
+    Map<String, String> texts,
+    String lang,
+    AsyncValue<List<dynamic>> historyAsync, {
+    required String childName,
+    required int level,
+    required int totalXp,
+    required int currentStreak,
+    required Map<String, double> skillScores,
+    required AsyncValue<List<Map<String, dynamic>>> achievementsAsync,
+  }) async {
+    setState(() => _isExportingPdf = true);
+    try {
+      final historyList = historyAsync.value ?? [];
+      final missionHistory = historyList.map((item) {
+        final skills = (item['earned_skills'] as Map?) ?? {};
+        return {
+          'roleId': item['role_id'],
+          'completedAt': parseDateSafely(item['completed_at'] ?? ''),
+          'xp': item['earned_xp'] ?? 0,
+          'skills': skills.keys
+              .map((k) => texts[k.toString().toLowerCase()] ?? k.toString())
+              .toList(),
+        };
+      }).toList();
+
+      final achievementsList = achievementsAsync.value ?? [];
+      final achievements = achievementsList.map((a) {
+        return {
+          'title': lang == 'id'
+              ? (a['title_id'] ?? 'Pencapaian')
+              : (a['title_en'] ?? 'Achievement'),
+          'unlockedAt': parseDateSafely(a['unlocked_at'] ?? ''),
+        };
+      }).toList();
+
+      final timeFilterLabel = switch (_selectedTimeFilter) {
+        'hari' => texts['filter_today']!,
+        'bulan' => texts['filter_month']!,
+        _ => texts['filter_week']!,
+      };
+      final roleFilterLabel = _selectedRoleFilter == 'semua'
+          ? texts['filter_all']!
+          : (roleVisualById(_selectedRoleFilter)?.name(lang) ?? _selectedRoleFilter);
+
+      await exportProgressReportPdf(
+        lang: lang,
+        data: ProgressReportData(
+          childName: childName,
+          level: level,
+          totalXp: totalXp,
+          currentStreak: currentStreak,
+          skillScores: skillScores,
+          achievements: achievements,
+          missionHistory: missionHistory,
+          periodLabel: '$timeFilterLabel • $roleFilterLabel',
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("${texts['err_load']}$e")));
+    } finally {
+      if (mounted) setState(() => _isExportingPdf = false);
+    }
   }
 
   Future<void> _openJournalFromHistory(
@@ -438,6 +515,18 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     texts,
                     lang,
                     historyAsync,
+                    childName: childName,
+                    level: _calculateLevelData(totalXp)['level']!,
+                    totalXp: totalXp,
+                    currentStreak: currentStreak,
+                    skillScores: {
+                      'cognitive': cog,
+                      'empathy': emp,
+                      'creativity': cre,
+                      'literacy': lit,
+                      'motoric': mot,
+                    },
+                    achievementsAsync: achievementsAsync,
                   ),
 
                   _buildAchievementsSection(texts, achievementsAsync, lang),
@@ -843,22 +932,62 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     BuildContext context,
     Map<String, String> texts,
     String lang,
-    AsyncValue<List<dynamic>> historyAsync,
-  ) {
+    AsyncValue<List<dynamic>> historyAsync, {
+    required String childName,
+    required int level,
+    required int totalXp,
+    required int currentStreak,
+    required Map<String, double> skillScores,
+    required AsyncValue<List<Map<String, dynamic>>> achievementsAsync,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            texts['mission_history']!,
-            style: const TextStyle(
-              color: AppColors.primary,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  texts['mission_history']!,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // Ekspor PDF — sebelumnya nggak ada cara buat orang tua
+              // nyimpen/ngirim rangkuman progres ke luar app. Ngikutin
+              // filter yang lagi aktif di layar (default "Minggu Ini"),
+              // jadi otomatis jadi ringkasan mingguan kalau filternya
+              // dibiarkan default.
+              IconButton(
+                tooltip: texts['export_pdf'],
+                onPressed: _isExportingPdf
+                    ? null
+                    : () => _exportReport(
+                        texts,
+                        lang,
+                        historyAsync,
+                        childName: childName,
+                        level: level,
+                        totalXp: totalXp,
+                        currentStreak: currentStreak,
+                        skillScores: skillScores,
+                        achievementsAsync: achievementsAsync,
+                      ),
+                icon: _isExportingPdf
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.picture_as_pdf_rounded, color: AppColors.accent),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
 
           Row(
             children: [
