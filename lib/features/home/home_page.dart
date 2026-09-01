@@ -15,6 +15,7 @@ import '../profile/screens/all_certificates_page.dart';
 import '../../core/constants/role_visuals.dart';
 import '../missions/data/mission_provider.dart';
 import '../missions/data/mission_model.dart';
+import '../missions/screens/mission_search_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -432,6 +433,30 @@ class _HomePageState extends ConsumerState<HomePage> {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
+          GestureDetector(
+            onTap: () => Navigator.of(
+              context,
+              rootNavigator: true,
+            ).push(appPageRoute(const MissionSearchScreen())),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                ],
+              ),
+              child: const Icon(
+                Icons.search_rounded,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Builder(
             builder: (context) {
               // Sebelumnya titik oranye kosong nempel terus tanpa nunjukin

@@ -13,6 +13,7 @@ import '../../core/router/app_page_transition.dart';
 import '../../core/app_info.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../legal/legal_page.dart';
@@ -158,6 +159,12 @@ const Map<String, Map<String, String>> _t = {
     'child_detail_title': "Child Details",
     'age': "Years Old",
     'default_child': "Child",
+    'onboarding_answers': "From the onboarding questionnaire",
+    'q_interests': "Favorite activities",
+    'q_learning_style': "Learning style",
+    'q_dev_focus': "Development focus",
+    'q_play_time': "Play time together",
+    'q_no_data': "No questionnaire data yet.",
     'err_logout': "Failed to log out: ",
     'err_save': "Failed to save: ",
     'help_desc':
@@ -204,6 +211,12 @@ const Map<String, Map<String, String>> _t = {
     'child_detail_title': "Detail Anak",
     'age': "Tahun",
     'default_child': "Anak",
+    'onboarding_answers': "Dari kuisioner awal (onboarding)",
+    'q_interests': "Kegiatan favorit",
+    'q_learning_style': "Gaya belajar",
+    'q_dev_focus': "Fokus pengembangan",
+    'q_play_time': "Waktu bermain bersama",
+    'q_no_data': "Belum ada data kuisioner.",
     'err_logout': "Gagal logout: ",
     'err_save': "Gagal menyimpan: ",
     'help_desc':
@@ -396,6 +409,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     Map<String, String> texts,
     Map<String, dynamic> childData,
   ) {
+    final String childId = childData['id'] ?? '';
+    final String lang = ref.read(languageProvider);
+
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -438,11 +454,119 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   _buildMiniStatBox("✨", "XP", "${childData['total_xp'] ?? 0}"),
                 ],
               ),
+              const SizedBox(height: AppSpacing.lg),
+              const Divider(),
+              const SizedBox(height: AppSpacing.sm),
+              Consumer(
+                builder: (context, ref, _) {
+                  final questAsync = ref.watch(
+                    childQuestionnaireProvider(childId),
+                  );
+                  return questAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                    error: (e, s) => const SizedBox(),
+                    data: (quest) => _buildQuestionnaireSummary(
+                      texts,
+                      lang,
+                      quest,
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: AppSpacing.md),
             ],
           ),
         );
       },
+    );
+  }
+
+  /// Ringkasan jawaban kuisioner onboarding (minat, gaya belajar, fokus
+  /// pengembangan, waktu bermain) — sebelumnya data ini nggak pernah
+  /// ditampilkan lagi ke orang tua setelah diisi sekali di awal.
+  Widget _buildQuestionnaireSummary(
+    Map<String, String> texts,
+    String lang,
+    Map<String, dynamic>? quest,
+  ) {
+    if (quest == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Text(
+          texts['q_no_data']!,
+          style: AppTextStyles.caption(color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    final interests = (quest['interests'] as List?)?.cast<String>() ?? [];
+    final learningStyles =
+        (quest['learning_styles'] as List?)?.cast<String>() ?? [];
+    final parentGoals = (quest['parent_goals'] as List?)?.cast<String>() ?? [];
+    final String playTime = timePreferenceLabel(
+      quest['time_preference'] as String?,
+      lang,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          texts['onboarding_answers']!,
+          style: AppTextStyles.caption(
+            color: AppColors.textMuted,
+          ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+        ),
+        const SizedBox(height: AppSpacing.sm + 4),
+        _buildQuestionnaireRow(
+          "🎨",
+          texts['q_interests']!,
+          interests.isEmpty ? '-' : interests.join(', '),
+        ),
+        _buildQuestionnaireRow(
+          "🧠",
+          texts['q_learning_style']!,
+          learningStyles.isEmpty ? '-' : learningStyles.join(', '),
+        ),
+        _buildQuestionnaireRow(
+          "🎯",
+          texts['q_dev_focus']!,
+          parentGoals.isEmpty ? '-' : parentGoals.join(', '),
+        ),
+        _buildQuestionnaireRow("⏰", texts['q_play_time']!, playTime),
+      ],
+    );
+  }
+
+  Widget _buildQuestionnaireRow(String icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTextStyles.caption(color: AppColors.textMuted),
+                ),
+                Text(value, style: AppTextStyles.bodyBold().copyWith(fontSize: 13)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
