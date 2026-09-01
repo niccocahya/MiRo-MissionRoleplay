@@ -8,7 +8,9 @@ import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/notification_provider.dart';
+import '../../core/providers/streak_provider.dart';
 import '../../core/router/app_page_transition.dart';
+import '../../core/utils/date_utils.dart';
 import '../profile/screens/all_certificates_page.dart';
 import '../../core/constants/role_visuals.dart';
 import '../missions/data/mission_provider.dart';
@@ -21,26 +23,8 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
 
-// ==========================================
-// FUNGSI PARSING TANGGAL SUPER ROBUST
-// Menangani semua format dari Supabase & memaksa UTC → WIB
-// ==========================================
-DateTime? parseDateSafely(String dateStr) {
-  if (dateStr.isEmpty) return null;
-
-  String s = dateStr.trim();
-
-  // Normalize ke ISO8601
-  if (!s.contains('T') && s.contains(' ')) {
-    s = s.replaceFirst(' ', 'T');
-  }
-
-  try {
-    return DateTime.parse(s); // ✅ NO toLocal()
-  } catch (_) {
-    return null;
-  }
-}
+// parseDateSafely dipindah ke core/utils/date_utils.dart (dulu duplikat
+// persis di sini dan di progress_page.dart).
 
 // ==========================================
 // 🔥 PROVIDER BARU: MENGAMBIL NAMA ORANG TUA DARI DATABASE
@@ -219,6 +203,10 @@ const Map<String, Map<String, String>> _t = {
     'empty_progress': "No activity this week. Let's start the first adventure!",
     'empty_achieve': "No achievements yet. Complete a mission to earn one!",
     'err_loading': "Error loading data: ",
+    'streak_active_title': "day streak going!",
+    'streak_active_desc': "Finish a mission today to keep it alive.",
+    'streak_start_title': "Start a streak today",
+    'streak_start_desc': "Complete a mission to begin your streak.",
   },
   'id': {
     'greeting': "Halo, Bapak/Ibu",
@@ -240,6 +228,10 @@ const Map<String, Map<String, String>> _t = {
     'empty_achieve':
         "Belum ada pencapaian. Selesaikan misi untuk mendapatkannya!",
     'err_loading': "Error memuat data: ",
+    'streak_active_title': "hari beruntun!",
+    'streak_active_desc': "Selesaikan misi hari ini biar streak-nya lanjut.",
+    'streak_start_title': "Mulai streak hari ini",
+    'streak_start_desc': "Selesaikan misi buat mulai streak-mu.",
   },
 };
 
@@ -330,6 +322,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           weeklyMissionCountStreamProvider(childId),
         );
         final achievementsAsync = ref.watch(childAchievementsProvider(childId));
+        final streakAsync = ref.watch(streakProvider(childId));
 
         // Rekomendasi misi: pilih role berdasarkan skill anak yang PALING
         // RENDAH saat ini (sebelumnya kartu ini statis, selalu nampilin
@@ -362,6 +355,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       childCurrentXp,
                       childMaxXp,
                     ),
+                    _buildStreakReminder(context, texts, streakAsync.value),
                     _buildQuickActions(context, texts),
                     _buildTodayMissionCard(
                       context,
@@ -565,6 +559,69 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Pengingat streak — sebelumnya jumlah hari beruntun cuma kelihatan
+  /// di halaman Progress, jadi orang tua nggak diingatkan buat jaga
+  /// streak-nya dari layar utama. `streak` null berarti masih loading,
+  /// jadi banner disembunyikan dulu biar nggak ada flicker "0 hari".
+  Widget _buildStreakReminder(
+    BuildContext context,
+    Map<String, String> texts,
+    int? streak,
+  ) {
+    if (streak == null) return const SizedBox.shrink();
+    final hPad = context.pageHPadding;
+    final bool active = streak > 0;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.xs),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 2,
+        ),
+        decoration: BoxDecoration(
+          color: active ? AppColors.goldTint : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: active ? AppColors.gold.withValues(alpha: 0.4) : AppColors.border,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(
+              active ? '🔥' : '✨',
+              style: const TextStyle(fontSize: 22),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    active
+                        ? '$streak ${texts['streak_active_title']!}'
+                        : texts['streak_start_title']!,
+                    style: AppTextStyles.bodyBold(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    active
+                        ? texts['streak_active_desc']!
+                        : texts['streak_start_desc']!,
+                    style: AppTextStyles.caption(color: AppColors.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
