@@ -14,6 +14,7 @@ import '../../core/app_info.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
+import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../help/help_center_page.dart';
@@ -23,6 +24,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_bottom_sheet.dart';
+import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
@@ -151,6 +153,20 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "App Language",
     'notif_setting': "Push Notifications",
     'display_setting': "Text Size",
+    'account_setting': "Account",
+    'change_email': "Change Email",
+    'change_password': "Change Password",
+    'current_email_label': "Current email",
+    'new_email_label': "New email",
+    'new_password_label': "New password",
+    'confirm_password_label': "Confirm new password",
+    'btn_update': "Update",
+    'email_update_sent':
+        "Check your new email inbox to confirm the change.",
+    'password_updated': "Password updated successfully.",
+    'err_update': "Failed to update: ",
+    'err_password_mismatch': "Passwords don't match.",
+    'err_password_short': "Password must be at least 6 characters.",
     'about_setting': "About",
     'app_version': "App Version",
     'terms_of_service': "Terms of Service",
@@ -201,6 +217,20 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "Bahasa Aplikasi",
     'notif_setting': "Notifikasi Aplikasi",
     'display_setting': "Ukuran Teks",
+    'account_setting': "Akun",
+    'change_email': "Ganti Email",
+    'change_password': "Ganti Password",
+    'current_email_label': "Email saat ini",
+    'new_email_label': "Email baru",
+    'new_password_label': "Password baru",
+    'confirm_password_label': "Konfirmasi password baru",
+    'btn_update': "Perbarui",
+    'email_update_sent':
+        "Cek inbox email barumu buat konfirmasi perubahan.",
+    'password_updated': "Password berhasil diperbarui.",
+    'err_update': "Gagal memperbarui: ",
+    'err_password_mismatch': "Password tidak cocok.",
+    'err_password_short': "Password minimal 6 karakter.",
     'about_setting': "Tentang",
     'app_version': "Versi Aplikasi",
     'terms_of_service': "Syarat & Ketentuan",
@@ -592,8 +622,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showSettingsModal(Map<String, String> texts, String currentLang) {
-    bool isNotifEnabled = true;
-
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
@@ -607,27 +635,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Setting Notifikasi
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryTint,
-                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
-                      ),
-                      child: const Icon(
-                        Icons.notifications_active_rounded,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    title: Text(texts['notif_setting']!, style: AppTextStyles.bodyBold()),
-                    trailing: Switch(
-                      value: isNotifEnabled,
-                      activeThumbColor: AppColors.accent,
-                      onChanged: (val) =>
-                          setModalState(() => isNotifEnabled = val),
-                    ),
+                  // Setting Notifikasi per kategori — sebelumnya cuma 1
+                  // saklar `bool` lokal yang nggak disimpan & nggak
+                  // connect ke apa pun (hilang tiap modal ditutup).
+                  Text(
+                    texts['notif_setting']!.toUpperCase(),
+                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final muted = ref.watch(notificationPrefsProvider);
+                      return Column(
+                        children: kNotificationCategories.map((cat) {
+                          final enabled = !muted.contains(cat.id);
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            dense: true,
+                            title: Text(
+                              cat.label(currentLang),
+                              style: AppTextStyles.body().copyWith(fontSize: 13),
+                            ),
+                            trailing: Switch(
+                              value: enabled,
+                              activeThumbColor: AppColors.accent,
+                              onChanged: (val) => ref
+                                  .read(notificationPrefsProvider.notifier)
+                                  .toggle(cat.id, val),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                   const Divider(),
 
@@ -698,6 +737,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   const Divider(),
 
+                  // Bagian Akun — ganti email/password. Sebelumnya nggak
+                  // ada cara sama sekali buat orang tua ganti kredensial
+                  // login sendiri dari dalam app.
+                  Text(
+                    texts['account_setting']!.toUpperCase(),
+                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.email_outlined, size: 20, color: AppColors.primary),
+                    title: Text(texts['change_email']!, style: AppTextStyles.body()),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    onTap: () => _showChangeEmailModal(texts),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    leading: const Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primary),
+                    title: Text(texts['change_password']!, style: AppTextStyles.body()),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    onTap: () => _showChangePasswordModal(texts),
+                  ),
+                  const Divider(),
+
                   // Bagian Tentang — versi app, syarat & ketentuan,
                   // kebijakan privasi, lisensi open source. Sebelumnya
                   // nggak ada satupun link legal di manapun di app.
@@ -750,6 +815,186 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       applicationName: kAppName,
                       applicationVersion: kAppVersion,
                     ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Ganti email login — pakai `updateUser` bawaan Supabase Auth. Email
+  /// baru butuh dikonfirmasi dulu (Supabase kirim link ke alamat baru)
+  /// sebelum beneran ganti, jadi bukan langsung aktif.
+  void _showChangeEmailModal(Map<String, String> texts) {
+    final emailController = TextEditingController();
+    final currentEmail = Supabase.instance.client.auth.currentUser?.email ?? '-';
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        bool isSaving = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> submit() async {
+              final newEmail = emailController.text.trim();
+              if (newEmail.isEmpty || !newEmail.contains('@')) return;
+              setState(() => isSaving = true);
+              try {
+                await Supabase.instance.client.auth.updateUser(
+                  UserAttributes(email: newEmail),
+                );
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                if (!mounted) return;
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text(texts['email_update_sent']!)),
+                );
+              } catch (e) {
+                setState(() => isSaving = false);
+                if (!mounted) return;
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text("${texts['err_update']}$e")),
+                );
+              }
+            }
+
+            return AppBottomSheet(
+              title: texts['change_email']!,
+              child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${texts['current_email_label']}: $currentEmail",
+                        style: AppTextStyles.caption(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      TextField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: texts['new_email_label'],
+                          filled: true,
+                          fillColor: AppColors.background,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      AppButton(
+                        label: texts['btn_update']!,
+                        isLoading: isSaving,
+                        onPressed: submit,
+                      ),
+                    ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Ganti password login lewat `updateUser` bawaan Supabase Auth.
+  void _showChangePasswordModal(Map<String, String> texts) {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        bool isSaving = false;
+        String? errorText;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> submit() async {
+              final pw = passwordController.text;
+              final confirm = confirmController.text;
+              if (pw.length < 6) {
+                setState(() => errorText = texts['err_password_short']);
+                return;
+              }
+              if (pw != confirm) {
+                setState(() => errorText = texts['err_password_mismatch']);
+                return;
+              }
+              setState(() {
+                errorText = null;
+                isSaving = true;
+              });
+              try {
+                await Supabase.instance.client.auth.updateUser(
+                  UserAttributes(password: pw),
+                );
+                if (!ctx.mounted) return;
+                Navigator.pop(ctx);
+                if (!mounted) return;
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text(texts['password_updated']!)),
+                );
+              } catch (e) {
+                setState(() => isSaving = false);
+                if (!mounted) return;
+                ScaffoldMessenger.of(this.context).showSnackBar(
+                  SnackBar(content: Text("${texts['err_update']}$e")),
+                );
+              }
+            }
+
+            return AppBottomSheet(
+              title: texts['change_password']!,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: texts['new_password_label'],
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm + 4),
+                  TextField(
+                    controller: confirmController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: texts['confirm_password_label'],
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  if (errorText != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      errorText!,
+                      style: AppTextStyles.caption(color: AppColors.danger),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: texts['btn_update']!,
+                    isLoading: isSaving,
+                    onPressed: submit,
                   ),
                 ],
               ),

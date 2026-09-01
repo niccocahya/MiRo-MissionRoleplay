@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/providers/language_provider.dart';
+import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/notification_provider.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../core/theme/app_colors.dart';
@@ -48,6 +49,10 @@ class NotificationsPage extends ConsumerWidget {
 
     // Memantau data langsung dari Supabase
     final notifsAsync = ref.watch(notificationsProvider);
+    // Disaring kategori yang dimatikan lewat Settings — sebelumnya
+    // "Notifikasi" di Settings cuma saklar dekoratif yang nggak ngefek
+    // ke apa pun.
+    final muted = ref.watch(notificationPrefsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -57,7 +62,12 @@ class NotificationsPage extends ConsumerWidget {
           notifsAsync.when(
             loading: () => const AppLoading(),
             error: (error, stack) => AppErrorView(message: "Error: $error"),
-            data: (notifications) {
+            data: (allNotifications) {
+              final notifications = muted.isEmpty
+                  ? allNotifications
+                  : allNotifications
+                      .where((n) => !muted.contains(n['type']))
+                      .toList();
               if (notifications.isEmpty) {
                 return _buildEmptyState(texts);
               }
@@ -189,10 +199,21 @@ class NotificationsPage extends ConsumerWidget {
     Color iconColor;
 
     switch (notif['type']) {
+      case 'mission_completed':
+        iconData = Icons.check_circle_rounded;
+        iconBgColor = AppColors.successTint;
+        iconColor = AppColors.success;
+        break;
+      case 'achievement':
       case 'reward':
         iconData = Icons.emoji_events_rounded;
         iconBgColor = AppColors.goldTint;
         iconColor = AppColors.accent;
+        break;
+      case 'certificate':
+        iconData = Icons.school_rounded;
+        iconBgColor = AppColors.primaryTint;
+        iconColor = AppColors.primary;
         break;
       case 'reminder':
         iconData = Icons.access_time_filled_rounded;

@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
-import '../../core/providers/notification_provider.dart';
+import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/utils/date_utils.dart';

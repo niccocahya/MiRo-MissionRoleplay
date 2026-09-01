@@ -36,13 +36,6 @@ final markNotificationReadProvider = Provider(
   },
 );
 
-/// Jumlah notifikasi yang belum dibaca — dulu ikon lonceng cuma nampilin
-/// titik oranye kosong, nggak pernah nunjukin ada berapa banyak.
-final unreadNotificationCountProvider = Provider<int>((ref) {
-  final notifs = ref.watch(notificationsProvider).value ?? [];
-  return notifs.where((n) => n['is_read'] != true).length;
-});
-
 /// Tandai SEMUA notifikasi sudah dibaca sekaligus.
 final markAllNotificationsReadProvider = Provider(
   (ref) => () async {
