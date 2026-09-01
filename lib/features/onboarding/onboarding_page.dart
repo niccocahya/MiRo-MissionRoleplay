@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
+import '../../core/router/app_page_transition.dart';
 import '../../core/theme/app_colors.dart';
+import '../legal/legal_page.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
 import '../../shared/widgets/penguin_chat_bot.dart';
@@ -739,6 +742,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   isPassword: true,
                   controller: _confirmController,
                 ),
+                const SizedBox(height: 16),
+                _buildLegalAgreementText(),
               ],
             ),
           ),
@@ -749,6 +754,59 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           onPrimary: _handleRegister,
         ),
       ],
+    );
+  }
+
+  // Sebelumnya nggak ada link Syarat & Ketentuan / Kebijakan Privasi di
+  // manapun di flow pendaftaran.
+  Widget _buildLegalAgreementText() {
+    final lang = ref.read(selectedLanguageProvider);
+    final isId = lang == 'id';
+    final linkStyle = TextStyle(
+      color: AppColors.primary,
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      decoration: TextDecoration.underline,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6), fontSize: 12),
+          children: [
+            TextSpan(text: isId ? 'Dengan mendaftar, kamu setuju dengan ' : 'By signing up, you agree to our '),
+            TextSpan(
+              text: isId ? 'Syarat & Ketentuan' : 'Terms of Service',
+              style: linkStyle,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => Navigator.of(context, rootNavigator: true).push(
+                      appPageRoute(
+                        LegalPage(
+                          title: isId ? 'Syarat & Ketentuan' : 'Terms of Service',
+                          sections: isId ? kTermsOfServiceId : kTermsOfServiceEn,
+                        ),
+                      ),
+                    ),
+            ),
+            TextSpan(text: isId ? ' dan ' : ' and '),
+            TextSpan(
+              text: isId ? 'Kebijakan Privasi' : 'Privacy Policy',
+              style: linkStyle,
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => Navigator.of(context, rootNavigator: true).push(
+                      appPageRoute(
+                        LegalPage(
+                          title: isId ? 'Kebijakan Privasi' : 'Privacy Policy',
+                          sections: isId ? kPrivacyPolicyId : kPrivacyPolicyEn,
+                        ),
+                      ),
+                    ),
+            ),
+            const TextSpan(text: '.'),
+          ],
+        ),
+      ),
     );
   }
 

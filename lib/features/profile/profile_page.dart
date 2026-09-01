@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // PASTIKAN PATH IMPORT INI SESUAI DENGAN STRUKTUR FOLDER KAMU
@@ -8,8 +10,12 @@ import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
 import './data/certificate_provider.dart';
 import '../../core/router/app_page_transition.dart';
+import '../../core/app_info.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/text_size_provider.dart';
+import '../../core/services/storage_upload_service.dart';
+import '../legal/legal_page.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -142,6 +148,12 @@ const Map<String, Map<String, String>> _t = {
     'update_success': "Profile updated successfully!",
     'lang_setting': "App Language",
     'notif_setting': "Push Notifications",
+    'display_setting': "Text Size",
+    'about_setting': "About",
+    'app_version': "App Version",
+    'terms_of_service': "Terms of Service",
+    'privacy_policy': "Privacy Policy",
+    'open_source_licenses': "Open Source Licenses",
     'contact_us': "Contact Support",
     'child_detail_title': "Child Details",
     'age': "Years Old",
@@ -182,6 +194,12 @@ const Map<String, Map<String, String>> _t = {
     'update_success': "Profil berhasil diperbarui!",
     'lang_setting': "Bahasa Aplikasi",
     'notif_setting': "Notifikasi Aplikasi",
+    'display_setting': "Ukuran Teks",
+    'about_setting': "Tentang",
+    'app_version': "Versi Aplikasi",
+    'terms_of_service': "Syarat & Ketentuan",
+    'privacy_policy': "Kebijakan Privasi",
+    'open_source_licenses': "Lisensi Open Source",
     'contact_us': "Hubungi Bantuan",
     'child_detail_title': "Detail Anak",
     'age': "Tahun",
@@ -518,9 +536,98 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           ref
                               .read(languageProvider.notifier)
                               .setLanguage(newLang);
-                          Navigator.pop(ctx);
                         }
                       },
+                    ),
+                  ),
+                  const Divider(),
+
+                  // Setting Ukuran Teks — sebelumnya nggak ada opsi
+                  // aksesibilitas ukuran teks sama sekali.
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.successTint,
+                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
+                      ),
+                      child: const Icon(Icons.format_size_rounded, color: AppColors.success),
+                    ),
+                    title: Text(texts['display_setting']!, style: AppTextStyles.bodyBold()),
+                    trailing: Consumer(
+                      builder: (context, ref, _) {
+                        final current = ref.watch(textSizeProvider);
+                        return DropdownButton<AppTextSize>(
+                          value: current,
+                          underline: const SizedBox(),
+                          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                          style: AppTextStyles.bodyBold(),
+                          items: AppTextSize.values
+                              .map((s) => DropdownMenuItem(value: s, child: Text(s.label(currentLang))))
+                              .toList(),
+                          onChanged: (size) {
+                            if (size != null) {
+                              ref.read(textSizeProvider.notifier).setSize(size);
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(),
+
+                  // Bagian Tentang — versi app, syarat & ketentuan,
+                  // kebijakan privasi, lisensi open source. Sebelumnya
+                  // nggak ada satupun link legal di manapun di app.
+                  Text(
+                    texts['about_setting']!.toUpperCase(),
+                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(texts['app_version']!, style: AppTextStyles.body()),
+                    trailing: Text('v$kAppVersion', style: AppTextStyles.caption()),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(texts['terms_of_service']!, style: AppTextStyles.body()),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    onTap: () => Navigator.of(context, rootNavigator: true).push(
+                      appPageRoute(
+                        LegalPage(
+                          title: texts['terms_of_service']!,
+                          sections: currentLang == 'id' ? kTermsOfServiceId : kTermsOfServiceEn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(texts['privacy_policy']!, style: AppTextStyles.body()),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    onTap: () => Navigator.of(context, rootNavigator: true).push(
+                      appPageRoute(
+                        LegalPage(
+                          title: texts['privacy_policy']!,
+                          sections: currentLang == 'id' ? kPrivacyPolicyId : kPrivacyPolicyEn,
+                        ),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(texts['open_source_licenses']!, style: AppTextStyles.body()),
+                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    onTap: () => showLicensePage(
+                      context: context,
+                      applicationName: kAppName,
+                      applicationVersion: kAppVersion,
                     ),
                   ),
                 ],
@@ -619,7 +726,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeaderProfile(context, texts, parentName, childName, childId),
+                _buildHeaderProfile(
+                  context,
+                  texts,
+                  parentName,
+                  childName,
+                  childId,
+                  childData['avatar_url'] as String?,
+                ),
                 _buildSubscriptionSection(context, texts, parentName),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -731,6 +845,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     String parentName,
     String childName,
     String childId,
+    String? avatarUrl,
   ) {
     final hPad = context.pageHPadding;
     return Padding(
@@ -761,7 +876,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          _buildAvatarStack(),
+          _buildAvatarStack(childId, avatarUrl),
         ],
       ),
     );
@@ -801,19 +916,80 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Widget _buildAvatarStack() {
-    return Container(
-      width: 72,
-      height: 72,
-      decoration: BoxDecoration(
-        color: AppColors.accentTint,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
+  // Sebelumnya avatar di sini selalu emoji statis, nggak pernah nampilin
+  // foto asli walau `children.avatar_url` udah keisi pas onboarding — dan
+  // nggak ada cara ganti foto lagi setelah itu.
+  Widget _buildAvatarStack(String childId, String? avatarUrl) {
+    return GestureDetector(
+      onTap: () => _changeAvatar(childId),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.accentTint,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
+            ),
+            alignment: Alignment.center,
+            clipBehavior: Clip.antiAlias,
+            child: (avatarUrl == null || avatarUrl.isEmpty)
+                ? const Text("👦🏻", style: TextStyle(fontSize: 36))
+                : ClipOval(
+                    child: Image.network(
+                      avatarUrl,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Text("👦🏻", style: TextStyle(fontSize: 36)),
+                    ),
+                  ),
+          ),
+          Positioned(
+            bottom: -2,
+            right: -2,
+            child: Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: AppColors.accent,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 12),
+            ),
+          ),
+        ],
       ),
-      alignment: Alignment.center,
-      child: const Text("👩🏻", style: TextStyle(fontSize: 36)),
     );
+  }
+
+  Future<void> _changeAvatar(String childId) async {
+    if (childId.isEmpty) return;
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 75,
+      );
+      if (picked == null) return;
+
+      final url = await StorageUploadService.uploadProfilePhoto(File(picked.path));
+      await Supabase.instance.client
+          .from('children')
+          .update({'avatar_url': url})
+          .eq('id', childId);
+      // Nggak perlu invalidate manual — childDataProvider stream-nya
+      // realtime, otomatis kebaca begitu kolomnya ke-update.
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal ganti foto: $e'), backgroundColor: AppColors.danger),
+        );
+      }
+    }
   }
 
   Widget _buildSubscriptionSection(

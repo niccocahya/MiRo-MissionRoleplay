@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Import router dan provider bahasa
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
+import 'core/providers/text_size_provider.dart';
 import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
@@ -37,6 +38,7 @@ class MyApp extends ConsumerWidget {
     // Di-watch (bukan cuma dibaca) supaya seluruh tree rebuild pas bahasa
     // diganti — banyak widget anak pilih field *_id / *_en berdasarkan ini.
     ref.watch(languageProvider);
+    final textSize = ref.watch(textSizeProvider);
 
     return MaterialApp.router(
       title: 'MiRO',
@@ -48,14 +50,21 @@ class MyApp extends ConsumerWidget {
       // 🔥 PINGUIN THE MASTER OVERLAY
       // ========================================================
       builder: (context, child) {
-        return Stack(
-          children: [
-            // 1. Seluruh layar aplikasi ditaruh di paling dasar
-            if (child != null) child,
+        // Terapkan preferensi ukuran teks (Settings > Tampilan) ke SELURUH
+        // app dari satu tempat.
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(textSize.scaleFactor),
+          ),
+          child: Stack(
+            children: [
+              // 1. Seluruh layar aplikasi ditaruh di paling dasar
+              if (child != null) child,
 
-            // 2. Pinguin dibiarkan lepas menguasai Stack!
-            const PenguinChatButton(),
-          ],
+              // 2. Pinguin dibiarkan lepas menguasai Stack!
+              const PenguinChatButton(),
+            ],
+          ),
         );
       },
     );

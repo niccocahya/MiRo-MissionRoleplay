@@ -11,6 +11,7 @@ import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
 import '../../../core/router/app_page_transition.dart';
+import '../../../core/services/favorite_missions_service.dart';
 import '../../../core/theme/app_colors.dart';
 
 // ==========================================
@@ -536,6 +537,17 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
           // Pin bintang HANYA untuk misi yang saat ini aktif (mengundang klik)
           if (isCurrent)
             Positioned(top: -12, right: -12, child: _buildStarPin()),
+          // Penanda misi yang difavoritkan dari layar Intro
+          if (ref.watch(favoriteMissionsProvider).contains(mission.id))
+            Positioned(
+              top: -6,
+              left: -6,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                child: const Icon(Icons.favorite_rounded, color: AppColors.accent, size: 14),
+              ),
+            ),
         ],
       ),
     );

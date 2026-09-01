@@ -10,6 +10,7 @@ import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/responsive.dart';
+import '../../../core/services/favorite_missions_service.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -40,6 +41,7 @@ class MissionIntroScreen extends ConsumerWidget {
     // TARIK BAHASA AKTIF DARI PROVIDER
     final lang = ref.watch(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
+    final isFavorite = ref.watch(favoriteMissionsProvider).contains(mission.id);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -58,11 +60,37 @@ class MissionIntroScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // TOMBOL KEMBALI
+                // TOMBOL KEMBALI + FAVORIT
                 Padding(
                   padding: const EdgeInsets.all(24.0),
-                  child: CustomBackButton(
-                    onPressed: () => Navigator.pop(context),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomBackButton(
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      GestureDetector(
+                        onTap: () => ref
+                            .read(favoriteMissionsProvider.notifier)
+                            .toggle(mission.id),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
+                            ],
+                          ),
+                          child: Icon(
+                            isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                            color: AppColors.accent,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
