@@ -25,6 +25,8 @@ const Map<String, Map<String, String>> _t = {
     'confirm_clear_desc': "This can't be undone.",
     'cancel': "Cancel",
     'delete': "Delete",
+    'err_mark_all_failed': "Couldn't mark all as read. Check your connection and try again.",
+    'err_clear_all_failed': "Couldn't clear notifications. Check your connection and try again.",
   },
   'id': {
     'title': "Notifikasi",
@@ -36,6 +38,8 @@ const Map<String, Map<String, String>> _t = {
     'confirm_clear_desc': "Nggak bisa dibatalin kalau udah dihapus.",
     'cancel': "Batal",
     'delete': "Hapus",
+    'err_mark_all_failed': "Gagal nandain semua dibaca. Cek koneksimu terus coba lagi.",
+    'err_clear_all_failed': "Gagal hapus notifikasi. Cek koneksimu terus coba lagi.",
   },
 };
 
@@ -49,10 +53,11 @@ class NotificationsPage extends ConsumerWidget {
 
     // Memantau data langsung dari Supabase
     final notifsAsync = ref.watch(notificationsProvider);
-    // Disaring kategori yang dimatikan lewat Settings — sebelumnya
-    // "Notifikasi" di Settings cuma saklar dekoratif yang nggak ngefek
-    // ke apa pun.
-    final muted = ref.watch(notificationPrefsProvider);
+    // visibleNotificationsProvider udah nyaring kategori yang dimatikan
+    // lewat Settings (dulu halaman ini nyaring ulang manual di sini,
+    // duplikat dari provider yang sama persis, gampang out-of-sync kalau
+    // logic filternya berubah di satu tempat doang).
+    final visibleNotifs = ref.watch(visibleNotificationsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -62,22 +67,17 @@ class NotificationsPage extends ConsumerWidget {
           notifsAsync.when(
             loading: () => const AppLoading(),
             error: (error, stack) => AppErrorView(message: "Error: $error"),
-            data: (allNotifications) {
-              final notifications = muted.isEmpty
-                  ? allNotifications
-                  : allNotifications
-                      .where((n) => !muted.contains(n['type']))
-                      .toList();
-              if (notifications.isEmpty) {
+            data: (_) {
+              if (visibleNotifs.isEmpty) {
                 return _buildEmptyState(texts);
               }
 
               return ListView.builder(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.fromLTRB(24, 120, 24, 16),
-                itemCount: notifications.length,
+                itemCount: visibleNotifs.length,
                 itemBuilder: (context, index) {
-                  final notif = notifications[index];
+                  final notif = visibleNotifs[index];
                   final bool isRead = notif['is_read'] ?? false;
                   return GestureDetector(
                     onTap: isRead
@@ -110,7 +110,13 @@ class NotificationsPage extends ConsumerWidget {
           CustomBackButton(onPressed: () => context.pop()),
 
           // ==================== MENU: TANDAI SEMUA / HAPUS SEMUA ====================
-          if (notifsAsync.value?.isNotEmpty ?? false)
+          // Digerbang pakai visibleNotifs (list yang KELIATAN), bukan
+          // notifsAsync.value mentah — dulu kalau satu-satunya notifikasi
+          // yang ada kebetulan dari kategori yang dimatikan di Settings,
+          // list-nya keliatan kosong (empty state tampil) tapi menu "⋮"
+          // tetap muncul, nawarin aksi buat notifikasi yang nggak ada yang
+          // keliatan.
+          if (visibleNotifs.isNotEmpty)
             Positioned(
               top: 60,
               right: 24,
@@ -120,7 +126,12 @@ class NotificationsPage extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   onSelected: (value) async {
                     if (value == 'mark_all') {
-                      await ref.read(markAllNotificationsReadProvider)();
+                      final ok = await ref.read(markAllNotificationsReadProvider)();
+                      if (!ok && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(texts['err_mark_all_failed']!)),
+                        );
+                      }
                     } else if (value == 'clear_all') {
                       final confirmed = await showDialog<bool>(
                         context: context,
@@ -143,7 +154,12 @@ class NotificationsPage extends ConsumerWidget {
                         ),
                       );
                       if (confirmed ?? false) {
-                        await ref.read(clearAllNotificationsProvider)();
+                        final ok = await ref.read(clearAllNotificationsProvider)();
+                        if (!ok && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(texts['err_clear_all_failed']!)),
+                          );
+                        }
                       }
                     }
                   },

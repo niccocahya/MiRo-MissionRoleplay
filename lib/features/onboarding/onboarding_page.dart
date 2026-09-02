@@ -51,6 +51,7 @@ const Map<String, Map<String, String>> _t = {
     'err_invalid_email': "That doesn't look like a valid email address.",
     'err_auth_generic': "Something went wrong. Please check your connection and try again.",
     'err_must_agree_terms': "Please check the box to agree to the Terms & Privacy Policy first.",
+    'err_profile_setup_failed': "Your account was created but we couldn't finish setting it up. Please try logging in -- if that doesn't work, try registering again.",
   },
   'id': {
     'splash_desc': 'Petualangan seru\ntanpa layar gawai',
@@ -84,6 +85,7 @@ const Map<String, Map<String, String>> _t = {
     'err_invalid_email': "Format emailnya kayaknya belum bener.",
     'err_auth_generic': "Ada yang salah. Cek koneksi internetmu terus coba lagi ya.",
     'err_must_agree_terms': "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
+    'err_profile_setup_failed': "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya -- kalau masih gagal, coba daftar ulang lagi.",
   },
 };
 
@@ -256,13 +258,32 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       );
 
       if (res.user != null) {
-        await supabase.from('parents').insert({
-          'id': res.user!.id,
-          'email': _emailController.text.trim(),
-          'full_name': _nameController.text.trim(),
-          'language_code': ref.read(selectedLanguageProvider),
-        });
-        if (mounted) context.go('/identify');
+        // auth.signUp() sudah berhasil (user Supabase Auth udah kebuat)
+        // begitu sampai sini -- kalau insert ke tabel parents di bawah ini
+        // gagal (mis. koneksi putus di tengah jalan), dulu user itu jadi
+        // "orphan": punya akun auth tapi nggak ada baris parents, dan
+        // nyangkut nggak bisa daftar ulang (email udah "terdaftar") maupun
+        // login normal (nanti crash pas coba bikin anak karena parent_id-nya
+        // nggak ada). Nggak ada akses admin/service-role dari client buat
+        // beneran rollback si auth user, jadi mitigasinya: signOut supaya
+        // nggak nyangkut di sesi yang setengah jadi, dan pesan errornya
+        // dibikin jelas suruh coba login -- _handleLogin() di bawah upsert
+        // baris parents kalau belum ada, jadi self-heal pas mereka login.
+        try {
+          await supabase.from('parents').insert({
+            'id': res.user!.id,
+            'email': _emailController.text.trim(),
+            'full_name': _nameController.text.trim(),
+            'language_code': ref.read(selectedLanguageProvider),
+          });
+          if (mounted) context.go('/identify');
+        } catch (insertError) {
+          debugPrint("Gagal insert parents setelah signUp: $insertError");
+          await supabase.auth.signOut();
+          if (mounted) {
+            _showMsg(texts['err_profile_setup_failed']!);
+          }
+        }
       }
     } catch (e) {
       _showMsg(_friendlyAuthError(e, texts));
@@ -284,10 +305,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       );
 
       if (res.user != null) {
-        // UPDATE database pakai bahasa yang baru user pilih!
-        await supabase.from('parents').update({
+        // UPDATE database pakai bahasa yang baru user pilih! (upsert, bukan
+        // update biasa -- kalau baris parents-nya belum ada sama sekali,
+        // misalnya karena insert-nya gagal pas registrasi dulu, ini bikinin
+        // baris barunya sekarang juga daripada diem-diem gagal nge-update
+        // 0 baris. Lihat catatan self-heal di _handleRegister().)
+        await supabase.from('parents').upsert({
+          'id': res.user!.id,
+          'email': res.user!.email ?? _emailController.text.trim(),
           'language_code': ref.read(selectedLanguageProvider),
-        }).eq('id', res.user!.id);
+        });
 
         // Cek anak milik parent INI (dulu query ini nggak difilter
         // `parent_id` sama sekali — cek "ada anak di seluruh tabel" bukan

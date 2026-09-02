@@ -1,21 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final notificationsProvider = FutureProvider<List<Map<String, dynamic>>>((
+/// Dulu ini FutureProvider (nembak sekali doang pas provider pertama
+/// dibuat / manual di-invalidate). Notifikasi baru yang kebentuk lewat
+/// trigger DB (misi selesai, lencana baru, dst.) sementara halaman
+/// Notifikasi lagi kebuka nggak bakal keliatan sampai user keluar-masuk
+/// halaman lagi. Sekarang StreamProvider, sama kayak childDataProvider/
+/// childrenListProvider — otomatis dorong data baru tiap ada perubahan.
+final notificationsProvider = StreamProvider<List<Map<String, dynamic>>>((
   ref,
-) async {
-  final supabase = Supabase.instance.client;
-  final user = supabase.auth.currentUser;
+) {
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user == null) return Stream.value([]);
 
-  if (user == null) return [];
-
-  final response = await supabase
+  return Supabase.instance.client
       .from('notifications')
-      .select()
+      .stream(primaryKey: ['id'])
       .eq('parent_id', user.id)
       .order('created_at', ascending: false);
-
-  return List<Map<String, dynamic>>.from(response);
 });
 
 /// Tandai satu notifikasi sudah dibaca. Sebelumnya kolom `is_read` cuma
@@ -36,11 +38,14 @@ final markNotificationReadProvider = Provider(
   },
 );
 
-/// Tandai SEMUA notifikasi sudah dibaca sekaligus.
+/// Tandai SEMUA notifikasi sudah dibaca sekaligus. Balikin `true`/`false`
+/// (dulu nggak balikin apa-apa dan gagalnya ditelan diem-diem di sisi
+/// provider — caller nggak punya cara ngasih tau user kalau operasinya
+/// gagal, mis. lagi offline).
 final markAllNotificationsReadProvider = Provider(
   (ref) => () async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
+    if (user == null) return false;
     try {
       await Supabase.instance.client
           .from('notifications')
@@ -48,21 +53,28 @@ final markAllNotificationsReadProvider = Provider(
           .eq('parent_id', user.id)
           .eq('is_read', false);
       ref.invalidate(notificationsProvider);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   },
 );
 
-/// Hapus SEMUA notifikasi milik parent yang login.
+/// Hapus SEMUA notifikasi milik parent yang login. Balikin `true`/`false`
+/// (lihat catatan di markAllNotificationsReadProvider di atas).
 final clearAllNotificationsProvider = Provider(
   (ref) => () async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
+    if (user == null) return false;
     try {
       await Supabase.instance.client
           .from('notifications')
           .delete()
           .eq('parent_id', user.id);
       ref.invalidate(notificationsProvider);
-    } catch (_) {}
+      return true;
+    } catch (_) {
+      return false;
+    }
   },
 );
