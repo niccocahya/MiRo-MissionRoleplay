@@ -9,6 +9,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/utils/level_utils.dart';
 import '../../core/services/report_pdf_service.dart';
 import '../../core/providers/skill_trend_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -289,35 +290,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   bool _isExportingPdf = false;
   String? _selectedTrendSkill;
 
-  Map<String, int> _calculateLevelData(int totalXp) {
-    int level = 1;
-    int currentLevelXp = 0;
-    int nextLevelRequiredXp = 100;
-
-    if (totalXp < 100) {
-      level = 1;
-      currentLevelXp = totalXp;
-      nextLevelRequiredXp = 100;
-    } else if (totalXp < 250) {
-      level = 2;
-      currentLevelXp = totalXp - 100;
-      nextLevelRequiredXp = 150;
-    } else if (totalXp < 500) {
-      level = 3;
-      currentLevelXp = totalXp - 250;
-      nextLevelRequiredXp = 250;
-    } else {
-      level = 4;
-      currentLevelXp = totalXp - 500;
-      nextLevelRequiredXp = 500;
-    }
-
-    return {
-      'level': level,
-      'currentXp': currentLevelXp,
-      'maxXp': nextLevelRequiredXp,
-    };
-  }
+  // calculateLevelInfo() dipindah ke core/utils/level_utils.dart — dulu
+  // fungsi ini (byte demi byte identik) ditulis ulang terpisah di
+  // home_page.dart dan profile_page.dart.
 
   /// Ekspor laporan PDF — sebelumnya nggak ada cara buat orang tua nyimpen/
   /// nge-print/ngirim rangkuman progres anaknya ke luar app (misal buat
@@ -527,7 +502,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     lang,
                     historyAsync,
                     childName: childName,
-                    level: _calculateLevelData(totalXp)['level']!,
+                    level: calculateLevel(totalXp),
                     totalXp: totalXp,
                     currentStreak: currentStreak,
                     skillScores: {
@@ -584,10 +559,10 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     int totalXp,
     Map<String, String> texts,
   ) {
-    final levelData = _calculateLevelData(totalXp);
-    final int level = levelData['level']!;
-    final int currentXp = levelData['currentXp']!;
-    final int maxXp = levelData['maxXp']!;
+    final levelData = calculateLevelInfo(totalXp);
+    final int level = levelData.level;
+    final int currentXp = levelData.currentXp;
+    final int maxXp = levelData.maxXp;
 
     final double progress = (currentXp / maxXp).clamp(0.0, 1.0);
 

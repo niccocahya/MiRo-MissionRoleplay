@@ -1,5 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gal/gal.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/providers/child_provider.dart';
@@ -61,6 +69,9 @@ const Map<String, Map<String, String>> _t = {
     'download': "Download",
     'share': "Share",
     'locked_warning': "Complete all missions to unlock the certificate!",
+    'save_success': "Certificate saved to gallery! 🎉",
+    'save_fail': "Failed to save the certificate.",
+    'share_text': "Look at my child's certificate on MiRO! 🐧✨",
   },
   'id': {
     'title': "Sertifikat Anda",
@@ -71,13 +82,81 @@ const Map<String, Map<String, String>> _t = {
     'download': "Unduh",
     'share': "Bagikan",
     'locked_warning': "Selesaikan semua misi untuk membuka sertifikat!",
+    'save_success': "Sertifikat berhasil disimpan ke Galeri! 🎉",
+    'save_fail': "Gagal menyimpan sertifikat.",
+    'share_text': "Yuk lihat sertifikat anakku di MiRO! 🐧✨",
   },
 };
 
 class CertificateDetailPage extends ConsumerWidget {
   final Map<String, dynamic> certData;
 
-  const CertificateDetailPage({super.key, required this.certData});
+  // Bukan const lagi — butuh field GlobalKey buat nge-capture banner
+  // sertifikat pas Unduh/Bagikan dipencet (GlobalKey() bukan ekspresi
+  // const).
+  CertificateDetailPage({super.key, required this.certData});
+
+  final GlobalKey _certificateKey = GlobalKey();
+
+  Future<Uint8List?> _captureCertificate() async {
+    try {
+      final boundary = _certificateKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      debugPrint("Gagal mengambil gambar sertifikat: $e");
+      return null;
+    }
+  }
+
+  Future<void> _downloadCertificate(
+    BuildContext context,
+    Map<String, String> texts,
+  ) async {
+    final bytes = await _captureCertificate();
+    if (bytes == null) return;
+    if (!context.mounted) return;
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+        '${tempDir.path}/MiRO_Sertifikat_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await tempFile.writeAsBytes(bytes);
+
+      final hasAccess = await Gal.hasAccess();
+      if (!hasAccess) await Gal.requestAccess();
+      await Gal.putImage(tempFile.path);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(texts['save_success']!), backgroundColor: AppColors.success),
+      );
+    } catch (e) {
+      debugPrint("Gagal menyimpan sertifikat: $e");
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(texts['save_fail']!), backgroundColor: AppColors.danger),
+      );
+    }
+  }
+
+  Future<void> _shareCertificate(
+    BuildContext context,
+    Map<String, String> texts,
+  ) async {
+    final bytes = await _captureCertificate();
+    if (bytes == null) return;
+    final tempDir = await getTemporaryDirectory();
+    final file = File(
+      '${tempDir.path}/miro_certificate_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
+    await file.writeAsBytes(bytes);
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], text: texts['share_text']!),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -174,7 +253,13 @@ class CertificateDetailPage extends ConsumerWidget {
                   // ===============================================
                   // BANNER SERTIFIKAT UTAMA
                   // ===============================================
-                  Container(
+                  // Dibungkus RepaintBoundary biar bannernya bisa
+                  // di-screenshot buat tombol Unduh/Bagikan di bawah
+                  // (dulu 2 tombol itu keliatan aktif tapi onPressed-nya
+                  // kosongan, nggak ngapa-ngapain sama sekali).
+                  RepaintBoundary(
+                    key: _certificateKey,
+                    child: Container(
                     width: double.infinity,
                     height: 240,
                     decoration: BoxDecoration(
@@ -390,6 +475,7 @@ class CertificateDetailPage extends ConsumerWidget {
                         ),
                       ],
                     ),
+                    ),
                   ),
                   const SizedBox(height: 32),
 
@@ -403,6 +489,7 @@ class CertificateDetailPage extends ConsumerWidget {
                           texts['download']!,
                           AppColors.accent,
                           isComplete,
+                          isComplete ? () => _downloadCertificate(context, texts) : null,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -411,6 +498,7 @@ class CertificateDetailPage extends ConsumerWidget {
                           texts['share']!,
                           AppColors.primary,
                           isComplete,
+                          isComplete ? () => _shareCertificate(context, texts) : null,
                         ),
                       ),
                     ],
@@ -588,9 +676,14 @@ class CertificateDetailPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActionButton(String label, Color color, bool enabled) {
+  Widget _buildActionButton(
+    String label,
+    Color color,
+    bool enabled,
+    VoidCallback? onPressed,
+  ) {
     return ElevatedButton(
-      onPressed: enabled ? () {} : null,
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         disabledBackgroundColor: Colors.grey.shade300,

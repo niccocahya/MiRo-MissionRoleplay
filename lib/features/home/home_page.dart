@@ -11,6 +11,7 @@ import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/utils/date_utils.dart';
+import '../../core/utils/level_utils.dart';
 import '../profile/screens/all_certificates_page.dart';
 import '../../core/constants/role_visuals.dart';
 import '../missions/data/mission_provider.dart';
@@ -253,35 +254,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
-  Map<String, int> _calculateLevelData(int totalXp) {
-    int level = 1;
-    int currentLevelXp = 0;
-    int nextLevelRequiredXp = 100;
-
-    if (totalXp < 100) {
-      level = 1;
-      currentLevelXp = totalXp;
-      nextLevelRequiredXp = 100;
-    } else if (totalXp < 250) {
-      level = 2;
-      currentLevelXp = totalXp - 100;
-      nextLevelRequiredXp = 150;
-    } else if (totalXp < 500) {
-      level = 3;
-      currentLevelXp = totalXp - 250;
-      nextLevelRequiredXp = 250;
-    } else {
-      level = 4;
-      currentLevelXp = totalXp - 500;
-      nextLevelRequiredXp = 500;
-    }
-
-    return {
-      'level': level,
-      'currentXp': currentLevelXp,
-      'maxXp': nextLevelRequiredXp,
-    };
-  }
+  // calculateLevelInfo() dipindah ke core/utils/level_utils.dart — dulu
+  // fungsi ini (byte demi byte identik) ditulis ulang terpisah di
+  // progress_page.dart dan profile_page.dart.
 
   @override
   Widget build(BuildContext context) {
@@ -314,10 +289,10 @@ class _HomePageState extends ConsumerState<HomePage> {
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
         final int totalXp = realtimeXpAsync.value ?? data?['total_xp'] ?? 0;
 
-        final levelData = _calculateLevelData(totalXp);
-        final int childLevel = levelData['level']!;
-        final int childCurrentXp = levelData['currentXp']!;
-        final int childMaxXp = levelData['maxXp']!;
+        final levelData = calculateLevelInfo(totalXp);
+        final int childLevel = levelData.level;
+        final int childCurrentXp = levelData.currentXp;
+        final int childMaxXp = levelData.maxXp;
 
         final progressAsync = ref.watch(
           weeklyMissionCountStreamProvider(childId),

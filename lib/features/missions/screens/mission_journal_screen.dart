@@ -47,6 +47,8 @@ const Map<String, Map<String, String>> _t = {
     'save_fail': "Failed to save photo.",
     'preparing': "Preparing photo...",
     'share_text': "Look at my child's exciting mission on MiRO! 🐧✨",
+    'sync_failed': "Failed to save this mission's progress. Your XP/skills weren't recorded yet.",
+    'btn_retry': "Try Again",
   },
   'id': {
     'journal_view': "Jurnal Misi",
@@ -72,6 +74,8 @@ const Map<String, Map<String, String>> _t = {
     'save_fail': "Gagal menyimpan foto.",
     'preparing': "Menyiapkan foto...",
     'share_text': "Yuk lihat keseruan misi anakku di MiRO! 🐧✨",
+    'sync_failed': "Gagal nyimpen progres misi ini. XP/skill-nya belum kecatat.",
+    'btn_retry': "Coba Lagi",
   },
 };
 
@@ -97,6 +101,14 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   String? _generatedMissionLogId;
   Map<String, Map<String, dynamic>> _updatedSkillsData = {};
   Map<String, dynamic>? _earnedAchievement;
+
+  // Dulu kalau _syncToDatabase gagal (network putus dkk), errornya cuma
+  // di-print ke console — orang tua/anak tetap lihat tampilan "berhasil"
+  // padahal XP/progres-nya nggak beneran kesimpen, tanpa cara buat tau
+  // atau nyoba lagi. Sekarang statusnya dilacak biar ada banner + tombol
+  // "Coba Lagi" di layar.
+  bool _syncFailed = false;
+  String? _pendingAchievementId;
   
   // 🔥 KEY UNTUK MENG-CAPTURE KOLASE JADI GAMBAR
   final GlobalKey _collageKey = GlobalKey();
@@ -157,6 +169,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       debugPrint("❌ Gagal memuat data achievement master: $e");
     }
 
+    _pendingAchievementId = achIdToSync;
     if (!widget.isViewOnly) {
       await _syncToDatabase(achIdToSync);
     }
@@ -183,6 +196,27 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       final String childId = childDb['id'];
       final int currentTotalXp = childDb['total_xp'] ?? 0;
       final String nowLocal = DateTime.now().toIso8601String();
+
+      // Cegah XP/skill/level kecatat dobel kalau misi ini kebetulan udah
+      // pernah diselesaikan sebelumnya buat anak ini — bisa kejadian kalau
+      // orang tua/anak pencet tombol back dari layar Win/Journal terus
+      // mulai ulang misi yang sama (Intro screen nggak pernah kecopot
+      // dari stack navigasi begitu Play/Win/Journal ke-push, jadi masih
+      // bisa "Mulai misi" lagi dari sana).
+      final alreadyCompleted = await supabase
+          .from('mission_logs')
+          .select('id')
+          .eq('child_id', childId)
+          .eq('mission_id', widget.mission.id)
+          .eq('status', 'completed')
+          .limit(1);
+
+      if (alreadyCompleted.isNotEmpty) {
+        debugPrint("⚠️ Misi ini udah pernah selesai — skip biar nggak dobel XP.");
+        _generatedMissionLogId = alreadyCompleted.first['id'];
+        if (mounted) setState(() => _syncFailed = false);
+        return;
+      }
 
       // 1. Simpan Log Misi
       final logResponse = await supabase
@@ -285,8 +319,13 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           }
         }
       }
+      if (mounted) setState(() => _syncFailed = false);
     } catch (e) {
       debugPrint("❌ FATAL DB SYNC ERROR: $e");
+      // Dulu di sini berhenti, dan tampilan tetap keliatan "berhasil"
+      // walau XP/progres-nya nggak beneran kesimpen. Sekarang ditandain
+      // biar ada banner + tombol coba lagi di layar.
+      if (mounted) setState(() => _syncFailed = true);
     }
   }
 
@@ -411,6 +450,52 @@ Future<void> _downloadCollage() async {
                             ),
                           ),
                           const SizedBox(height: 16),
+
+                          if (_syncFailed && !widget.isViewOnly) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.dangerTint,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.error_outline_rounded, color: AppColors.danger, size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          texts['sync_failed']!,
+                                          style: TextStyle(
+                                            color: AppColors.danger,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton(
+                                      onPressed: () => _syncToDatabase(_pendingAchievementId),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: AppColors.danger,
+                                        side: BorderSide(color: AppColors.danger),
+                                      ),
+                                      child: Text(texts['btn_retry']!),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
 
                           if (!hasPhotos) ...[
                             Text(

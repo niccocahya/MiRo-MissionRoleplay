@@ -145,6 +145,36 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(showChatbotGlobalProvider.notifier).hide();
     });
+    _restoreSessionIfAny();
+  }
+
+  /// Sebelumnya app SELALU mulai dari splash/login, walau ada session
+  /// Supabase yang masih valid (Supabase persist session-nya otomatis di
+  /// device, tapi di sini nggak pernah dicek) — jadi orang tua yang udah
+  /// login harus login ulang manual tiap kali app dibuka lagi. Sekarang
+  /// dicek dulu pas halaman ini pertama kali muncul.
+  Future<void> _restoreSessionIfAny() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session == null) return;
+
+    setState(() => _isLoading = true);
+    try {
+      final children = await Supabase.instance.client
+          .from('children')
+          .select('id')
+          .eq('parent_id', session.user.id)
+          .limit(1);
+      if (!mounted) return;
+      if (children.isNotEmpty) {
+        context.go('/home');
+      } else {
+        context.go('/identify');
+      }
+    } catch (e) {
+      // Gagal cek (mis. lagi offline) — bukan fatal, biarin aja lanjut ke
+      // alur onboarding/login normal daripada nyangkut di loading terus.
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

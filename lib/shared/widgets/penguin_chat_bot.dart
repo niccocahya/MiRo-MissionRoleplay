@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ⚠️ PASTIKAN IMPORT PROVIDER ANAK INI BENAR SESUAI FOLDERMU
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/child_stats_provider.dart';
+import '../../core/utils/level_utils.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/responsive.dart';
@@ -239,8 +241,10 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
 
     final String timeGreeting = _timeGreeting();
 
-    final int level = childFullData['current_level'] ?? 1;
     final int xp = childFullData['total_xp'] ?? 0;
+    // Bukan `childFullData['current_level']` — kolom itu di DB nggak
+    // pernah ditulis balik, selalu nyangkut di angka default (biasanya 1).
+    final int level = calculateLevel(xp);
     final double cog = (childFullData['cognitive_score'] ?? 0).toDouble();
     final double emp = (childFullData['empathy_score'] ?? 0).toDouble();
     final double cre = (childFullData['creativity_score'] ?? 0).toDouble();
@@ -414,6 +418,14 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     final childData = ref.watch(childDataProvider).value ?? {};
     final String childName = childData['name'] ?? 'Anak Hebat';
 
+    // Skor 5 skill (buat konteks yang dikasih ke Mink) ada di tabel
+    // `child_stats`, BUKAN di `children` — `childData` doang nggak
+    // punya field cognitive_score/dst, jadi sebelumnya field itu SELALU
+    // kebaca 0 di system prompt Mink walau anaknya punya skor beneran.
+    final childStats =
+        ref.watch(childStatsProvider(childData['id'] ?? '')).value ?? {};
+    final childFullDataForChat = <String, dynamic>{...childData, ...childStats};
+
     // MEMBACA KONTEKS DINAMIS DARI PROVIDER
     final globalMissionContext = ref.watch(currentMissionContextProvider);
     final activeContext = widget.missionContext ?? globalMissionContext;
@@ -442,7 +454,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       child: _buildChatWindow(
                         chatState,
                         childName,
-                        childData,
+                        childFullDataForChat,
                         activeContext,
                       ),
                     ),

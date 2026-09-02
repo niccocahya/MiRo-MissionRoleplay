@@ -17,6 +17,8 @@ import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/providers/theme_mode_provider.dart';
+import '../../core/providers/streak_provider.dart';
+import '../../core/utils/level_utils.dart';
 import '../../core/services/account_deletion_service.dart';
 import '../../core/services/data_export_service.dart';
 import '../../core/services/storage_upload_service.dart';
@@ -515,12 +517,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   _buildMiniStatBox(
                     "⭐",
                     texts['level']!,
-                    "${childData['current_level'] ?? 1}",
+                    // Bukan `childData['current_level']` — kolom itu di DB
+                    // nggak pernah ditulis balik, selalu nyangkut di angka
+                    // default. Level SELALU dihitung dari XP, biar sama
+                    // kaya yang ditampilin Home & Progress.
+                    "${calculateLevel(childData['total_xp'] ?? 0)}",
                   ),
-                  _buildMiniStatBox(
-                    "🔥",
-                    "Streak",
-                    "${childData['current_streak'] ?? 0}",
+                  Consumer(
+                    builder: (context, ref, _) {
+                      // Sama alasannya kaya level — `current_streak` juga
+                      // kolom mati, streak beneran dihitung live dari
+                      // riwayat misi (lihat streakProvider).
+                      final streakAsync = ref.watch(streakProvider(childId));
+                      return _buildMiniStatBox(
+                        "🔥",
+                        "Streak",
+                        "${streakAsync.value ?? 0}",
+                      );
+                    },
                   ),
                   _buildMiniStatBox("✨", "XP", "${childData['total_xp'] ?? 0}"),
                 ],
@@ -1220,12 +1234,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  int _calculateLevel(int totalXp) {
-    if (totalXp < 100) return 1;
-    if (totalXp < 250) return 2;
-    if (totalXp < 500) return 3;
-    return 4;
-  }
+  // calculateLevel()/calculateLevelInfo() dipindah ke
+  // core/utils/level_utils.dart — dulu logika ini ditulis ulang terpisah
+  // di home_page.dart dan progress_page.dart juga.
 
   @override
   Widget build(BuildContext context) {
@@ -1238,7 +1249,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final String childId = childData['id'] ?? '';
     final String childName = childData['name'] ?? texts['default_child']!;
     final int totalXp = childData['total_xp'] ?? 0;
-    final int childLevel = _calculateLevel(totalXp);
+    final int childLevel = calculateLevel(totalXp);
 
     final currentUser = Supabase.instance.client.auth.currentUser;
     final String parentName =
@@ -1594,7 +1605,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }) {
     final String name = child['name'] ?? texts['default_child']!;
     final String? avatarUrl = child['avatar_url'] as String?;
-    final int level = _calculateLevel(child['total_xp'] ?? 0);
+    final int level = calculateLevel(child['total_xp'] ?? 0);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),

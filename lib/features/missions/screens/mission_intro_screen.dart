@@ -181,7 +181,18 @@ class MissionIntroScreen extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // KUNCI HILANGKAN NAVBAR DI HALAMAN SELANJUTNYA
-                        Navigator.of(context, rootNavigator: true).push(
+                        //
+                        // pushReplacement, BUKAN push — dulu ini push biasa,
+                        // jadi layar Intro ini tetap hidup di belakang Play/
+                        // Win/Journal (yang semuanya pakai pushReplacement
+                        // ke satu sama lain). Efeknya: mencet tombol back
+                        // dari Win/Journal bisa nyasar balik ke Intro yang
+                        // masih hidup, dan "Mulai misi" bisa dipencet lagi
+                        // buat misi yang sama. (Pengulangan tetap dicegah
+                        // di level data lewat pengecekan mission_logs yang
+                        // udah `completed` — ini cuma benerin alur baliknya
+                        // biar nggak nyasar/aneh.)
+                        Navigator.of(context, rootNavigator: true).pushReplacement(
                           appPageRoute(MissionPlayScreen(mission: mission)),
                         );
                       },
