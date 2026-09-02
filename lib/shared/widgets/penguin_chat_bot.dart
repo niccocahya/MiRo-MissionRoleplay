@@ -230,6 +230,11 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     required Map<String, dynamic> childFullData,
     required List<Map<String, dynamic>> recentAchievements,
   }) async {
+    // Dulu nggak ada penjaga apa pun di sini -- ngetuk kirim 2x cepat
+    // (atau nekan Enter sambil nge-tap tombol) nembak 2 panggilan Groq
+    // yang overlap, balesannya bisa numpuk/keluar nggak sesuai urutan.
+    if (state.isLoading) return;
+
     state = state.copyWith(
       messages: [
         ...state.messages,
@@ -355,6 +360,13 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     String? activeContext,
   ) async {
     if (_chatController.text.trim().isEmpty) return;
+    // Dulu nggak ada penjaga ini -- kirim pesan baru sementara Mink masih
+    // mikirin balasan sebelumnya (mis. ngetik cepet terus nekan kirim 2x)
+    // nembak 2 request Groq yang overlap. Beda dari penjaga di
+    // sendMessage(): ini dicek SEBELUM textnya kehapus, jadi pesan yang
+    // lagi diketik nggak ilang -- tetap ada di kolom teks, tinggal kirim
+    // lagi begitu balasan sebelumnya kelar.
+    if (ref.read(chatbotProvider).isLoading) return;
     final text = _chatController.text;
     _chatController.clear();
 
@@ -368,6 +380,10 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
             .from('child_achievements')
             .select('achievements_master(title_id, role_id)')
             .eq('child_id', childId)
+            // Dulu nggak ada .order() sama sekali -- "3 lencana terbaru"
+            // sebenernya cuma 3 baris dalam urutan apa pun yang Postgres
+            // kebetulan balikin, bukan beneran yang paling baru dibuka.
+            .order('unlocked_at', ascending: false)
             .limit(3);
 
         for (var item in achRes) {
@@ -727,11 +743,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                 filled: true,
                 fillColor: AppColors.background,
                 suffixIcon: GestureDetector(
-                  onTap: () => _handleSend(childData, activeContext),
+                  onTap: chatState.isLoading
+                      ? null
+                      : () => _handleSend(childData, activeContext),
                   child: Container(
                     margin: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: chatState.isLoading
+                          ? AppColors.primary.withValues(alpha: 0.4)
+                          : AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(

@@ -42,10 +42,18 @@ final skillTrendProvider =
     final date = parseDateSafely(row['completed_at']?.toString() ?? '');
     if (date == null) continue;
 
+    // Loop atas KEY YANG BENERAN ADA di earned_skills, bukan cuma 5 nama
+    // yang di-hardcode di atas -- sebelumnya kalau satu baris punya key
+    // yang nggak persis cocok sama daftar itu (typo, skill baru yang belum
+    // ditambahin ke daftar, dsb.) poinnya ke-skip diem-diem tanpa
+    // ketauan, bikin tren keliatan lebih rendah dari yang seharusnya.
     final skills = (row['earned_skills'] as Map?) ?? {};
-    for (final key in running.keys) {
-      final gained = skills[key];
-      if (gained is num) running[key] = running[key]! + gained.toDouble();
+    for (final entry in skills.entries) {
+      final gained = entry.value;
+      if (gained is num) {
+        final key = entry.key.toString();
+        running[key] = (running[key] ?? 0) + gained.toDouble();
+      }
     }
     points.add(SkillTrendPoint(date: date, cumulative: Map.of(running)));
   }

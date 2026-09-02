@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -163,7 +164,17 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
   @override
   void initState() {
     super.initState();
-    final int stepCount = widget.mission.stepsId.length;
+    // Ambil yang PALING PANJANG dari dua array, bukan cuma stepsId --
+    // dulu ini selalu pakai stepsId.length, jadi kalau suatu misi ternyata
+    // stepsEn-nya lebih panjang dari stepsId-nya (kesalahan input konten,
+    // dua array ini dikelola manual & terpisah), user yang app-nya bahasa
+    // Inggris bakal index-out-of-range pas nyentuh step terakhir karena
+    // _currentSubSteps/_pageControllers kealokasi lebih pendek dari steps
+    // yang beneran ditampilin.
+    final int stepCount = math.max(
+      widget.mission.stepsId.length,
+      widget.mission.stepsEn.length,
+    );
     _currentSubSteps = List.filled(stepCount, 0);
     _pageControllers = List.generate(stepCount, (_) => PageController());
     flutterTts = FlutterTts();

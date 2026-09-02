@@ -38,7 +38,43 @@ class DataExportService {
     final childStats = await forChildren('child_stats');
     final missionLogs = await forChildren('mission_logs');
     final achievements = await forChildren('child_achievements');
-    final certifications = await forChildren('child_certifications');
+
+    // Sertifikat BUKAN baris tersendiri per anak di database -- nggak ada
+    // apa pun di app ini yang pernah nulis ke `child_certifications` (tabel
+    // itu selalu kosong). "Sertifikat terbuka" itu dihitung, sama kayak di
+    // UI (lihat certificateProgressProvider): semua achievement_id yang
+    // disyaratkan sebuah sertifikat udah ada di child_achievements anak
+    // itu. Dulu field ini query langsung ke child_certifications, jadi
+    // laporan ekspor selalu bilang anaknya nol sertifikat walau di app-nya
+    // udah dapet beberapa.
+    final certificationsMaster = await supabase
+        .from('certifications_master')
+        .select();
+    final Map<String, Set<String>> earnedByChild = {};
+    for (final a in achievements) {
+      final cid = a['child_id'] as String?;
+      final aid = a['achievement_id'] as String?;
+      if (cid == null || aid == null) continue;
+      earnedByChild.putIfAbsent(cid, () => {}).add(aid);
+    }
+    final certifications = <Map<String, dynamic>>[];
+    for (final childId in childIds) {
+      final earned = earnedByChild[childId] ?? {};
+      for (final cert in certificationsMaster) {
+        final required = List<String>.from(
+          cert['required_achievement_ids'] ?? [],
+        );
+        if (required.isNotEmpty && required.every(earned.contains)) {
+          certifications.add({
+            'child_id': childId,
+            'certification_id': cert['id'],
+            'title_en': cert['title_en'],
+            'title_id': cert['title_id'],
+          });
+        }
+      }
+    }
+
     final aiChats = await supabase.from('ai_chats').select().eq('parent_id', userId);
     final notifications = await supabase.from('notifications').select().eq('parent_id', userId);
     final feedback = await supabase.from('feedback').select().eq('parent_id', userId);
@@ -64,6 +100,12 @@ class DataExportService {
     final jsonStr = const JsonEncoder.withIndent('  ').convert(data);
 
     final dir = await getTemporaryDirectory();
+
+    // Bersihin sisa file ekspor dari percobaan sebelumnya -- dulu file JSON
+    // berisi seluruh data pribadi anak ini numpuk di penyimpanan device
+    // selama-lamanya, nggak pernah dihapus abis dibagi/disimpan.
+    await _cleanupOldExports(dir);
+
     final file = File(
       '${dir.path}/miro_data_export_${DateTime.now().millisecondsSinceEpoch}.json',
     );
@@ -72,5 +114,29 @@ class DataExportService {
     await SharePlus.instance.share(
       ShareParams(files: [XFile(file.path)], text: 'Ekspor data MiRO kamu'),
     );
+
+    // Kasih jeda dulu sebelum hapus file ini sendiri -- di banyak platform
+    // share() return begitu dialog OS-nya kebuka, bukan begitu app tujuan
+    // (mis. email, penyimpanan cloud) beneran selesai baca filenya.
+    Future.delayed(const Duration(seconds: 30), () {
+      try {
+        if (file.existsSync()) file.deleteSync();
+      } catch (_) {
+        // Nggak fatal -- kalau gagal hapus sekarang, kepakai _cleanupOldExports
+        // di kesempatan ekspor berikutnya.
+      }
+    });
+  }
+
+  static Future<void> _cleanupOldExports(Directory dir) async {
+    try {
+      await for (final entity in dir.list()) {
+        if (entity is File && entity.path.contains('miro_data_export_')) {
+          await entity.delete();
+        }
+      }
+    } catch (_) {
+      // Nggak fatal -- kalau gagal bersihin, file lama paling numpuk lagi.
+    }
   }
 }
