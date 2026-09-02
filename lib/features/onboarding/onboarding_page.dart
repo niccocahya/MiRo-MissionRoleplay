@@ -44,6 +44,13 @@ const Map<String, Map<String, String>> _t = {
     'name_hint': '(type your full name)',
     'divider_signup': 'or Sign up with',
     'divider_login': 'or Login with',
+    'err_password_mismatch': "Passwords do not match!",
+    'err_email_taken': "This email is already registered. Try logging in instead.",
+    'err_invalid_credentials': "Incorrect email or password.",
+    'err_password_too_short': "Password must be at least 6 characters.",
+    'err_invalid_email': "That doesn't look like a valid email address.",
+    'err_auth_generic': "Something went wrong. Please check your connection and try again.",
+    'err_must_agree_terms': "Please check the box to agree to the Terms & Privacy Policy first.",
   },
   'id': {
     'splash_desc': 'Petualangan seru\ntanpa layar gawai',
@@ -70,6 +77,13 @@ const Map<String, Map<String, String>> _t = {
     'name_hint': '(ketik nama lengkapmu)',
     'divider_signup': 'atau daftar dengan',
     'divider_login': 'atau masuk dengan',
+    'err_password_mismatch': "Password tidak cocok!",
+    'err_email_taken': "Email ini udah kedaftar. Coba login aja langsung.",
+    'err_invalid_credentials': "Email atau password salah.",
+    'err_password_too_short': "Password minimal 6 karakter.",
+    'err_invalid_email': "Format emailnya kayaknya belum bener.",
+    'err_auth_generic': "Ada yang salah. Cek koneksi internetmu terus coba lagi ya.",
+    'err_must_agree_terms': "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
   },
 };
 
@@ -139,6 +153,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final _confirmController = TextEditingController();
   bool _isLoading = false;
 
+  // Dulu link ToS/Privacy di layar daftar cuma teks pasif — tombol
+  // Daftar tetap aktif & langsung submit walau nggak pernah dicentang/
+  // dibaca. Sekarang dijadiin gate beneran sebelum submit.
+  bool _agreedToTerms = false;
+
   @override
   void initState() {
     super.initState();
@@ -189,9 +208,43 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   // ==========================================
   // 3. AUTH LOGIC (RLS & DATABASE SYNC)
   // ==========================================
+  /// Dulu error registrasi/login ditampilin mentah dari
+  /// `AuthException`/exception lain (`e.toString()`), selalu bahasa
+  /// Inggris walau app-nya lagi di mode Indonesia, dan kadang bunyinya
+  /// teknis banget (mis. "AuthApiException: User already registered").
+  /// Sekarang dipetakan ke pesan yang jelas & ngikutin bahasa aktif —
+  /// error asli-nya tetap di-log ke console buat debugging.
+  String _friendlyAuthError(Object e, Map<String, String> texts) {
+    final String raw = e is AuthException ? e.message : e.toString();
+    final String lower = raw.toLowerCase();
+    debugPrint("Auth error: $raw");
+
+    if (lower.contains('already registered') || lower.contains('already exists')) {
+      return texts['err_email_taken']!;
+    }
+    if (lower.contains('invalid login credentials')) {
+      return texts['err_invalid_credentials']!;
+    }
+    if (lower.contains('password') && lower.contains('6 characters')) {
+      return texts['err_password_too_short']!;
+    }
+    if (lower.contains('email') &&
+        (lower.contains('invalid') || lower.contains('valid'))) {
+      return texts['err_invalid_email']!;
+    }
+    return texts['err_auth_generic']!;
+  }
+
   Future<void> _handleRegister() async {
+    final lang = ref.read(selectedLanguageProvider);
+    final texts = _t[lang] ?? _t['en']!;
+
     if (_passwordController.text != _confirmController.text) {
-      _showMsg("Passwords do not match!");
+      _showMsg(texts['err_password_mismatch']!);
+      return;
+    }
+    if (!_agreedToTerms) {
+      _showMsg(texts['err_must_agree_terms']!);
       return;
     }
     setState(() => _isLoading = true);
@@ -212,13 +265,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         if (mounted) context.go('/identify');
       }
     } catch (e) {
-      _showMsg(e.toString());
+      _showMsg(_friendlyAuthError(e, texts));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _handleLogin() async {
+    final lang = ref.read(selectedLanguageProvider);
+    final texts = _t[lang] ?? _t['en']!;
+
     setState(() => _isLoading = true);
     try {
       final supabase = Supabase.instance.client;
@@ -249,7 +305,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         }
       }
     } catch (e) {
-      _showMsg("Invalid login credentials");
+      _showMsg(_friendlyAuthError(e, texts));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -781,7 +837,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   controller: _confirmController,
                 ),
                 const SizedBox(height: 16),
-                _buildLegalAgreementText(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _agreedToTerms,
+                      activeColor: AppColors.accent,
+                      onChanged: (val) => setState(() => _agreedToTerms = val ?? false),
+                    ),
+                    Expanded(child: _buildLegalAgreementText()),
+                  ],
+                ),
               ],
             ),
           ),

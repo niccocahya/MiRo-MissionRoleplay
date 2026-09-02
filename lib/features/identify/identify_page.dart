@@ -41,6 +41,7 @@ const Map<String, Map<String, String>> _t = {
     'err_step2': "Please select at least 1 activity",
     'err_step3': "Please select a learning style",
     'err_step4': "Please select at least 1 skill",
+    'err_max_reached': "You can only pick up to 3. Unpick one first.",
     'err_image': "Failed to capture image: ",
     'err_submit': "Error: ",
     // STEP 2
@@ -83,6 +84,7 @@ const Map<String, Map<String, String>> _t = {
     'err_step2': "Pilih setidaknya 1 kegiatan",
     'err_step3': "Pilih gaya belajar anak",
     'err_step4': "Pilih setidaknya 1 keahlian",
+    'err_max_reached': "Maksimal cuma boleh pilih 3. Batalin salah satu dulu.",
     'err_image': "Gagal mengambil gambar: ",
     'err_submit': "Terjadi kesalahan: ",
     // STEP 2
@@ -157,18 +159,26 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     final user = supabase.auth.currentUser;
     if (user == null) return;
 
-    // List + limit(1), BUKAN `.maybeSingle()` — `.maybeSingle()` error
-    // kalau baris yang cocok lebih dari 1, dan itu bakal kejadian begitu
-    // parent ini punya lebih dari 1 anak.
-    final data = await supabase
-        .from('children')
-        .select()
-        .eq('parent_id', user.id)
-        .order('created_at', ascending: false)
-        .limit(1);
-    if (data.isNotEmpty && mounted) {
-      ref.read(selectedChildIdProvider.notifier).setId(data.first['id']);
-      context.go('/home');
+    try {
+      // List + limit(1), BUKAN `.maybeSingle()` — `.maybeSingle()` error
+      // kalau baris yang cocok lebih dari 1, dan itu bakal kejadian begitu
+      // parent ini punya lebih dari 1 anak.
+      final data = await supabase
+          .from('children')
+          .select()
+          .eq('parent_id', user.id)
+          .order('created_at', ascending: false)
+          .limit(1);
+      if (data.isNotEmpty && mounted) {
+        ref.read(selectedChildIdProvider.notifier).setId(data.first['id']);
+        context.go('/home');
+      }
+    } catch (e) {
+      // Beda sama _pickImage/_handleSubmit di file ini yang udah dijaga
+      // try/catch, cek ini sebelumnya nggak — kalau lagi offline pas app
+      // baru dibuka, biarin aja lanjut ke alur identify normal daripada
+      // nge-throw Future error yang nggak ketangkep.
+      debugPrint("Gagal cek anak yang udah ada: $e");
     }
   }
 
@@ -193,12 +203,23 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     List<String> currentList,
     Function(List<String>) updateList, {
     int max = 3,
+    Map<String, String>? texts,
   }) {
     List<String> newList = List.from(currentList);
     if (newList.contains(item)) {
       newList.remove(item);
+    } else if (newList.length < max) {
+      newList.add(item);
     } else {
-      if (newList.length < max) newList.add(item);
+      // Dulu di sini nggak ngapa-ngapain sama sekali kalau udah kena
+      // batas maksimal — kesannya kartu itemnya rusak/nggak responsif,
+      // padahal emang sengaja dibatasi.
+      if (texts != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(texts['err_max_reached'] ?? 'Max $max')),
+        );
+      }
+      return;
     }
     updateList(newList);
   }
@@ -790,7 +811,13 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                     ? const Color(0xFFFFE8B6)
                     : const Color(0xFFF0F4F8),
                 onTap: () => setState(
-                  () => toggleSelection(dbId, current, onUpdate, max: max),
+                  () => toggleSelection(
+                    dbId,
+                    current,
+                    onUpdate,
+                    max: max,
+                    texts: texts,
+                  ),
                 ),
               ),
             );

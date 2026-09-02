@@ -150,6 +150,8 @@ const Map<String, Map<String, String>> _t = {
     'menu_settings': "Settings",
     'menu_help': "Help Center",
     'logout': "Log Out",
+    'confirm_logout_title': "Log out?",
+    'confirm_logout_desc': "You'll need to log in again to access this account.",
     'edit_profile_title': "Edit Profile",
     'parent_name_label': "Parent's Name",
     'child_name_label': "Child's Name",
@@ -233,6 +235,8 @@ const Map<String, Map<String, String>> _t = {
     'menu_settings': "Pengaturan",
     'menu_help': "Pusat Bantuan",
     'logout': "Keluar",
+    'confirm_logout_title': "Keluar dari akun?",
+    'confirm_logout_desc': "Kamu perlu login lagi buat masuk ke akun ini.",
     'edit_profile_title': "Edit Profil",
     'parent_name_label': "Nama Ibu/Bapak",
     'child_name_label': "Nama Anak",
@@ -307,6 +311,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context,
       rootNavigator: true,
     ).push(appPageRoute(screen));
+  }
+
+  /// Dulu tombol Log Out langsung nge-logout tanpa konfirmasi sama
+  /// sekali — nggak konsisten sama Hapus Akun yang justru minta ketik
+  /// "HAPUS" dulu. Logout emang nggak sedestruktif itu (tinggal login
+  /// lagi), tapi tetep sayang kalau ke-pencet nggak sengaja.
+  Future<void> _confirmLogout(Map<String, String> texts) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(texts['confirm_logout_title']!),
+        content: Text(texts['confirm_logout_desc']!),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(texts['cancel'] ?? 'Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              texts['logout']!,
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) {
+      await _handleLogout(texts);
+    }
   }
 
   Future<void> _handleLogout(Map<String, String> texts) async {
@@ -2187,7 +2221,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
       child: ElevatedButton(
-        onPressed: () => _handleLogout(texts),
+        onPressed: () => _confirmLogout(texts),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
