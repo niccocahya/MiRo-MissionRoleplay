@@ -99,3 +99,52 @@ final allCertificatesProvider = FutureProvider<List<Map<String, dynamic>>>((
     return [];
   }
 });
+
+/// Jumlah lencana yang sudah terbuka per role, buat progres sertifikat
+/// ("3/5 lencana"). Sama seperti allCertificatesProvider di atas, dulu ada
+/// DUA deklarasi top-level bernama sama persis di file terpisah
+/// (profile_page.dart pakai StreamProvider realtime, all_certificates_page
+/// .dart pakai FutureProvider fetch-sekali) -- masing-masing "menang" cuma
+/// di file-nya sendiri. Akibatnya progres di halaman Profil update
+/// realtime pas lencana baru kebuka, tapi halaman "Semua Sertifikat" tetap
+/// nunjukin angka lama sampai di-buka ulang. Sekarang satu StreamProvider
+/// di sini dipakai keduanya.
+final certificateProgressProvider =
+    StreamProvider.family<Map<String, int>, String>((ref, childId) {
+      if (childId.isEmpty) return Stream.value({});
+
+      final supabase = Supabase.instance.client;
+      return supabase
+          .from('child_achievements')
+          .stream(primaryKey: ['child_id', 'achievement_id'])
+          .eq('child_id', childId)
+          .asyncMap((achievements) async {
+            if (achievements.isEmpty) return <String, int>{};
+
+            try {
+              final achievementIds = achievements
+                  .map((a) => a['achievement_id'])
+                  .toSet()
+                  .toList();
+              final masterRes = await supabase
+                  .from('achievements_master')
+                  .select('id, role_id')
+                  .inFilter('id', achievementIds);
+
+              final masterMap = {
+                for (var item in masterRes) item['id']: item['role_id'],
+              };
+
+              Map<String, int> roleCounts = {};
+              for (var item in achievements) {
+                final roleId =
+                    masterMap[item['achievement_id']]?.toString() ?? 'unknown';
+                roleCounts[roleId] = (roleCounts[roleId] ?? 0) + 1;
+              }
+              return roleCounts;
+            } catch (e) {
+              debugPrint("Gagal memuat progres sertifikat stream: $e");
+              return <String, int>{};
+            }
+          });
+    });

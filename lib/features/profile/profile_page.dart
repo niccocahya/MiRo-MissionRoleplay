@@ -72,55 +72,11 @@ final unlockedAchievementsCountProvider = StreamProvider.family<int, String>((
       .map((event) => event.length);
 });
 
-// allCertificatesProvider sekarang di ./data/certificate_provider.dart
-// (dulu di sini juga ada 1 salinan lagi di all_certificates_page.dart —
-// dua provider dengan nama identik, isi identik, di file berbeda).
-
-// ==========================================
-// PROVIDER REAL-TIME: MENGHITUNG LENCANA YANG SUDAH DIBUKA PER ROLE
-// ==========================================
-final certificateProgressProvider =
-    StreamProvider.family<Map<String, int>, String>((ref, childId) {
-      if (childId.isEmpty) return Stream.value({});
-
-      final supabase = Supabase.instance.client;
-      return supabase
-          .from('child_achievements')
-          .stream(
-            primaryKey: ['child_id', 'achievement_id'],
-          ) // Stream data achievement
-          .eq('child_id', childId)
-          .asyncMap((achievements) async {
-            if (achievements.isEmpty) return <String, int>{};
-
-            try {
-              // Trik Join Manual untuk Stream: Ambil semua ID role dari master
-              final achievementIds = achievements
-                  .map((a) => a['achievement_id'])
-                  .toSet()
-                  .toList();
-              final masterRes = await supabase
-                  .from('achievements_master')
-                  .select('id, role_id')
-                  .inFilter('id', achievementIds);
-
-              final masterMap = {
-                for (var item in masterRes) item['id']: item['role_id'],
-              };
-
-              Map<String, int> roleCounts = {};
-              for (var item in achievements) {
-                final roleId =
-                    masterMap[item['achievement_id']]?.toString() ?? 'unknown';
-                roleCounts[roleId] = (roleCounts[roleId] ?? 0) + 1;
-              }
-              return roleCounts;
-            } catch (e) {
-              debugPrint("Gagal memuat progres sertifikat stream: $e");
-              return <String, int>{};
-            }
-          });
-    });
+// allCertificatesProvider & certificateProgressProvider sekarang di
+// ./data/certificate_provider.dart (dulu di sini juga ada 1 salinan lagi
+// dari keduanya di all_certificates_page.dart — provider dengan nama
+// identik di file berbeda, "Semua Sertifikat" pakai versi FutureProvider
+// fetch-sekali jadi progresnya nggak update realtime kayak di sini).
 
 // ==========================================
 // DICTIONARY (KAMUS BAHASA PROFIL)

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 // PASTIKAN IMPORT INI SESUAI
 import 'certificate_detail_page.dart';
@@ -13,37 +12,12 @@ import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/back_button.dart'; // Wajib panggil tombol kembali estetik
 
-// allCertificatesProvider sekarang di ../data/certificate_provider.dart
-// (dulu ada salinan identik di sini DAN di profile_page.dart).
-
-// ==========================================
-// PROVIDER: MENGHITUNG LENCANA YANG SUDAH DIBUKA PER ROLE
-// ==========================================
-final certificateProgressProvider =
-    FutureProvider.family<Map<String, int>, String>((ref, childId) async {
-      if (childId.isEmpty) return {};
-
-      try {
-        final supabase = Supabase.instance.client;
-        // Mengambil riwayat pencapaian sekaligus join dengan master untuk tahu role_id nya
-        final response = await supabase
-            .from('child_achievements')
-            .select('achievements_master!inner(role_id)')
-            .eq('child_id', childId);
-
-        // Mengelompokkan jumlah lencana yang terbuka berdasarkan role_id
-        Map<String, int> roleCounts = {};
-        for (var item in response) {
-          final roleId =
-              item['achievements_master']['role_id']?.toString() ?? 'unknown';
-          roleCounts[roleId] = (roleCounts[roleId] ?? 0) + 1;
-        }
-        return roleCounts;
-      } catch (e) {
-        debugPrint("Gagal memuat progres sertifikat: $e");
-        return {};
-      }
-    });
+// allCertificatesProvider & certificateProgressProvider sekarang di
+// ../data/certificate_provider.dart (dulu ada salinan identik dari
+// keduanya di sini DAN di profile_page.dart — versi certificateProgress
+// di sini pakai FutureProvider fetch-sekali, beda dari versi StreamProvider
+// realtime di profile_page.dart, jadi progres di halaman ini nggak update
+// otomatis pas ada lencana baru terbuka sampai halaman dibuka ulang).
 
 // ==========================================
 // DICTIONARY (KAMUS BAHASA)
