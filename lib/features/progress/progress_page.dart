@@ -24,6 +24,7 @@ import '../../shared/widgets/app_state_views.dart';
 // IMPORT BARU UNTUK MEMBUKA JURNAL
 import '../missions/data/mission_model.dart';
 import '../missions/screens/mission_journal_screen.dart';
+import 'screens/streak_calendar_page.dart';
 
 // parseDateSafely & streakProvider dipindah ke core/utils/date_utils.dart
 // dan core/providers/streak_provider.dart (dulu duplikat persis di sini
@@ -482,7 +483,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(texts, childName),
-                  _buildStreakAndLevelSection(currentStreak, totalXp, texts),
+                  _buildStreakAndLevelSection(currentStreak, totalXp, texts, childId),
                   _buildRadarChart(texts, radarData, rawScores, maxIndex),
                   _buildSkillTrendSection(texts, trendAsync, maxIndex),
 
@@ -558,6 +559,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     int streak,
     int totalXp,
     Map<String, String> texts,
+    String childId,
   ) {
     final levelData = calculateLevelInfo(totalXp);
     final int level = levelData.level;
@@ -573,45 +575,53 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFFF4E5), Color(0xFFFFE8CC)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.gold.withValues(alpha: 0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+              // Dulu kartu ini statis (angka streak polos, nggak bisa
+              // di-tap). Sekarang buka kalender streak -- pola hari
+              // aktif/kelewat, bukan cuma 1 angka.
+              child: GestureDetector(
+                onTap: () => Navigator.of(context, rootNavigator: true).push(
+                  appPageRoute(StreakCalendarPage(childId: childId)),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("🔥", style: TextStyle(fontSize: 32)),
-                    const SizedBox(height: 8),
-                    Text(
-                      "$streak",
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                      ),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFFF4E5), Color(0xFFFFE8CC)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    Text(
-                      texts['streak_label']!,
-                      style: TextStyle(
-                        color: AppColors.primary.withValues(alpha: 0.7),
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.gold.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("🔥", style: TextStyle(fontSize: 32)),
+                      const SizedBox(height: 8),
+                      Text(
+                        "$streak",
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        texts['streak_label']!,
+                        style: TextStyle(
+                          color: AppColors.primary.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

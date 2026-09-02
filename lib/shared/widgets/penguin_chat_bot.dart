@@ -41,6 +41,25 @@ final showChatbotGlobalProvider =
       return ChatbotVisibilityNotifier();
     });
 
+/// Kebuka/nggaknya JENDELA chat Mink (beda dari showChatbotGlobalProvider,
+/// yang cuma ngatur BOLA/tombol Mink-nya keliatan atau nggak). Dulu ini
+/// state lokal di dalam _PenguinChatButtonState, jadi nggak ada cara buka
+/// jendela chat dari layar LAIN (mis. tombol "Chat Mink" di Help Center) --
+/// paling jauh cuma bisa manggil showChatbotGlobalProvider buat munculin
+/// bola-nya, tapi jendelanya tetep ketutup sampai bola itu di-tap manual.
+class ChatWindowOpenNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void open() => state = true;
+  void close() => state = false;
+}
+
+final chatWindowOpenProvider =
+    NotifierProvider<ChatWindowOpenNotifier, bool>(() {
+      return ChatWindowOpenNotifier();
+    });
+
 // ============================================================================
 // 🌐 GLOBAL CONTEXT PROVIDER (Mata Mink untuk membaca halaman)
 // ============================================================================
@@ -313,7 +332,6 @@ class PenguinChatButton extends ConsumerStatefulWidget {
 
 class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
   double _top = 240.0;
-  bool _isChatOpen = false;
 
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -446,11 +464,16 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     final globalMissionContext = ref.watch(currentMissionContextProvider);
     final activeContext = widget.missionContext ?? globalMissionContext;
 
+    // Dipindah dari state lokal ke provider (chatWindowOpenProvider) biar
+    // layar lain (mis. tombol "Chat Mink" di Help Center) bisa buka
+    // jendela ini juga, bukan cuma dari tap bola Mink sendiri.
+    final isChatOpen = ref.watch(chatWindowOpenProvider);
+
     return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
-        if (_isChatOpen)
+        if (isChatOpen)
           Positioned.fill(
             child: Scaffold(
               backgroundColor: Colors.transparent,
@@ -458,7 +481,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               body: Stack(
                 children: [
                   GestureDetector(
-                    onTap: () => setState(() => _isChatOpen = false),
+                    onTap: () => ref.read(chatWindowOpenProvider.notifier).close(),
                     child: Container(
                       color: Colors.black.withValues(alpha: 0.5),
                     ),
@@ -480,7 +503,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
             ),
           ),
 
-        if (!_isChatOpen)
+        if (!isChatOpen)
           Positioned(
             top: _top,
             left: 6,
@@ -490,7 +513,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    setState(() => _isChatOpen = true);
+                    ref.read(chatWindowOpenProvider.notifier).open();
                     _scrollToBottom();
                   },
                   onVerticalDragUpdate: (details) {
@@ -618,7 +641,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                     ),
                   ),
                 IconButton(
-                  onPressed: () => setState(() => _isChatOpen = false),
+                  onPressed: () => ref.read(chatWindowOpenProvider.notifier).close(),
                   icon: Icon(
                     Icons.close_rounded,
                     color: AppColors.primary,

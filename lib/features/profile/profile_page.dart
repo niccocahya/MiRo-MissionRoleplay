@@ -12,6 +12,7 @@ import './screens/all_badges_page.dart';
 import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
 import './screens/edit_questionnaire_page.dart';
+import './screens/memory_book_page.dart';
 import './data/certificate_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/app_info.dart';
@@ -103,6 +104,7 @@ const Map<String, Map<String, String>> _t = {
     'menu_switch_account': "Switch Account",
     'menu_questionnaire': "Interests & Learning Style",
     'menu_badges': "All Badges",
+    'menu_memory_book': "Memory Book",
     'logout': "Log Out",
     'confirm_logout_title': "Log out?",
     'confirm_logout_desc': "You'll need to log in again to access this account.",
@@ -195,6 +197,7 @@ const Map<String, Map<String, String>> _t = {
     'menu_switch_account': "Ganti Akun",
     'menu_questionnaire': "Minat & Gaya Belajar",
     'menu_badges': "Semua Lencana",
+    'menu_memory_book': "Buku Kenangan",
     'logout': "Keluar",
     'confirm_logout_title': "Keluar dari akun?",
     'confirm_logout_desc': "Kamu perlu login lagi buat masuk ke akun ini.",
@@ -2260,6 +2263,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Icons.emoji_events_rounded,
             () => _navigateToFullscreen(
               AllBadgesPage(childId: childData['id'] ?? ''),
+            ),
+          ),
+          // Dulu foto journal cuma bisa diliat lagi 1 misi per 1 misi
+          // lewat replay di Progress -- nggak ada galeri terpadu.
+          _buildMenuItem(
+            texts['menu_memory_book']!,
+            Icons.photo_library_rounded,
+            () => _navigateToFullscreen(
+              MemoryBookPage(childId: childData['id'] ?? ''),
             ),
           ),
           _buildMenuItem(

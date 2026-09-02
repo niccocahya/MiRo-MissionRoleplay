@@ -13,6 +13,7 @@ import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/back_button.dart';
+import '../../shared/widgets/penguin_chat_bot.dart';
 import '../../shared/widgets/section_header.dart';
 
 const Map<String, Map<String, String>> _t = {
@@ -37,6 +38,7 @@ const Map<String, Map<String, String>> _t = {
     'faq_q6': "Is my child's data safe?",
     'faq_a6':
         "Photos and progress are private to your account. See Settings → About → Privacy Policy for full details.",
+    'open_mink_chat': "Open Mink Chat",
     'feedback_title': "Send Feedback",
     'feedback_desc': "Found a bug, or have an idea to make MiRO better? Let us know.",
     'type_feedback': "Suggestion",
@@ -72,6 +74,7 @@ const Map<String, Map<String, String>> _t = {
     'faq_q6': "Data anak saya aman nggak?",
     'faq_a6':
         "Foto dan progres cuma bisa diakses dari akunmu sendiri. Detail lengkap ada di Pengaturan → Tentang → Kebijakan Privasi.",
+    'open_mink_chat': "Buka Chat Mink",
     'feedback_title': "Kirim Masukan",
     'feedback_desc': "Nemu bug, atau ada ide biar MiRO makin baik? Kabari kami.",
     'type_feedback': "Masukan",
@@ -217,6 +220,41 @@ class _HelpCenterPageState extends ConsumerState<HelpCenterPage> {
                                     color: AppColors.textSecondary,
                                   ).copyWith(fontSize: 13, height: 1.4),
                                 ),
+                                // Entri FAQ ini (index 4) khusus jelasin Mink,
+                                // tapi dulu nggak ada tombol buat langsung
+                                // buka chat-nya dari sini -- harus nutup Help
+                                // Center dulu baru cari-cari bola Mink sendiri.
+                                if (i == 4) ...[
+                                  const SizedBox(height: AppSpacing.sm + 4),
+                                  GestureDetector(
+                                    onTap: () {
+                                      ref.read(showChatbotGlobalProvider.notifier).show();
+                                      ref.read(chatWindowOpenProvider.notifier).open();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.md,
+                                        vertical: AppSpacing.sm + 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.accentTint,
+                                        borderRadius: BorderRadius.circular(AppRadius.md),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.chat_bubble_rounded, color: AppColors.accent, size: 16),
+                                          const SizedBox(width: AppSpacing.xs + 2),
+                                          Text(
+                                            texts['open_mink_chat']!,
+                                            style: AppTextStyles.bodyBold(color: AppColors.accent)
+                                                .copyWith(fontSize: 13),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),

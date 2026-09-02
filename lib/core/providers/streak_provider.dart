@@ -106,3 +106,30 @@ final streakAtRiskProvider = StreamProvider.family<bool, String>((
         return mostRecent == yesterdayNormalized;
       });
 });
+
+/// Semua TANGGAL (dinormalisasi ke tengah malam lokal) yang punya minimal 1
+/// misi selesai -- dulu streak cuma pernah ditampilin sebagai 1 angka polos
+/// ("7 hari beruntun"), nggak ada cara liat KAPAN aja hari-hari aktifnya
+/// atau hari mana yang kelewat. Dipakai buat kalender streak di Progress.
+final streakActiveDatesProvider = StreamProvider.family<Set<DateTime>, String>((
+  ref,
+  childId,
+) {
+  if (childId.isEmpty) return Stream.value({});
+
+  final supabase = Supabase.instance.client;
+  return supabase
+      .from('mission_logs')
+      .stream(primaryKey: ['id'])
+      .eq('child_id', childId)
+      .map((event) {
+        final Set<DateTime> dates = {};
+        for (final log in event) {
+          if (log['status'] != 'completed') continue;
+          final date = parseDateSafely(log['completed_at'] ?? '');
+          if (date == null) continue;
+          dates.add(DateTime(date.year, date.month, date.day));
+        }
+        return dates;
+      });
+});
