@@ -8,8 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // PASTIKAN PATH IMPORT INI SESUAI DENGAN STRUKTUR FOLDER KAMU
+import './screens/all_badges_page.dart';
 import './screens/all_certificates_page.dart';
 import './screens/certificate_detail_page.dart';
+import './screens/edit_questionnaire_page.dart';
 import './data/certificate_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/app_info.dart';
@@ -99,6 +101,8 @@ const Map<String, Map<String, String>> _t = {
     'menu_settings': "Settings",
     'menu_help': "Help Center",
     'menu_switch_account': "Switch Account",
+    'menu_questionnaire': "Interests & Learning Style",
+    'menu_badges': "All Badges",
     'logout': "Log Out",
     'confirm_logout_title': "Log out?",
     'confirm_logout_desc': "You'll need to log in again to access this account.",
@@ -189,6 +193,8 @@ const Map<String, Map<String, String>> _t = {
     'menu_settings': "Pengaturan",
     'menu_help': "Pusat Bantuan",
     'menu_switch_account': "Ganti Akun",
+    'menu_questionnaire': "Minat & Gaya Belajar",
+    'menu_badges': "Semua Lencana",
     'logout': "Keluar",
     'confirm_logout_title': "Keluar dari akun?",
     'confirm_logout_desc': "Kamu perlu login lagi buat masuk ke akun ini.",
@@ -1279,6 +1285,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   context,
                   texts,
                   ref.watch(profileCompletenessProvider),
+                  childId,
                 ),
                 _buildSubscriptionSection(context, texts, parentName),
                 Padding(
@@ -1434,71 +1441,86 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // onboarding) padahal fotonya kepakai di banyak tempat (header ini,
   // kartu misi, dst). Nggak ditampilin sama sekali kalau udah 100% biar
   // nggak numpuk jadi noise permanen.
+  // Dulu 1 kartu ini punya 1 onTap doang buat SEMUA item yang kurang
+  // lengkap (selalu buka child-switcher, walaupun yang kurang itu
+  // kuisioner minat/gaya belajar -- yang nggak bisa diapa-apain dari
+  // switcher itu, jadi dead end). Sekarang tiap item yang kurang punya
+  // baris & tujuan sendiri: foto -> child switcher (ganti foto ada di
+  // situ), kuisioner -> EditQuestionnairePage (sekarang beneran ada).
   Widget _buildProfileCompleteness(
     BuildContext context,
     Map<String, String> texts,
     ProfileCompletenessInfo info,
+    String childId,
   ) {
     if (info.isComplete) return const SizedBox.shrink();
     final hPad = context.pageHPadding;
 
-    final List<String> missing = [
-      if (info.missingPhoto) texts['completeness_missing_photo']!,
-      if (info.missingQuestionnaire) texts['completeness_missing_questionnaire']!,
-    ];
-
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.md),
-      child: GestureDetector(
-        onTap: () => _showChildSwitcherModal(texts),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      "${texts['completeness_title']!} ${(info.ratio * 100).round()}%",
-                      style: AppTextStyles.bodyBold(),
-                    ),
-                  ),
-                  Text(
-                    texts['completeness_action']!,
-                    style: AppTextStyles.caption(color: AppColors.accent)
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    size: 16,
-                    color: AppColors.accent,
-                  ),
-                ],
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${texts['completeness_title']!} ${(info.ratio * 100).round()}%",
+              style: AppTextStyles.bodyBold(),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppRadius.pill),
+              child: LinearProgressIndicator(
+                value: info.ratio,
+                minHeight: 6,
+                backgroundColor: AppColors.border,
+                valueColor: AlwaysStoppedAnimation(AppColors.accent),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                child: LinearProgressIndicator(
-                  value: info.ratio,
-                  minHeight: 6,
-                  backgroundColor: AppColors.border,
-                  valueColor: AlwaysStoppedAnimation(AppColors.accent),
+            ),
+            const SizedBox(height: AppSpacing.sm + 2),
+            if (info.missingPhoto)
+              _buildCompletenessItem(
+                texts['completeness_missing_photo']!,
+                () => _showChildSwitcherModal(texts),
+              ),
+            if (info.missingQuestionnaire)
+              _buildCompletenessItem(
+                texts['completeness_missing_questionnaire']!,
+                () => Navigator.of(context, rootNavigator: true).push(
+                  appPageRoute(EditQuestionnairePage(childId: childId)),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                missing.join(" • "),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompletenessItem(String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
                 style: AppTextStyles.caption(color: AppColors.textSecondary),
               ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              size: 16,
+              color: AppColors.accent,
+            ),
+          ],
         ),
       ),
     );
@@ -2216,6 +2238,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             texts['menu_child_data']!,
             Icons.child_care_rounded,
             () => _showChildDataModal(texts, childData),
+          ),
+          // Selalu ada di sini (nggak cuma nongol pas belum keisi lewat
+          // kartu completeness) -- minat/gaya belajar anak berubah seiring
+          // waktu, jadi orang tua perlu bisa balik ke sini kapan aja buat
+          // update, bukan cuma pas ngelengkapin data pertama kali.
+          _buildMenuItem(
+            texts['menu_questionnaire']!,
+            Icons.interests_rounded,
+            () => Navigator.of(context, rootNavigator: true).push(
+              appPageRoute(
+                EditQuestionnairePage(childId: childData['id'] ?? ''),
+              ),
+            ),
+          ),
+          // Dulu badge cuma keliatan sepotong (strip "terbaru" di Home,
+          // atau nempel di kartu sertifikat sebagai syarat) -- nggak ada
+          // tempat liat SEMUA badge (termasuk yang masih terkunci).
+          _buildMenuItem(
+            texts['menu_badges']!,
+            Icons.emoji_events_rounded,
+            () => _navigateToFullscreen(
+              AllBadgesPage(childId: childData['id'] ?? ''),
+            ),
           ),
           _buildMenuItem(
             texts['menu_settings']!,

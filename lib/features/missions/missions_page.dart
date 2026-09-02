@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/mission_provider.dart';
 import 'screens/mission_path_screen.dart';
 import '../../core/providers/language_provider.dart';
+import '../../core/providers/last_viewed_role_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/app_state_views.dart';
 
@@ -38,13 +39,23 @@ class MissionsPage extends ConsumerWidget {
             );
           }
 
-          // Pakai role dari query param kalau ada & valid; kalau nggak,
-          // fallback ke role pertama yang punya misi (perilaku lama).
+          // Prioritas: query param role (dari kartu Home/hasil pencarian)
+          // > role terakhir yang dibuka (dari tab bottom nav, lihat
+          // lastViewedRoleProvider) > role pertama yang punya misi
+          // (fallback lama, buat kunjungan paling pertama).
           final availableRoleIds = missions.map((m) => m.roleId).toSet();
+          final lastViewedRoleId = ref.read(lastViewedRoleProvider);
           final resolvedRoleId =
               (roleId != null && availableRoleIds.contains(roleId))
               ? roleId!
-              : missions.first.roleId;
+              : (lastViewedRoleId != null &&
+                      availableRoleIds.contains(lastViewedRoleId))
+                  ? lastViewedRoleId
+                  : missions.first.roleId;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(lastViewedRoleProvider.notifier).setRole(resolvedRoleId);
+          });
 
           final roleName = rolesAsync.maybeWhen(
             data: (roles) {

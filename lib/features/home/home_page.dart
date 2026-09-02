@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../core/providers/app_rating_prompt_provider.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/child_role_progress_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
@@ -18,15 +19,18 @@ import '../profile/screens/all_certificates_page.dart';
 import '../../core/constants/role_visuals.dart';
 import '../missions/data/mission_provider.dart';
 import '../missions/data/mission_model.dart';
+import '../missions/screens/mission_intro_screen.dart';
 import '../missions/screens/mission_search_screen.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
+import '../profile/screens/all_badges_page.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_rating_dialog.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
+import '../../shared/widgets/section_header.dart';
 
 // parseDateSafely dipindah ke core/utils/date_utils.dart (dulu duplikat
 // persis di sini dan di progress_page.dart).
@@ -204,6 +208,7 @@ const Map<String, Map<String, String>> _t = {
     'weekly_prog': "Weekly Progress",
     'keep_it_up': "Keep it up this week!",
     'recent_achieve': "Recent Achievements",
+    'see_all': "See All",
     'btn_start_role': "Start This Role",
     'empty_progress': "No activity this week. Let's start the first adventure!",
     'empty_achieve': "No achievements yet. Complete a mission to earn one!",
@@ -229,6 +234,7 @@ const Map<String, Map<String, String>> _t = {
     'weekly_prog': "Kemajuan Mingguan",
     'keep_it_up': "Pertahankan terus minggu ini!",
     'recent_achieve': "Pencapaian Terbaru",
+    'see_all': "Lihat Semua",
     'btn_start_role': "Mulai Peran Ini",
     'empty_progress':
         "Belum ada aktivitas minggu ini. Yuk mulai petualangan pertama!",
@@ -343,6 +349,30 @@ class _HomePageState extends ConsumerState<HomePage> {
         final recommendedMissionsAsync = ref.watch(
           missionsByRoleProvider(recommendedRoleId),
         );
+        // missionsByRoleProvider balikin SEMUA misi role itu, urutan apa
+        // adanya dari database -- dulu kartu "misi hari ini" langsung
+        // pakai .first dari situ, jadi kadang nunjukin misi yang udah
+        // KESELESAI atau yang masih TERKUNCI, bukan misi yang beneran
+        // lagi jadi giliran anak. Dihitung ulang di sini pakai
+        // unlocked_level yang sama dipakai peta misi/pencarian misi.
+        final roleProgressAsync = ref.watch(
+          childRoleProgressProvider(childId),
+        );
+        final List<MissionModel>? recommendedMissions =
+            recommendedMissionsAsync.value;
+        final int recommendedUnlockedLevel =
+            roleProgressAsync.value?[recommendedRoleId] ?? 1;
+        // null kalau list-nya kosong ATAU anak udah nyelesein semua misi
+        // role ini (unlockedLevel ngelewatin panjang list) -- di kedua
+        // kasus itu kartu fallback ke deskripsi role generik + tombol ke
+        // peta role, bukan maksa nunjukin misi yang udah kelar sebagai
+        // "misi hari ini".
+        final MissionModel? currentMission =
+            (recommendedMissions == null ||
+                    recommendedMissions.isEmpty ||
+                    recommendedUnlockedLevel > recommendedMissions.length)
+                ? null
+                : recommendedMissions[recommendedUnlockedLevel - 1];
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -376,7 +406,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       texts,
                       lang,
                       recommendedRoleId,
-                      recommendedMissionsAsync.value,
+                      currentMission,
                     ),
                     _buildChooseRole(context, texts, lang),
 
@@ -401,6 +431,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         texts,
                         achievementsData,
                         lang,
+                        childId,
                       ),
                     ),
                     const SizedBox(height: 120),
@@ -832,15 +863,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     Map<String, String> texts,
     String lang,
     String recommendedRoleId,
-    List<MissionModel>? recommendedMissions,
+    MissionModel? mission,
   ) {
     // Rekomendasi asli berdasarkan skill anak yang paling perlu dilatih —
     // dulu kartu ini selalu nampilin "Memasak Bersama" (role Koki) buat
     // SEMUA anak, apapun datanya.
     final role = roleVisualById(recommendedRoleId) ?? kUnknownRoleVisual;
-    final MissionModel? mission = (recommendedMissions == null || recommendedMissions.isEmpty)
-        ? null
-        : recommendedMissions.first;
 
     final String missionTitle = mission == null
         ? role.name(lang)
@@ -917,7 +945,28 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       ElevatedButton(
-                        onPressed: () => context.go('/missions?role=$recommendedRoleId'),
+                        // Dulu selalu bawa ke peta role-nya (`/missions?role=`)
+                        // biar sesuai judul "Misi hari ini: [Judul Spesifik]",
+                        // walau kartunya nunjukin 1 misi spesifik -- user
+                        // harus nyari lagi manual misi yang sama di peta.
+                        // Sekarang langsung ke misi itu kalau memang lagi
+                        // jadi giliran anak (isCurrent); kalau nggak (mis.
+                        // udah selesai semua/masih terkunci -- kasus langka
+                        // tapi mungkin), fallback ke peta role seperti dulu.
+                        onPressed: () {
+                          if (mission != null) {
+                            Navigator.of(context, rootNavigator: true).push(
+                              appPageRoute(
+                                MissionIntroScreen(
+                                  mission: mission,
+                                  roleName: role.name(lang),
+                                ),
+                              ),
+                            );
+                          } else {
+                            context.go('/missions?role=$recommendedRoleId');
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,
@@ -1183,6 +1232,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     Map<String, String> texts,
     List achievementsData,
     String lang,
+    String childId,
   ) {
     final hPad = context.pageHPadding;
     return Padding(
@@ -1190,8 +1240,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(texts['recent_achieve']!, style: AppTextStyles.h3()),
-          const SizedBox(height: AppSpacing.md),
+          // Dulu cuma teks statis, nggak ada cara buat liat SEMUA badge
+          // (termasuk yang masih terkunci) -- cuma strip beberapa
+          // terakhir ini doang.
+          SectionHeader(
+            title: texts['recent_achieve']!,
+            actionLabel: texts['see_all']!,
+            onAction: () => Navigator.of(context, rootNavigator: true).push(
+              appPageRoute(AllBadgesPage(childId: childId)),
+            ),
+          ),
           if (achievementsData.isEmpty)
             _emptyCard(
               icon: Icons.emoji_events_outlined,
@@ -1224,6 +1282,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     width: 180,
                     child: AppCard(
                       padding: const EdgeInsets.all(AppSpacing.sm + 4),
+                      // Dulu kartu ini statis, nggak ada onTap sama sekali.
+                      onTap: () => Navigator.of(context, rootNavigator: true)
+                          .push(appPageRoute(AllBadgesPage(childId: childId))),
                       child: Row(
                         children: [
                           Container(

@@ -11,6 +11,7 @@ import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
+import '../../../core/providers/last_viewed_role_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/favorite_missions_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -301,6 +302,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       onSelected: (newRoleId) {
         if (newRoleId != widget.roleId) {
           final selectedRole = roles.firstWhere((r) => r.id == newRoleId);
+          ref.read(lastViewedRoleProvider.notifier).setRole(newRoleId);
           Navigator.pushReplacement(
             context,
             appPageRoute(
