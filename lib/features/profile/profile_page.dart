@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -1488,12 +1490,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             child: (avatarUrl == null || avatarUrl.isEmpty)
                 ? const Text("👦🏻", style: TextStyle(fontSize: 36))
                 : ClipOval(
-                    child: Image.network(
-                      avatarUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: avatarUrl,
                       width: 72,
                       height: 72,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorWidget: (_, __, ___) =>
                           const Text("👦🏻", style: TextStyle(fontSize: 36)),
                     ),
                   ),
@@ -1621,12 +1623,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: (avatarUrl == null || avatarUrl.isEmpty)
                       ? const Text("👦🏻", style: TextStyle(fontSize: 24))
                       : ClipOval(
-                          child: Image.network(
-                            avatarUrl,
+                          child: CachedNetworkImage(
+                            imageUrl: avatarUrl,
                             width: 48,
                             height: 48,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorWidget: (_, __, ___) =>
                                 const Text("👦🏻", style: TextStyle(fontSize: 24)),
                           ),
                         ),
@@ -1638,7 +1640,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     bottom: -2,
                     right: -2,
                     child: GestureDetector(
-                      onTap: () => _changeAvatar(child['id'] as String),
+                      onTap: () => _changeAvatar(
+                        child['id'] as String,
+                        oldAvatarUrl: avatarUrl,
+                      ),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -1683,7 +1688,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
-  Future<void> _changeAvatar(String childId) async {
+  Future<void> _changeAvatar(String childId, {String? oldAvatarUrl}) async {
     if (childId.isEmpty) return;
     try {
       final picked = await ImagePicker().pickImage(
@@ -1699,6 +1704,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           .eq('id', childId);
       // Nggak perlu invalidate manual — childDataProvider stream-nya
       // realtime, otomatis kebaca begitu kolomnya ke-update.
+
+      // Baru hapus foto LAMA setelah yang baru beneran kepasang -- kalau
+      // upload/update di atas gagal, foto lama yang masih berfungsi nggak
+      // ikut kehapus.
+      unawaited(StorageUploadService.deleteProfilePhoto(oldAvatarUrl));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

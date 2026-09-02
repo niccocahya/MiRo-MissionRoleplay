@@ -32,6 +32,25 @@ class StorageUploadService {
     return _bucket('user_photo').getPublicUrl(path);
   }
 
+  /// Hapus foto profil lama dari bucket `user_photo`. Nama file di atas
+  /// selalu unik (ada timestamp), jadi tiap ganti foto bikin file BARU --
+  /// dulu file lamanya nggak pernah dihapus, numpuk terus selamanya di
+  /// storage tiap kali orang tua ganti foto anaknya. Dipanggil setelah
+  /// avatar_url baru berhasil ke-set, dikasih URL lama yang mau dibuang.
+  static Future<void> deleteProfilePhoto(String? publicUrl) async {
+    if (publicUrl == null || publicUrl.isEmpty) return;
+    const marker = '/user_photo/';
+    final idx = publicUrl.indexOf(marker);
+    if (idx == -1) return; // Bukan file dari bucket ini (mis. URL eksternal).
+
+    final path = publicUrl.substring(idx + marker.length);
+    try {
+      await _bucket('user_photo').remove([path]);
+    } catch (_) {
+      // Nggak fatal -- foto barunya udah kepasang, ini cuma bersih-bersih.
+    }
+  }
+
   /// Upload foto langkah misi (jurnal) ke bucket `mission-assets`.
   static Future<String> uploadMissionStepPhoto({
     required String missionId,

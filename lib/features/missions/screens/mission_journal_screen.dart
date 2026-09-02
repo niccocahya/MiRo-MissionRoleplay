@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -968,10 +969,10 @@ Future<void> _downloadCollage() async {
       width: double.infinity,
       height: double.infinity,
       child: url.startsWith('http')
-          ? Image.network(
-              url,
+          ? CachedNetworkImage(
+              imageUrl: url,
               fit: BoxFit.cover,
-              errorBuilder: (c, e, s) => Container(
+              errorWidget: (c, e, s) => Container(
                 color: Colors.grey.shade200,
                 child: const Icon(Icons.broken_image, color: Colors.grey),
               ),
