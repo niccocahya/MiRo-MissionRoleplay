@@ -61,3 +61,48 @@ final streakProvider = StreamProvider.family<int, String>((ref, childId) {
         return streak;
       });
 });
+
+/// True kalau streak-nya lagi POSITIF tapi anak BELUM nyelesein misi hari
+/// ini -- artinya bakal putus ke 0 kalau kelewat tengah malam tanpa
+/// nyelesein 1 misi lagi. Dulu Home cuma nampilin jumlah streak polos,
+/// nggak ada yang nandain "buruan, streak-mu bakal ilang" secara jelas.
+final streakAtRiskProvider = StreamProvider.family<bool, String>((
+  ref,
+  childId,
+) {
+  if (childId.isEmpty) return Stream.value(false);
+
+  final supabase = Supabase.instance.client;
+  return supabase
+      .from('mission_logs')
+      .stream(primaryKey: ['id'])
+      .eq('child_id', childId)
+      .map((event) {
+        final completedLogs = event.where(
+          (item) => item['status'] == 'completed',
+        );
+
+        final today = DateTime.now();
+        final todayNormalized = DateTime(today.year, today.month, today.day);
+        final yesterdayNormalized = todayNormalized.subtract(
+          const Duration(days: 1),
+        );
+
+        bool doneToday = false;
+        DateTime? mostRecent;
+        for (final log in completedLogs) {
+          final date = parseDateSafely(log['completed_at'] ?? '');
+          if (date == null) continue;
+          final normalized = DateTime(date.year, date.month, date.day);
+          if (normalized == todayNormalized) doneToday = true;
+          if (mostRecent == null || normalized.isAfter(mostRecent)) {
+            mostRecent = normalized;
+          }
+        }
+
+        if (doneToday || mostRecent == null) return false;
+        // Streak-nya masih "hidup" (terakhir selesai kemarin) tapi belum
+        // dilanjutin hari ini -- ini persis kondisi "bakal putus".
+        return mostRecent == yesterdayNormalized;
+      });
+});

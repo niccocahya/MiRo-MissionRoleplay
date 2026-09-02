@@ -16,6 +16,7 @@ import '../../core/app_info.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
+import '../../core/providers/profile_completeness_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/providers/theme_mode_provider.dart';
@@ -88,6 +89,10 @@ const Map<String, Map<String, String>> _t = {
     'parent_prefix': "Parent",
     'parent_greeting': "Parent of",
     'edit_profile': "EDIT PROFILE",
+    'completeness_title': "Profile",
+    'completeness_missing_photo': "Add a profile photo",
+    'completeness_missing_questionnaire': "Fill in interests & learning style",
+    'completeness_action': "Complete it",
     'your_plan': "YOUR PLAN",
     'free_user': "Free User",
     'monthly_plan': "MONTHLY PLAN",
@@ -173,6 +178,10 @@ const Map<String, Map<String, String>> _t = {
     'parent_prefix': "Ibu/Bapak",
     'parent_greeting': "Orang Tua dari",
     'edit_profile': "EDIT PROFIL",
+    'completeness_title': "Profil",
+    'completeness_missing_photo': "Tambahin foto profil",
+    'completeness_missing_questionnaire': "Isi minat & gaya belajar",
+    'completeness_action': "Lengkapi",
     'your_plan': "PAKETMU",
     'free_user': "Pengguna Gratis",
     'monthly_plan': "PAKET BULANAN",
@@ -1278,6 +1287,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   childId,
                   childData['avatar_url'] as String?,
                 ),
+                _buildProfileCompleteness(
+                  context,
+                  texts,
+                  ref.watch(profileCompletenessProvider),
+                ),
                 _buildSubscriptionSection(context, texts, parentName),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -1422,6 +1436,82 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(width: AppSpacing.md),
           _buildAvatarStack(texts, childId, avatarUrl),
         ],
+      ),
+    );
+  }
+
+  // Dulu nggak ada indikator apa pun buat data OPSIONAL yang belum diisi
+  // (foto profil, kuisioner minat/gaya belajar) -- di data beneran, foto
+  // profil HAMPIR SELALU kosong (langkahnya gampang dilewatin pas
+  // onboarding) padahal fotonya kepakai di banyak tempat (header ini,
+  // kartu misi, dst). Nggak ditampilin sama sekali kalau udah 100% biar
+  // nggak numpuk jadi noise permanen.
+  Widget _buildProfileCompleteness(
+    BuildContext context,
+    Map<String, String> texts,
+    ProfileCompletenessInfo info,
+  ) {
+    if (info.isComplete) return const SizedBox.shrink();
+    final hPad = context.pageHPadding;
+
+    final List<String> missing = [
+      if (info.missingPhoto) texts['completeness_missing_photo']!,
+      if (info.missingQuestionnaire) texts['completeness_missing_questionnaire']!,
+    ];
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.md),
+      child: GestureDetector(
+        onTap: () => _showChildSwitcherModal(texts),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "${texts['completeness_title']!} ${(info.ratio * 100).round()}%",
+                      style: AppTextStyles.bodyBold(),
+                    ),
+                  ),
+                  Text(
+                    texts['completeness_action']!,
+                    style: AppTextStyles.caption(color: AppColors.accent)
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 16,
+                    color: AppColors.accent,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: LinearProgressIndicator(
+                  value: info.ratio,
+                  minHeight: 6,
+                  backgroundColor: AppColors.border,
+                  valueColor: AlwaysStoppedAnimation(AppColors.accent),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                missing.join(" • "),
+                style: AppTextStyles.caption(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

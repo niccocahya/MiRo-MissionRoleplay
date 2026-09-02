@@ -46,6 +46,26 @@ const Map<String, Map<String, String>> _t = {
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
 
+  // Notifikasi nggak nyimpen ID misi/lencana/sertifikat spesifik yang
+  // dimaksud (cuma `type` + teks), jadi deep-link-nya per-KATEGORI --
+  // ke halaman tempat kontennya biasanya ada -- bukan ke item persis yang
+  // dimaksud. Tetap jauh lebih berguna daripada nge-tap notifikasi terus
+  // nggak kejadian apa-apa sama sekali.
+  String _routeForNotifType(String? type) {
+    switch (type) {
+      case 'mission_completed':
+      case 'reminder':
+        return '/home';
+      case 'achievement':
+      case 'reward':
+      case 'certificate':
+        return '/profile';
+      case 'info':
+      default:
+        return '/home';
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lang = ref.watch(languageProvider);
@@ -80,9 +100,17 @@ class NotificationsPage extends ConsumerWidget {
                   final notif = visibleNotifs[index];
                   final bool isRead = notif['is_read'] ?? false;
                   return GestureDetector(
-                    onTap: isRead
-                        ? null
-                        : () => ref.read(markNotificationReadProvider)(notif['id']),
+                    // Dulu nge-tap notifikasi cuma nandain "dibaca" (dan
+                    // nggak ngapa-ngapain lagi kalau udah dibaca) -- nggak
+                    // pernah beneran mindahin ke halaman yang relevan.
+                    // Sekarang selalu ikut ke halaman sesuai jenis
+                    // notifikasinya, tandain dibaca sekalian kalau belum.
+                    onTap: () {
+                      if (!isRead) {
+                        ref.read(markNotificationReadProvider)(notif['id']);
+                      }
+                      context.go(_routeForNotifType(notif['type'] as String?));
+                    },
                     child: _buildNotificationCard(notif, lang),
                   );
                 },

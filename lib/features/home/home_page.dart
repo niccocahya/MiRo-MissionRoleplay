@@ -206,9 +206,11 @@ const Map<String, Map<String, String>> _t = {
     'empty_achieve': "No achievements yet. Complete a mission to earn one!",
     'err_loading': "Error loading data: ",
     'streak_active_title': "day streak going!",
-    'streak_active_desc': "Finish a mission today to keep it alive.",
+    'streak_active_desc': "You're all set for today. Nice work!",
     'streak_start_title': "Start a streak today",
     'streak_start_desc': "Complete a mission to begin your streak.",
+    'streak_risk_title': "day streak -- about to break!",
+    'streak_risk_desc': "Finish 1 mission today before it resets to zero.",
   },
   'id': {
     'greeting': "Halo, Bapak/Ibu",
@@ -231,9 +233,11 @@ const Map<String, Map<String, String>> _t = {
         "Belum ada pencapaian. Selesaikan misi untuk mendapatkannya!",
     'err_loading': "Error memuat data: ",
     'streak_active_title': "hari beruntun!",
-    'streak_active_desc': "Selesaikan misi hari ini biar streak-nya lanjut.",
+    'streak_active_desc': "Udah aman buat hari ini. Mantap!",
     'streak_start_title': "Mulai streak hari ini",
     'streak_start_desc': "Selesaikan misi buat mulai streak-mu.",
+    'streak_risk_title': "hari beruntun -- hampir putus!",
+    'streak_risk_desc': "Selesaikan 1 misi hari ini sebelum balik ke nol.",
   },
 };
 
@@ -299,6 +303,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         );
         final achievementsAsync = ref.watch(childAchievementsProvider(childId));
         final streakAsync = ref.watch(streakProvider(childId));
+        final streakAtRiskAsync = ref.watch(streakAtRiskProvider(childId));
 
         // Rekomendasi misi: pilih role berdasarkan skill anak yang PALING
         // RENDAH saat ini (sebelumnya kartu ini statis, selalu nampilin
@@ -331,7 +336,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                       childCurrentXp,
                       childMaxXp,
                     ),
-                    _buildStreakReminder(context, texts, streakAsync.value),
+                    _buildStreakReminder(
+                      context,
+                      texts,
+                      streakAsync.value,
+                      streakAtRiskAsync.value ?? false,
+                    ),
                     _buildQuickActions(context, texts),
                     _buildTodayMissionCard(
                       context,
@@ -572,10 +582,32 @@ class _HomePageState extends ConsumerState<HomePage> {
     BuildContext context,
     Map<String, String> texts,
     int? streak,
+    bool atRisk,
   ) {
     if (streak == null) return const SizedBox.shrink();
     final hPad = context.pageHPadding;
     final bool active = streak > 0;
+
+    // 3 kondisi visual: belum punya streak (netral), streak aman (emas),
+    // dan streak AKTIF TAPI BELUM lanjut hari ini (danger, mendesak).
+    // Sebelumnya cuma 2 kondisi -- streak yang lagi kepotong-hampir-putus
+    // ditampilin SAMA PERSIS kayak streak yang udah aman hari ini, jadi
+    // orang tua nggak ada tanda sama sekali kalau streak-nya bakal ilang.
+    final String emoji = atRisk ? '⚠️' : (active ? '🔥' : '✨');
+    final Color bg = atRisk
+        ? AppColors.dangerTint
+        : (active ? AppColors.goldTint : AppColors.surface);
+    final Color borderColor = atRisk
+        ? AppColors.danger.withValues(alpha: 0.4)
+        : (active ? AppColors.gold.withValues(alpha: 0.4) : AppColors.border);
+    final String title = atRisk
+        ? '$streak ${texts['streak_risk_title']!}'
+        : (active
+              ? '$streak ${texts['streak_active_title']!}'
+              : texts['streak_start_title']!);
+    final String desc = atRisk
+        ? texts['streak_risk_desc']!
+        : (active ? texts['streak_active_desc']! : texts['streak_start_desc']!);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.xs),
@@ -585,35 +617,28 @@ class _HomePageState extends ConsumerState<HomePage> {
           vertical: AppSpacing.sm + 2,
         ),
         decoration: BoxDecoration(
-          color: active ? AppColors.goldTint : AppColors.surface,
+          color: bg,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(
-            color: active ? AppColors.gold.withValues(alpha: 0.4) : AppColors.border,
-          ),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
-            Text(
-              active ? '🔥' : '✨',
-              style: const TextStyle(fontSize: 22),
-            ),
+            Text(emoji, style: const TextStyle(fontSize: 22)),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    active
-                        ? '$streak ${texts['streak_active_title']!}'
-                        : texts['streak_start_title']!,
-                    style: AppTextStyles.bodyBold(),
+                    title,
+                    style: AppTextStyles.bodyBold(
+                      color: atRisk ? AppColors.danger : null,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    active
-                        ? texts['streak_active_desc']!
-                        : texts['streak_start_desc']!,
+                    desc,
                     style: AppTextStyles.caption(color: AppColors.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
