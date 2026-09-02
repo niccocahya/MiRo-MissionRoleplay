@@ -8,6 +8,7 @@ import '../../../core/router/app_page_transition.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib panggil otak bahasa
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/back_button.dart'; // Wajib panggil tombol kembali estetik
@@ -180,7 +181,7 @@ class AllCertificatesPage extends ConsumerWidget {
                 cert['gradient'] ??
                 [AppColors.primary, AppColors.primaryLight],
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,

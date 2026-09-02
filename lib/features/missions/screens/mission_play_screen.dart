@@ -15,6 +15,7 @@ import '../../../core/providers/language_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/storage_upload_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -378,7 +379,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                 color: isCompleted || isActive
                                     ? AppColors.primary
                                     : Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(AppRadius.sm),
                                 boxShadow: isActive
                                     ? [
                                         BoxShadow(
@@ -442,7 +443,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                             color: isOpen
                                 ? null
                                 : AppColors.gold.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
                             boxShadow: isOpen
                                 ? const [
                                     BoxShadow(
@@ -932,7 +933,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(30),
+                                                  BorderRadius.circular(AppRadius.xl),
                                             ),
                                             elevation:
                                                 (isCurrent &&
@@ -977,7 +978,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                             backgroundColor: AppColors.accent,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                             ),
                           ),
                           child: Text(
@@ -1014,7 +1015,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                 : Colors.grey.shade300,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                             ),
                           ),
                           child: Text(

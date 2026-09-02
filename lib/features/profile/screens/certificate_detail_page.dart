@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/back_button.dart'; // Wajib narik custom back button
 
 // ==========================================
@@ -689,7 +690,7 @@ class CertificateDetailPage extends ConsumerWidget {
         disabledBackgroundColor: Colors.grey.shade300,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
         elevation: enabled ? 4 : 0,
       ),
       child: Text(

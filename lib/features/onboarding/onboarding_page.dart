@@ -11,6 +11,7 @@ import '../../shared/widgets/coming_soon_badge.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 import '../legal/legal_page.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
@@ -572,7 +573,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 60),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
             ),
             child: Text(
@@ -733,7 +734,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
       ),
       child: Text(
         label,
@@ -780,7 +781,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
                   border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
@@ -1032,7 +1033,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
             ),
             child: Text(
@@ -1122,7 +1123,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           disabledBackgroundColor: AppColors.surface,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
             side: BorderSide(color: Colors.grey.shade300),
           ),
         ),
@@ -1207,19 +1208,19 @@ class _CustomTextFieldState extends State<_CustomTextField> {
               vertical: 16,
             ),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
                 color: AppColors.primary.withValues(alpha: 0.3),
               ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
                 color: AppColors.primary.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
                 color: AppColors.primary,
                 width: 1.5,

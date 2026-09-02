@@ -12,6 +12,7 @@ import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_spacing.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
 import '../../shared/widgets/penguin_chat_bot.dart';
@@ -424,7 +425,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                   backgroundColor: AppColors.accent,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                   ),
                 ),
                 child: Text(
@@ -451,7 +452,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
                 ),
               ),
               child: Text(
@@ -502,7 +503,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               filled: true,
               fillColor: AppColors.surface,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
             ),
           ),
@@ -753,7 +754,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                     color: isSel
                         ? AppColors.gold
                         : const Color(0xFFF4F7FA),
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
                   ),
                   child: Text(
                     label,
@@ -856,7 +857,7 @@ class _OptionCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           border: Border.all(
             color: isSelected ? AppColors.accent : Colors.transparent,
             width: 2,
