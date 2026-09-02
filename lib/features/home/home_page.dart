@@ -4,9 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/providers/app_rating_prompt_provider.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
+import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/router/app_page_transition.dart';
@@ -22,6 +24,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_rating_dialog.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
 
@@ -277,6 +280,23 @@ class _HomePageState extends ConsumerState<HomePage> {
       }
     });
 
+    // Dulu nggak ada cara buat orang tua ngasih rating/kesan pakai app ini
+    // kecuali nemu sendiri menu Bantuan. appRatingPromptProvider dipicu di
+    // bawah (setelah tau total misi selesai) -- listener ini yang beneran
+    // munculin dialognya begitu state-nya jadi true.
+    ref.listen<bool>(appRatingPromptProvider, (previous, shouldShow) {
+      if (shouldShow) {
+        final totalMissionsCompleted =
+            ref.read(totalMissionsCompletedProvider(childDataAsync.value?['id'] ?? '')).value ?? 0;
+        showDialog(
+          context: context,
+          builder: (_) => AppRatingDialog(
+            totalMissionsCompleted: totalMissionsCompleted,
+          ),
+        );
+      }
+    });
+
     return childDataAsync.when(
       loading: () => Scaffold(
         backgroundColor: AppColors.background,
@@ -304,6 +324,14 @@ class _HomePageState extends ConsumerState<HomePage> {
         final achievementsAsync = ref.watch(childAchievementsProvider(childId));
         final streakAsync = ref.watch(streakProvider(childId));
         final streakAtRiskAsync = ref.watch(streakAtRiskProvider(childId));
+
+        final totalMissionsCompleted =
+            ref.watch(totalMissionsCompletedProvider(childId)).value ?? 0;
+        if (childId.isNotEmpty && totalMissionsCompleted > 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(appRatingPromptProvider.notifier).maybeShow(totalMissionsCompleted);
+          });
+        }
 
         // Rekomendasi misi: pilih role berdasarkan skill anak yang PALING
         // RENDAH saat ini (sebelumnya kartu ini statis, selalu nampilin

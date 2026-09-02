@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
+import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/theme/app_colors.dart';
 import '../legal/legal_page.dart';
@@ -52,6 +53,7 @@ const Map<String, Map<String, String>> _t = {
     'err_auth_generic': "Something went wrong. Please check your connection and try again.",
     'err_must_agree_terms': "Please check the box to agree to the Terms & Privacy Policy first.",
     'err_profile_setup_failed': "Your account was created but we couldn't finish setting it up. Please try logging in -- if that doesn't work, try registering again.",
+    'recent_accounts': "Recent accounts on this device",
   },
   'id': {
     'splash_desc': 'Petualangan seru\ntanpa layar gawai',
@@ -86,6 +88,7 @@ const Map<String, Map<String, String>> _t = {
     'err_auth_generic': "Ada yang salah. Cek koneksi internetmu terus coba lagi ya.",
     'err_must_agree_terms': "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
     'err_profile_setup_failed': "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya -- kalau masih gagal, coba daftar ulang lagi.",
+    'recent_accounts': "Akun yang pernah login di HP ini",
   },
 };
 
@@ -276,6 +279,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             'full_name': _nameController.text.trim(),
             'language_code': ref.read(selectedLanguageProvider),
           });
+          await ref.read(recentAccountsProvider.notifier).remember(
+                _emailController.text,
+                _nameController.text,
+              );
           if (mounted) context.go('/identify');
         } catch (insertError) {
           debugPrint("Gagal insert parents setelah signUp: $insertError");
@@ -326,6 +333,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             .select('id')
             .eq('parent_id', res.user!.id)
             .limit(1);
+
+        await ref.read(recentAccountsProvider.notifier).remember(
+              res.user!.email ?? _emailController.text,
+              res.user!.userMetadata?['full_name'] ??
+                  (res.user!.email ?? '').split('@').first,
+            );
 
         if (mounted) {
           children.isEmpty ? context.go('/identify') : context.go('/home');
@@ -729,6 +742,66 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
+  // Chip akun yang PERNAH login di device ini (max 3, terbaru duluan) --
+  // tap buat isi cepet kolom email, password tetep harus diketik ulang
+  // (nggak ada password/token yang disimpan). Berguna buat device yang
+  // gantian dipakai lebih dari 1 orang tua/akun.
+  Widget _buildRecentAccountsRow(Map<String, String> texts) {
+    final accounts = ref.watch(recentAccountsProvider);
+    if (accounts.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          texts['recent_accounts']!,
+          style: TextStyle(
+            color: AppColors.primary.withValues(alpha: 0.6),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: accounts.map((account) {
+            final label = account.displayName.isNotEmpty
+                ? account.displayName
+                : account.email;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _emailController.text = account.email;
+                  _passwordController.clear();
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person_outline, size: 14, color: AppColors.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(color: AppColors.primary, fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
   // ==================== LOGIN SCREEN ====================
   Widget _buildLoginScreen(Map<String, String> texts) {
     return Column(
@@ -769,7 +842,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
+                _buildRecentAccountsRow(texts),
+                const SizedBox(height: 16),
                 _CustomTextField(
                   label: texts['email_label']!,
                   icon: Icons.email_outlined,

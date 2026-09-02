@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Wajib buat baca languageProvider
 
@@ -45,6 +48,10 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  // Dulu layar "misi selesai" cuma ada 1 animasi kecil (penguin scale-in)
+  // -- momen paling seru buat anak (baru aja nyelesein misi) rasanya
+  // hambar. Confetti nembak sekali pas layar ini muncul.
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
@@ -58,11 +65,17 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _controller.forward();
+
+    _confettiController = ConfettiController(
+      duration: const Duration(seconds: 2),
+    );
+    _confettiController.play();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -82,6 +95,27 @@ class _MissionWinScreenState extends ConsumerState<MissionWinScreen>
               child: Opacity(
                 opacity: 0.4,
                 child: Image.asset('assets/images/snow.png', fit: BoxFit.cover),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: math.pi / 2,
+                blastDirectionality: BlastDirectionality.explosive,
+                emissionFrequency: 0.04,
+                numberOfParticles: 16,
+                maxBlastForce: 20,
+                minBlastForce: 8,
+                gravity: 0.25,
+                shouldLoop: false,
+                colors: const [
+                  Colors.white,
+                  Color(0xFFF1A22F),
+                  Color(0xFFE57B65),
+                  Color(0xFF4CAF50),
+                  Color(0xFFA5CBEB),
+                ],
               ),
             ),
             SafeArea(

@@ -16,6 +16,7 @@ import '../../core/app_info.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
+import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/profile_completeness_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
@@ -37,24 +38,9 @@ import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
 
-// ==========================================
-// PROVIDER REAL-TIME 1: MENGHITUNG TOTAL MISI SELESAI
-// ==========================================
-final totalMissionsCompletedProvider = StreamProvider.family<int, String>((
-  ref,
-  childId,
-) {
-  if (childId.isEmpty) return Stream.value(0);
-
-  final supabase = Supabase.instance.client;
-  return supabase
-      .from('mission_logs')
-      .stream(primaryKey: ['id'])
-      .eq('child_id', childId)
-      .map((event) {
-        return event.where((row) => row['status'] == 'completed').length;
-      });
-});
+// totalMissionsCompletedProvider sekarang di
+// ../../core/providers/mission_stats_provider.dart (dipindah biar bisa
+// dipakai fitur lain juga, mis. pemicu app-rating prompt di Home).
 
 // ==========================================
 // PROVIDER REAL-TIME 2: MENGHITUNG TOTAL LENCANA (ACHIEVEMENTS)
@@ -112,6 +98,7 @@ const Map<String, Map<String, String>> _t = {
     'menu_child_data': "Child Data",
     'menu_settings': "Settings",
     'menu_help': "Help Center",
+    'menu_switch_account': "Switch Account",
     'logout': "Log Out",
     'confirm_logout_title': "Log out?",
     'confirm_logout_desc': "You'll need to log in again to access this account.",
@@ -201,6 +188,7 @@ const Map<String, Map<String, String>> _t = {
     'menu_child_data': "Data Anak",
     'menu_settings': "Pengaturan",
     'menu_help': "Pusat Bantuan",
+    'menu_switch_account': "Ganti Akun",
     'logout': "Keluar",
     'confirm_logout_title': "Keluar dari akun?",
     'confirm_logout_desc': "Kamu perlu login lagi buat masuk ke akun ini.",
@@ -2241,6 +2229,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               context,
               rootNavigator: true,
             ).push(appPageRoute(HelpCenterPage())),
+          ),
+          // Sama persis kayak Log Out (signOut + kembali ke layar login),
+          // cuma dinamain & ditempatin beda -- buat device yang gantian
+          // dipakai 2 orang tua, "Ganti Akun" kerasa lebih pas daripada
+          // "Log Out" yang gayanya destruktif. Layar Login abis ini nunjukin
+          // daftar akun yang pernah login di device ini buat isi ulang
+          // email dengan cepat (lihat recentAccountsProvider).
+          _buildMenuItem(
+            texts['menu_switch_account']!,
+            Icons.switch_account_rounded,
+            () => _handleLogout(texts),
           ),
         ],
       ),

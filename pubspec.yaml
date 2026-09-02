@@ -16,6 +16,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_fonts: ^8.0.2
   fl_chart: ^1.2.0
+  confetti: ^0.8.0
 
   # ==================== ROUTING & STATE MANAGEMENT ====================
   go_router: ^17.2.2
