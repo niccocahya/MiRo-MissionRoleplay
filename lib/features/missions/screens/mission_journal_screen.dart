@@ -16,6 +16,7 @@ import 'mission_intro_screen.dart';
 import 'mission_reflection_screen.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/providers/mission_reflection_provider.dart';
 import '../../../core/constants/role_visuals.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
@@ -54,6 +55,9 @@ const Map<String, Map<String, String>> _t = {
     'rate_mission': "How fun was this mission?",
     'btn_replay': "Play This Mission Again",
     'replay_note': "Replaying won't earn extra XP or badges -- it's just for fun!",
+    'reflection_title': "How you both felt",
+    'reflection_parent': "Parent",
+    'reflection_child': "Child",
   },
   'id': {
     'journal_view': "Jurnal Misi",
@@ -84,6 +88,9 @@ const Map<String, Map<String, String>> _t = {
     'rate_mission': "Seberapa seru misi ini?",
     'btn_replay': "Ulangi Misi Ini",
     'replay_note': "Ulangi misi nggak nambah XP/lencana lagi -- ini cuma buat seru-seruan!",
+    'reflection_title': "Gimana perasaan kalian",
+    'reflection_parent': "Orang Tua",
+    'reflection_child': "Anak",
   },
 };
 
@@ -174,6 +181,105 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
               ),
             );
           }),
+        ),
+      ],
+    );
+  }
+
+  // Refleksi (perasaan Bunda/Ayah & anak + catatan) yang diisi pas misi ini
+  // pertama kali diselesaikan -- dulu cuma pernah DITULIS, nggak pernah
+  // ditampilin lagi di mana pun. Sekarang muncul lagi pas jurnal ini
+  // dibuka ulang (replay dari Progress/Buku Kenangan), jadi ngisinya nggak
+  // sia-sia.
+  static const List<String> _feelingEmojis = ["😞", "😐", "🙂", "😀", "🤩"];
+
+  Widget _buildReflectionCard(Map<String, String> texts) {
+    if (_generatedMissionLogId == null) return const SizedBox.shrink();
+
+    final reflectionAsync = ref.watch(
+      missionReflectionProvider(_generatedMissionLogId!),
+    );
+
+    return reflectionAsync.maybeWhen(
+      data: (reflection) {
+        if (reflection == null) return const SizedBox.shrink();
+
+        final int? parentFeeling = reflection['parent_feeling'] as int?;
+        final int? childFeeling = reflection['child_feeling'] as int?;
+        final String notes = (reflection['notes'] as String? ?? '').trim();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 24),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTint,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texts['reflection_title']!,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    _feelingChip(
+                      texts['reflection_parent']!,
+                      parentFeeling,
+                    ),
+                    const SizedBox(width: 16),
+                    _feelingChip(
+                      texts['reflection_child']!,
+                      childFeeling,
+                    ),
+                  ],
+                ),
+                if (notes.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    notes,
+                    style: TextStyle(
+                      color: AppColors.primary.withValues(alpha: 0.8),
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _feelingChip(String label, int? feelingIndex) {
+    final String emoji =
+        (feelingIndex != null && feelingIndex >= 0 && feelingIndex < _feelingEmojis.length)
+            ? _feelingEmojis[feelingIndex]
+            : '❓';
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 22)),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: TextStyle(
+            color: AppColors.primary.withValues(alpha: 0.7),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -722,6 +828,7 @@ Future<void> _downloadCollage() async {
                           ],
 
                           _buildRatingRow(texts),
+                          if (widget.isViewOnly) _buildReflectionCard(texts),
                           const SizedBox(height: 32),
 
                           Text(

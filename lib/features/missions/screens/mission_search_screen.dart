@@ -8,6 +8,7 @@ import '../../../core/constants/role_visuals.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/child_role_progress_provider.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/services/favorite_missions_service.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -22,7 +23,9 @@ const Map<String, Map<String, String>> _t = {
     'title': "Search Missions",
     'hint': "Search mission name...",
     'all_roles': "All",
+    'favorites_only': "Favorites",
     'empty': "No missions match your search.",
+    'empty_favorites': "No favorites yet -- tap the heart on a mission's intro to save it here.",
     'err': "Failed to load missions: ",
     'status_done': "Completed",
     'status_active': "Active",
@@ -33,7 +36,9 @@ const Map<String, Map<String, String>> _t = {
     'title': "Cari Misi",
     'hint': "Cari nama misi...",
     'all_roles': "Semua",
+    'favorites_only': "Favorit",
     'empty': "Nggak ada misi yang cocok.",
+    'empty_favorites': "Belum ada favorit -- ketuk ikon hati di layar intro misi buat nyimpennya di sini.",
     'err': "Gagal memuat misi: ",
     'status_done': "Selesai",
     'status_active': "Aktif",
@@ -59,6 +64,10 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
   final _searchController = TextEditingController();
   String _query = '';
   String? _selectedRoleId;
+  // Dulu nge-favoritin misi (bintang hati di mission_intro_screen.dart)
+  // cuma munculin badge kecil di peta -- nggak ada tempat buat BENERAN
+  // liat "misi favoritku" lintas role. Filter ini yang ngasih fungsi.
+  bool _favoritesOnly = false;
 
   @override
   void dispose() {
@@ -76,6 +85,7 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
     final String childId = childDataAsync.value?['id'] ?? '';
     final progressAsync = ref.watch(childRoleProgressProvider(childId));
     final missionsAsync = ref.watch(missionsProvider);
+    final favoriteIds = ref.watch(favoriteMissionsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -133,6 +143,8 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: hPad),
                 children: [
+                  _favoritesChip(texts),
+                  const SizedBox(width: AppSpacing.sm),
                   _roleChip(null, texts['all_roles']!, AppColors.primary),
                   const SizedBox(width: AppSpacing.sm),
                   ...kRoleVisuals.map(
@@ -151,6 +163,9 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
                 error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
                 data: (missions) {
                   final filtered = missions.where((m) {
+                    if (_favoritesOnly && !favoriteIds.contains(m.id)) {
+                      return false;
+                    }
                     final matchesRole =
                         _selectedRoleId == null || m.roleId == _selectedRoleId;
                     if (!matchesRole) return false;
@@ -162,8 +177,12 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
 
                   if (filtered.isEmpty) {
                     return AppEmptyState(
-                      message: texts['empty']!,
-                      icon: Icons.search_off_rounded,
+                      message: _favoritesOnly && favoriteIds.isEmpty
+                          ? texts['empty_favorites']!
+                          : texts['empty']!,
+                      icon: _favoritesOnly
+                          ? Icons.favorite_border_rounded
+                          : Icons.search_off_rounded,
                     );
                   }
 
@@ -232,6 +251,38 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
           style: AppTextStyles.bodyBold(
             color: selected ? Colors.white : AppColors.textPrimary,
           ).copyWith(fontSize: 13),
+        ),
+      ),
+    );
+  }
+
+  Widget _favoritesChip(Map<String, String> texts) {
+    return GestureDetector(
+      onTap: () => setState(() => _favoritesOnly = !_favoritesOnly),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: _favoritesOnly ? AppColors.accent : AppColors.surface,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: _favoritesOnly ? AppColors.accent : AppColors.border),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _favoritesOnly ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+              size: 14,
+              color: _favoritesOnly ? Colors.white : AppColors.textPrimary,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              texts['favorites_only']!,
+              style: AppTextStyles.bodyBold(
+                color: _favoritesOnly ? Colors.white : AppColors.textPrimary,
+              ).copyWith(fontSize: 13),
+            ),
+          ],
         ),
       ),
     );

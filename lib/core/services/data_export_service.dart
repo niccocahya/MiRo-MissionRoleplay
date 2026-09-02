@@ -75,6 +75,29 @@ class DataExportService {
       }
     }
 
+    // journals (foto jurnal) & reflections (perasaan + catatan) nggak
+    // punya child_id LANGSUNG (cuma mission_log_id), jadi nggak bisa lewat
+    // forChildren() di atas -- dulu keduanya kelewat sama sekali dari
+    // ekspor, padahal ini termasuk data paling personal di app ini (foto
+    // anak beraktivitas, perasaan Bunda/Ayah & anak per misi).
+    final missionLogIds = missionLogs.map((m) => m['id'] as String).toList();
+    final journals = missionLogIds.isEmpty
+        ? <Map<String, dynamic>>[]
+        : List<Map<String, dynamic>>.from(
+            await supabase
+                .from('journals')
+                .select()
+                .inFilter('mission_log_id', missionLogIds),
+          );
+    final reflections = missionLogIds.isEmpty
+        ? <Map<String, dynamic>>[]
+        : List<Map<String, dynamic>>.from(
+            await supabase
+                .from('reflections')
+                .select()
+                .inFilter('mission_log_id', missionLogIds),
+          );
+
     final aiChats = await supabase.from('ai_chats').select().eq('parent_id', userId);
     final notifications = await supabase.from('notifications').select().eq('parent_id', userId);
     final feedback = await supabase.from('feedback').select().eq('parent_id', userId);
@@ -86,6 +109,8 @@ class DataExportService {
       'questionnaires': questionnaires,
       'child_stats': childStats,
       'mission_history': missionLogs,
+      'mission_journal_photos': journals,
+      'mission_reflections': reflections,
       'achievements': achievements,
       'certifications': certifications,
       'ai_chat_history': aiChats,
