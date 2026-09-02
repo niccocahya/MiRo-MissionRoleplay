@@ -12,6 +12,7 @@ import 'package:gal/gal.dart';
 
 // JALUR IMPORT
 import '../data/mission_model.dart';
+import 'mission_intro_screen.dart';
 import 'mission_reflection_screen.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart';
@@ -50,6 +51,9 @@ const Map<String, Map<String, String>> _t = {
     'share_text': "Look at my child's exciting mission on MiRO! 🐧✨",
     'sync_failed': "Failed to save this mission's progress. Your XP/skills weren't recorded yet.",
     'btn_retry': "Try Again",
+    'rate_mission': "How fun was this mission?",
+    'btn_replay': "Play This Mission Again",
+    'replay_note': "Replaying won't earn extra XP or badges -- it's just for fun!",
   },
   'id': {
     'journal_view': "Jurnal Misi",
@@ -77,6 +81,9 @@ const Map<String, Map<String, String>> _t = {
     'share_text': "Yuk lihat keseruan misi anakku di MiRO! 🐧✨",
     'sync_failed': "Gagal nyimpen progres misi ini. XP/skill-nya belum kecatat.",
     'btn_retry': "Coba Lagi",
+    'rate_mission': "Seberapa seru misi ini?",
+    'btn_replay': "Ulangi Misi Ini",
+    'replay_note': "Ulangi misi nggak nambah XP/lencana lagi -- ini cuma buat seru-seruan!",
   },
 };
 
@@ -84,12 +91,19 @@ class MissionJournalScreen extends ConsumerStatefulWidget {
   final MissionModel mission;
   final List<String> capturedPhotos;
   final bool isViewOnly;
+  // Cuma keisi kalau isViewOnly (dikasih dari mission_path_screen.dart,
+  // yang udah nyari baris mission_logs-nya) -- perlu ID-nya biar rating
+  // bintang bisa di-update pas ngeliat jurnal misi yang udah lewat.
+  final String? existingMissionLogId;
+  final int? existingRating;
 
   const MissionJournalScreen({
     super.key,
     required this.mission,
     required this.capturedPhotos,
     this.isViewOnly = false,
+    this.existingMissionLogId,
+    this.existingRating,
   });
 
   @override
@@ -110,14 +124,72 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   // "Coba Lagi" di layar.
   bool _syncFailed = false;
   String? _pendingAchievementId;
-  
+
+  // Rating bintang (1-5) buat misi ini -- null berarti belum dikasih
+  // rating. Dulu nggak ada cara buat anak/orang tua ngasih tau seberapa
+  // seru satu misi dibanding misi lain.
+  int? _rating;
+
   // 🔥 KEY UNTUK MENG-CAPTURE KOLASE JADI GAMBAR
   final GlobalKey _collageKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
+    _rating = widget.existingRating;
+    if (widget.isViewOnly) {
+      _generatedMissionLogId = widget.existingMissionLogId;
+    }
     _initJournalData();
+  }
+
+  // Baris 5 bintang tappable -- dulu nggak ada cara buat anak/orang tua
+  // ngasih tau seberapa seru satu misi dibanding misi lain di app ini.
+  Widget _buildRatingRow(Map<String, String> texts) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          texts['rate_mission']!,
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: List.generate(5, (i) {
+            final int starValue = i + 1;
+            final bool filled = (_rating ?? 0) >= starValue;
+            return GestureDetector(
+              onTap: () => _saveRating(starValue),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  filled ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: filled ? AppColors.gold : AppColors.textMuted,
+                  size: 34,
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _saveRating(int stars) async {
+    setState(() => _rating = stars);
+    if (_generatedMissionLogId == null) return;
+    try {
+      await Supabase.instance.client
+          .from('mission_logs')
+          .update({'rating': stars})
+          .eq('id', _generatedMissionLogId!);
+    } catch (e) {
+      debugPrint("Gagal simpan rating: $e");
+    }
   }
 
   Future<void> _initJournalData() async {
@@ -141,6 +213,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
 
     // 2. Cari tahu apakah misi ini punya hadiah lencana
     String? achIdToSync;
+    Map<String, dynamic>? fetchedAchievement;
     try {
       final supabase = Supabase.instance.client;
       final missionRes = await supabase
@@ -154,17 +227,11 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           missionRes['achievement_reward_id'].toString().trim().isNotEmpty) {
         achIdToSync = missionRes['achievement_reward_id'].toString().trim();
 
-        final achRes = await supabase
+        fetchedAchievement = await supabase
             .from('achievements_master')
             .select()
             .eq('id', achIdToSync)
             .maybeSingle();
-
-        if (achRes != null && mounted) {
-          setState(() {
-            _earnedAchievement = achRes;
-          });
-        }
       }
     } catch (e) {
       debugPrint("❌ Gagal memuat data achievement master: $e");
@@ -172,7 +239,18 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
 
     _pendingAchievementId = achIdToSync;
     if (!widget.isViewOnly) {
-      await _syncToDatabase(achIdToSync);
+      // Dulu banner "Lencana Baru!" ditampilin cuma berdasarkan "misi ini
+      // PUNYA hadiah lencana", TANPA peduli lencananya beneran baru
+      // dikreditkan atau nggak -- efeknya, ngeliat jurnal misi yang udah
+      // selesai lagi (isViewOnly) ATAU ngulang misi lewat "Ulangi Misi"
+      // (replay, yang sengaja nggak ngasih lencana lagi) tetap nunjukin
+      // "Lencana Baru!" seolah baru dapet, padahal nggak ada yang
+      // dikreditkan. Sekarang banner cuma muncul kalau _syncToDatabase
+      // bilang ini beneran completion yang FRESH (bukan replay).
+      final bool wasFreshCompletion = await _syncToDatabase(achIdToSync);
+      if (wasFreshCompletion && fetchedAchievement != null && mounted) {
+        setState(() => _earnedAchievement = fetchedAchievement);
+      }
     }
 
     setState(() {
@@ -180,7 +258,30 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
     });
   }
 
-  Future<void> _syncToDatabase(String? earnedAchievementId) async {
+  Future<void> _saveJournalPhotos(
+    SupabaseClient supabase,
+    String missionLogId,
+  ) async {
+    if (widget.capturedPhotos.isEmpty) return;
+    try {
+      final rows = [
+        for (int i = 0; i < widget.capturedPhotos.length; i++)
+          {
+            'mission_log_id': missionLogId,
+            'step_index': i,
+            'image_url': widget.capturedPhotos[i],
+          },
+      ];
+      await supabase.from('journals').insert(rows);
+    } catch (e) {
+      debugPrint("Gagal simpan foto jurnal: $e");
+    }
+  }
+
+  // Balikin `true` cuma kalau ini beneran completion FRESH (bukan replay,
+  // bukan retry dari baris yang udah ada) -- dipakai _initJournalData buat
+  // mutusin boleh nggaknya nampilin banner "Lencana Baru!".
+  Future<bool> _syncToDatabase(String? earnedAchievementId) async {
     try {
       final supabase = Supabase.instance.client;
 
@@ -192,7 +293,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       // pakai `childDataProvider`, sumber kebenaran anak yang lagi aktif
       // dipilih (sama yang dipakai Home/Progress/Profile).
       final childDb = await ref.read(childDataProvider.future);
-      if (childDb == null) return;
+      if (childDb == null) return false;
 
       final String childId = childDb['id'];
       final int currentTotalXp = childDb['total_xp'] ?? 0;
@@ -213,10 +314,39 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           .limit(1);
 
       if (alreadyCompleted.isNotEmpty) {
-        debugPrint("⚠️ Misi ini udah pernah selesai — skip biar nggak dobel XP.");
-        _generatedMissionLogId = alreadyCompleted.first['id'];
+        // Ini "Ulangi Misi" (replay) atau alur-balik-lalu-mulai-lagi yang
+        // udah dijelasin di atas -- baik pun caranya, misi ini emang lagi
+        // dikerjain ulang. Dulu di sini langsung return tanpa nyimpen apa
+        // pun; sekarang tetap dicatat sebagai baris BARU berstatus
+        // 'replayed' (bukan 'completed') + foto barunya kesimpen ke jurnal,
+        // TAPI nggak ngasih XP/skill/lencana lagi. Semua provider yang
+        // ngitung progres (streak, misi minggu ini, tren skill, total
+        // misi) explicitly filter status == 'completed', jadi baris
+        // 'replayed' otomatis nggak kehitung di mana pun -- nggak ada
+        // celah buat farming XP dari replay.
+        debugPrint("⚠️ Misi ini udah pernah selesai — catat sbg replay, nggak dobel XP.");
+        try {
+          final replayLog = await supabase
+              .from('mission_logs')
+              .insert({
+                'child_id': childId,
+                'role_id': widget.mission.roleId,
+                'mission_id': widget.mission.id,
+                'status': 'replayed',
+                'earned_xp': 0,
+                'earned_skills': {},
+                'completed_at': nowLocal,
+              })
+              .select('id')
+              .single();
+          _generatedMissionLogId = replayLog['id'];
+          await _saveJournalPhotos(supabase, _generatedMissionLogId!);
+        } catch (e) {
+          debugPrint("Gagal simpan log replay: $e");
+          _generatedMissionLogId = alreadyCompleted.first['id'];
+        }
         if (mounted) setState(() => _syncFailed = false);
-        return;
+        return false;
       }
 
       // 1. Simpan Log Misi
@@ -229,12 +359,21 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
             'status': 'completed',
             'earned_xp': widget.mission.xpReward,
             'earned_skills': widget.mission.skillsReward,
-            'completed_at': nowLocal, 
+            'completed_at': nowLocal,
           })
           .select('id')
           .single();
 
       _generatedMissionLogId = logResponse['id'];
+      // Dulu foto yang diambil pas misi berlangsung cuma ada di memori
+      // layar ini (buat kolase win screen) -- nggak PERNAH ditulis ke
+      // tabel `journals`. Efeknya, buka lagi jurnal misi yang udah
+      // selesai (dari peta misi) SELALU nunjukin nol foto, walau anaknya
+      // beneran ambil beberapa pas ngerjain. step_index di sini pakai
+      // urutan pengambilan (bukan step misi asli -- itu nggak pernah
+      // diteruskan sampai ke sini), cukup buat urutan tampil & nggak ada
+      // yang baca kolom itu di tempat lain.
+      await _saveJournalPhotos(supabase, _generatedMissionLogId!);
 
       // 2. Update Total XP Anak
       await supabase
@@ -321,12 +460,14 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
         }
       }
       if (mounted) setState(() => _syncFailed = false);
+      return true;
     } catch (e) {
       debugPrint("❌ FATAL DB SYNC ERROR: $e");
       // Dulu di sini berhenti, dan tampilan tetap keliatan "berhasil"
       // walau XP/progres-nya nggak beneran kesimpen. Sekarang ditandain
       // biar ada banner + tombol coba lagi di layar.
       if (mounted) setState(() => _syncFailed = true);
+      return false;
     }
   }
 
@@ -580,6 +721,9 @@ Future<void> _downloadCollage() async {
                             const SizedBox(height: 40),
                           ],
 
+                          _buildRatingRow(texts),
+                          const SizedBox(height: 32),
+
                           Text(
                             texts['skill_prog']!,
                             style: TextStyle(
@@ -709,6 +853,49 @@ Future<void> _downloadCollage() async {
                         ],
                       ),
               ),
+              if (widget.isViewOnly) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    texts['replay_note']!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true).push(
+                          appPageRoute(
+                            MissionIntroScreen(mission: widget.mission),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.replay_rounded, color: AppColors.primary, size: 18),
+                      label: Text(
+                        texts['btn_replay']!,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: AppColors.primary, width: 1.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: ElevatedButton(

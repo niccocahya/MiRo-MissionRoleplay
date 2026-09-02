@@ -125,7 +125,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       // 1. Cari log misi ini yang sudah selesai
       final logRes = await supabase
           .from('mission_logs')
-          .select('id')
+          .select('id, rating')
           .eq('child_id', _childId)
           .eq('mission_id', mission.id)
           .eq('status', 'completed')
@@ -135,12 +135,23 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
 
       List<String> photos = [];
 
-      // 2. Jika ada log-nya, ambil foto dari tabel journals
+      // 2. Ambil foto dari tabel journals -- dikumpulin dari SEMUA baris
+      // mission_logs punya misi ini (baris 'completed' asli + baris
+      // 'replayed' kalau anaknya pernah ulang misi ini), bukan cuma dari
+      // baris completed yang asli, biar foto dari replay juga keliatan
+      // pas jurnal ini dibuka lagi nanti.
       if (logRes != null && logRes['id'] != null) {
+        final allLogsForMission = await supabase
+            .from('mission_logs')
+            .select('id')
+            .eq('child_id', _childId)
+            .eq('mission_id', mission.id);
+        final logIds = allLogsForMission.map((r) => r['id'] as String).toList();
+
         final journalRes = await supabase
             .from('journals')
             .select('image_url')
-            .eq('mission_log_id', logRes['id']);
+            .inFilter('mission_log_id', logIds);
 
         photos = journalRes.map((e) => e['image_url'].toString()).toList();
       }
@@ -156,6 +167,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               mission: mission,
               capturedPhotos: photos,
               isViewOnly: true, // Flag agar tidak nambah poin lagi
+              existingMissionLogId: logRes?['id'] as String?,
+              existingRating: logRes?['rating'] as int?,
             ),
           ),
         );
