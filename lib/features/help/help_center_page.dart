@@ -323,7 +323,7 @@ class _HelpCenterPageState extends ConsumerState<HelpCenterPage> {
                             color: AppColors.primaryTint,
                             borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                           ),
-                          child: const Icon(Icons.mail_rounded, color: AppColors.primary),
+                          child: Icon(Icons.mail_rounded, color: AppColors.primary),
                         ),
                         const SizedBox(width: AppSpacing.sm + 2),
                         Expanded(
@@ -341,7 +341,7 @@ class _HelpCenterPageState extends ConsumerState<HelpCenterPage> {
                             ],
                           ),
                         ),
-                        const Icon(Icons.copy_rounded, color: AppColors.textMuted, size: 18),
+                        Icon(Icons.copy_rounded, color: AppColors.textMuted, size: 18),
                       ],
                     ),
                   ),

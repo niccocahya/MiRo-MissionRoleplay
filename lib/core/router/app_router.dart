@@ -34,7 +34,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
             bottom: 24, // Jarak dari bawah layar
             left: 0,
             right: 0,
-            child: const Center(child: CustomBottomNavBar()),
+            // BUKAN const — widget const dikanonikalisasi jadi 1 objek yang
+            // sama persis tiap kali, jadi Flutter skip rebuild-nya walau
+            // parent (ScaffoldWithNavBar) rebuild. Itu bikin warnanya
+            // "nyangkut" ke mode lama pas dark mode di-toggle sementara
+            // masih di halaman yang sama. Sama alasannya buat semua
+            // `const XxxPage()` di bawah.
+            child: Center(child: CustomBottomNavBar()),
           ),
         ],
       ),
@@ -52,7 +58,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/onboarding',
       pageBuilder: (context, state) =>
-          appPage(key: state.pageKey, child: const OnboardingPage()),
+          appPage(key: state.pageKey, child: OnboardingPage()),
     ),
     GoRoute(
       path: '/identify',
@@ -68,7 +74,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/notifications',
       pageBuilder: (context, state) =>
-          appPage(key: state.pageKey, child: const NotificationsPage()),
+          appPage(key: state.pageKey, child: NotificationsPage()),
     ),
 
     ShellRoute(
@@ -77,7 +83,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: const HomePage()),
+              appPage(key: state.pageKey, child: HomePage()),
         ),
         GoRoute(
           path: '/missions',
@@ -89,12 +95,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/progress',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: const ProgressPage()),
+              appPage(key: state.pageKey, child: ProgressPage()),
         ),
         GoRoute(
           path: '/profile',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: const ProfilePage()),
+              appPage(key: state.pageKey, child: ProfilePage()),
         ),
       ],
     ),

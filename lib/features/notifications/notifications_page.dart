@@ -98,7 +98,7 @@ class NotificationsPage extends ConsumerWidget {
             child: Text(
               texts['title']!,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -116,7 +116,7 @@ class NotificationsPage extends ConsumerWidget {
               right: 24,
               child: SafeArea(
                 child: PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_horiz_rounded, color: AppColors.primary),
+                  icon: Icon(Icons.more_horiz_rounded, color: AppColors.primary),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   onSelected: (value) async {
                     if (value == 'mark_all') {
@@ -136,7 +136,7 @@ class NotificationsPage extends ConsumerWidget {
                               onPressed: () => Navigator.pop(ctx, true),
                               child: Text(
                                 texts['delete']!,
-                                style: const TextStyle(color: AppColors.danger),
+                                style: TextStyle(color: AppColors.danger),
                               ),
                             ),
                           ],
@@ -156,7 +156,7 @@ class NotificationsPage extends ConsumerWidget {
                       value: 'clear_all',
                       child: Text(
                         texts['clear_all']!,
-                        style: const TextStyle(color: AppColors.danger),
+                        style: TextStyle(color: AppColors.danger),
                       ),
                     ),
                   ],
@@ -304,7 +304,7 @@ class NotificationsPage extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 6),
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
@@ -330,7 +330,7 @@ class NotificationsPage extends ConsumerWidget {
                 // ilustrasi ini selama ini SELALU jatuh ke fallback icon.
                 'assets/images/penguin_peek.png',
                 height: 150,
-                errorBuilder: (context, error, stackTrace) => const Icon(
+                errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.notifications_off_rounded,
                   size: 80,
                   color: AppColors.primaryLighter,
@@ -340,7 +340,7 @@ class NotificationsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Text(
               texts['empty_title']!,
-              style: const TextStyle(
+              style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

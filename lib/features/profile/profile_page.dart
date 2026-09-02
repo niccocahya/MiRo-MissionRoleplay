@@ -16,6 +16,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/text_size_provider.dart';
+import '../../core/providers/theme_mode_provider.dart';
 import '../../core/services/account_deletion_service.dart';
 import '../../core/services/data_export_service.dart';
 import '../../core/services/storage_upload_service.dart';
@@ -155,6 +156,7 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "App Language",
     'notif_setting': "Push Notifications",
     'display_setting': "Text Size",
+    'theme_setting': "Theme",
     'account_setting': "Account",
     'change_email': "Change Email",
     'change_password': "Change Password",
@@ -237,6 +239,7 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "Bahasa Aplikasi",
     'notif_setting': "Notifikasi Aplikasi",
     'display_setting': "Ukuran Teks",
+    'theme_setting': "Tema",
     'account_setting': "Akun",
     'change_email': "Ganti Email",
     'change_password': "Ganti Password",
@@ -418,7 +421,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: parentController,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
@@ -433,7 +436,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: childController,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
@@ -489,7 +492,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 40,
                 backgroundColor: AppColors.accentTint,
                 child: Text("👦🏻", style: TextStyle(fontSize: 40)),
@@ -720,13 +723,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         color: AppColors.accentTint,
                         borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
-                      child: const Icon(Icons.language_rounded, color: AppColors.gold),
+                      child: Icon(Icons.language_rounded, color: AppColors.gold),
                     ),
                     title: Text(texts['lang_setting']!, style: AppTextStyles.bodyBold()),
                     trailing: DropdownButton<String>(
                       value: currentLang,
                       underline: const SizedBox(),
-                      icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                      icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
                       style: AppTextStyles.bodyBold(),
                       items: const [
                         DropdownMenuItem(value: 'id', child: Text("🇮🇩 IND")),
@@ -753,7 +756,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         color: AppColors.successTint,
                         borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
-                      child: const Icon(Icons.format_size_rounded, color: AppColors.success),
+                      child: Icon(Icons.format_size_rounded, color: AppColors.success),
                     ),
                     title: Text(texts['display_setting']!, style: AppTextStyles.bodyBold()),
                     trailing: Consumer(
@@ -762,7 +765,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         return DropdownButton<AppTextSize>(
                           value: current,
                           underline: const SizedBox(),
-                          icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
                           style: AppTextStyles.bodyBold(),
                           items: AppTextSize.values
                               .map((s) => DropdownMenuItem(value: s, child: Text(s.label(currentLang))))
@@ -770,6 +773,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           onChanged: (size) {
                             if (size != null) {
                               ref.read(textSizeProvider.notifier).setSize(size);
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(),
+
+                  // Setting Tema (dark mode) — sebelumnya app cuma punya
+                  // mode terang, nggak ada opsi sama sekali.
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryTint,
+                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
+                      ),
+                      child: Icon(Icons.dark_mode_rounded, color: AppColors.primary),
+                    ),
+                    title: Text(texts['theme_setting']!, style: AppTextStyles.bodyBold()),
+                    trailing: Consumer(
+                      builder: (context, ref, _) {
+                        final current = ref.watch(themeModeProvider);
+                        return DropdownButton<AppThemeMode>(
+                          value: current,
+                          underline: const SizedBox(),
+                          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                          style: AppTextStyles.bodyBold(),
+                          items: AppThemeMode.values
+                              .map((m) => DropdownMenuItem(value: m, child: Text(m.label(currentLang))))
+                              .toList(),
+                          onChanged: (mode) {
+                            if (mode != null) {
+                              ref.read(themeModeProvider.notifier).setMode(mode);
                             }
                           },
                         );
@@ -789,17 +827,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: const Icon(Icons.email_outlined, size: 20, color: AppColors.primary),
+                    leading: Icon(Icons.email_outlined, size: 20, color: AppColors.primary),
                     title: Text(texts['change_email']!, style: AppTextStyles.body()),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
                     onTap: () => _showChangeEmailModal(texts),
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: const Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primary),
+                    leading: Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primary),
                     title: Text(texts['change_password']!, style: AppTextStyles.body()),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
                     onTap: () => _showChangePasswordModal(texts),
                   ),
                   const Divider(),
@@ -822,7 +860,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     title: Text(texts['terms_of_service']!, style: AppTextStyles.body()),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
                     onTap: () => Navigator.of(context, rootNavigator: true).push(
                       appPageRoute(
                         LegalPage(
@@ -836,7 +874,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     title: Text(texts['privacy_policy']!, style: AppTextStyles.body()),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
                     onTap: () => Navigator.of(context, rootNavigator: true).push(
                       appPageRoute(
                         LegalPage(
@@ -850,7 +888,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                     title: Text(texts['open_source_licenses']!, style: AppTextStyles.body()),
-                    trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
                     onTap: () => showLicensePage(
                       context: context,
                       applicationName: kAppName,
@@ -870,7 +908,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: const Icon(Icons.download_rounded, size: 20, color: AppColors.primary),
+                    leading: Icon(Icons.download_rounded, size: 20, color: AppColors.primary),
                     title: Text(texts['download_data']!, style: AppTextStyles.body()),
                     subtitle: Text(
                       texts['download_data_desc']!,
@@ -881,7 +919,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: const Icon(Icons.delete_forever_rounded, size: 20, color: AppColors.danger),
+                    leading: Icon(Icons.delete_forever_rounded, size: 20, color: AppColors.danger),
                     title: Text(
                       texts['delete_account']!,
                       style: AppTextStyles.body().copyWith(color: AppColors.danger, fontWeight: FontWeight.bold),
@@ -1310,10 +1348,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       Center(
                         child: GestureDetector(
                           onTap: () =>
-                              _navigateToFullscreen(const AllCertificatesPage()),
+                              _navigateToFullscreen(AllCertificatesPage()),
                           child: Container(
                             padding: const EdgeInsets.only(bottom: 2),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: AppColors.primary, width: 2),
                               ),
@@ -1396,15 +1434,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.xs + 2),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.sm + 10),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.border),
           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.edit, color: AppColors.primary, size: 12),
+            Icon(Icons.edit, color: AppColors.primary, size: 12),
             const SizedBox(width: AppSpacing.xs + 2),
             Text(
               texts['edit_profile']!,
@@ -1772,7 +1810,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.verified, color: AppColors.primary, size: 16),
+                  Icon(Icons.verified, color: AppColors.primary, size: 16),
                   const SizedBox(width: AppSpacing.sm),
                   Text(texts['monthly_plan']!, style: AppTextStyles.bodyBold()),
                 ],
@@ -2101,7 +2139,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             () => Navigator.of(
               context,
               rootNavigator: true,
-            ).push(appPageRoute(const HelpCenterPage())),
+            ).push(appPageRoute(HelpCenterPage())),
           ),
         ],
       ),

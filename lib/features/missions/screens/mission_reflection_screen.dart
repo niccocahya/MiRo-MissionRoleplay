@@ -128,7 +128,7 @@ class _MissionReflectionScreenState
             children: [
               Text(
                 texts['title']!,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -164,7 +164,7 @@ class _MissionReflectionScreenState
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 14,
                   ),
@@ -174,19 +174,19 @@ class _MissionReflectionScreenState
                       color: AppColors.primary.withValues(alpha: 0.4),
                     ),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: AppColors.surface,
                     contentPadding: const EdgeInsets.all(20),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: const BorderSide(color: AppColors.primary),
+                      borderSide: BorderSide(color: AppColors.primary),
                     ),
                   ),
                 ),
@@ -236,7 +236,7 @@ class _MissionReflectionScreenState
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -258,7 +258,7 @@ class _MissionReflectionScreenState
               color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.star_rounded,
               color: AppColors.gold,
               size: 32,
@@ -309,7 +309,7 @@ class _MissionReflectionScreenState
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.primary,
             fontSize: 12,
             fontWeight: FontWeight.w900,

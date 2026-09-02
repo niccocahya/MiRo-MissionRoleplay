@@ -44,14 +44,38 @@ class RoleVisual {
   final List<RoleSkill> skills;
   final String penguinIcon;
   final String bgImage;
+
+  /// Warna dasar (mode terang) role ini — identitas warna role sendiri,
+  /// independen dari tema app. Di widget, pakai `resolvedTint`/
+  /// `resolvedBadgeColor`, BUKAN field ini langsung.
   final Color tint;
   final Color badgeColor;
 
   String name(String lang) => lang == 'id' ? nameId : nameEn;
   String description(String lang) => lang == 'id' ? descriptionId : descriptionEn;
+
+  /// `tint` dulu pastel-terang doang — di mode gelap keliatan "nempel"
+  /// terang di atas background gelap. Diredupkan (di-blend ke arah
+  /// `AppColors.surface`) tiap kali diakses, bukan cuma sekali pas
+  /// `kRoleVisuals` dibikin — soalnya list-nya cuma dibangun SEKALI (baca
+  /// `AppColors.surface` real-time di sini, bukan field statis, biar ganti
+  /// mode langsung kepakai tanpa perlu rebuild list-nya).
+  Color get resolvedTint => AppColors.isDark
+      ? Color.lerp(tint, AppColors.surface, 0.65)!
+      : tint;
+
+  Color get resolvedBadgeColor => AppColors.isDark
+      ? Color.lerp(badgeColor, AppColors.surface, 0.12)!
+      : badgeColor;
 }
 
-const List<RoleVisual> kRoleVisuals = [
+// Nggak lagi `const` — dulu tint/badgeColor sebagian nunjuk ke
+// `AppColors.xTint` yang sekarang getter (bukan const value lagi), jadi
+// list ini nggak bisa jadi compile-time constant. Diganti jadi literal
+// warna mode-terang murni di sini (identitas warna role, independen dari
+// tema), dan versi gelapnya dihitung on-the-fly lewat `resolvedTint`/
+// `resolvedBadgeColor` di atas.
+final List<RoleVisual> kRoleVisuals = [
   RoleVisual(
     id: 'artist',
     nameId: 'Pelukis',
@@ -64,8 +88,8 @@ const List<RoleVisual> kRoleVisuals = [
     ],
     penguinIcon: 'assets/images/penguin_artist.png',
     bgImage: 'assets/images/artist_trans.png',
-    tint: AppColors.accentTint,
-    badgeColor: AppColors.accent,
+    tint: Color(0xFFFDF1E8),
+    badgeColor: Color(0xFFE57B65),
   ),
   RoleVisual(
     id: 'chef',
@@ -80,7 +104,7 @@ const List<RoleVisual> kRoleVisuals = [
     ],
     penguinIcon: 'assets/images/penguin_chef.png',
     bgImage: 'assets/images/chef_trans.png',
-    tint: AppColors.primaryTint,
+    tint: Color(0xFFEBF4FA),
     badgeColor: Color(0xFF75AADB),
   ),
   RoleVisual(
@@ -97,7 +121,7 @@ const List<RoleVisual> kRoleVisuals = [
     ],
     penguinIcon: 'assets/images/penguin_doctor.png',
     bgImage: 'assets/images/doctor_trans.png',
-    tint: AppColors.successTint,
+    tint: Color(0xFFE8F2E6),
     badgeColor: Color(0xFF81C784),
   ),
   RoleVisual(
@@ -141,7 +165,7 @@ RoleVisual? roleVisualById(String? id) {
 }
 
 /// Fallback dipakai kalau role_id dari database nggak ketemu di daftar di atas.
-const RoleVisual kUnknownRoleVisual = RoleVisual(
+final RoleVisual kUnknownRoleVisual = RoleVisual(
   id: 'unknown',
   nameId: 'Penjelajah',
   nameEn: 'Explorer',
@@ -150,6 +174,6 @@ const RoleVisual kUnknownRoleVisual = RoleVisual(
   skills: [],
   penguinIcon: 'assets/images/penguin_head.png',
   bgImage: 'assets/images/frost.png',
-  tint: AppColors.primaryTint,
-  badgeColor: Color(0xFF90A4AE),
+  tint: const Color(0xFFEBF4FA),
+  badgeColor: const Color(0xFF90A4AE),
 );

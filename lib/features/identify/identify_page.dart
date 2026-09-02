@@ -360,7 +360,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           if (isLoading)
             Container(
               color: Colors.black26,
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               ),
             ),
@@ -459,7 +459,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           Text(
             texts['step1_title']!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -479,7 +479,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             decoration: InputDecoration(
               hintText: texts['step1_hint']!,
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
@@ -488,7 +488,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           const SizedBox(height: 40),
           Text(
             texts['step1_age']!,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -537,7 +537,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             right: -8,
             child: Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
@@ -704,7 +704,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           Text(
             texts['step5_title']!,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
@@ -765,7 +765,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
@@ -876,7 +876,7 @@ class _OptionCard extends StatelessWidget {
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: AppColors.accent),
+              Icon(Icons.check_circle, color: AppColors.accent),
           ],
         ),
       ),

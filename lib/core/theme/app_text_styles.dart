@@ -13,35 +13,42 @@ abstract class AppTextStyles {
   static TextStyle _base({
     required double size,
     required FontWeight weight,
-    Color color = AppColors.textPrimary,
+    Color? color,
     double? height,
   }) => GoogleFonts.poppins(
     fontSize: size,
     fontWeight: weight,
-    color: color,
+    color: color ?? AppColors.textPrimary,
     height: height,
   );
 
-  static TextStyle h1({Color color = AppColors.textPrimary}) =>
+  static TextStyle h1({Color? color}) =>
       _base(size: 28, weight: FontWeight.w700, color: color, height: 1.2);
 
-  static TextStyle h2({Color color = AppColors.textPrimary}) =>
+  static TextStyle h2({Color? color}) =>
       _base(size: 22, weight: FontWeight.w700, color: color, height: 1.25);
 
-  static TextStyle h3({Color color = AppColors.textPrimary}) =>
+  static TextStyle h3({Color? color}) =>
       _base(size: 18, weight: FontWeight.w600, color: color, height: 1.3);
 
-  static TextStyle bodyLarge({Color color = AppColors.textPrimary}) =>
+  static TextStyle bodyLarge({Color? color}) =>
       _base(size: 16, weight: FontWeight.w400, color: color, height: 1.4);
 
-  static TextStyle body({Color color = AppColors.textSecondary}) =>
-      _base(size: 14, weight: FontWeight.w400, color: color, height: 1.4);
+  static TextStyle body({Color? color}) => _base(
+    size: 14,
+    weight: FontWeight.w400,
+    color: color ?? AppColors.textSecondary,
+    height: 1.4,
+  );
 
-  static TextStyle bodyBold({Color color = AppColors.textPrimary}) =>
+  static TextStyle bodyBold({Color? color}) =>
       _base(size: 14, weight: FontWeight.w600, color: color, height: 1.4);
 
-  static TextStyle caption({Color color = AppColors.textMuted}) =>
-      _base(size: 12, weight: FontWeight.w400, color: color);
+  static TextStyle caption({Color? color}) => _base(
+    size: 12,
+    weight: FontWeight.w400,
+    color: color ?? AppColors.textMuted,
+  );
 
   static TextStyle button({Color color = Colors.white}) =>
       _base(size: 15, weight: FontWeight.w600, color: color);

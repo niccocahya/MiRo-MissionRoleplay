@@ -299,9 +299,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
 
     return childDataAsync.when(
-      loading: () => const Scaffold(
+      loading: () => Scaffold(
         backgroundColor: AppColors.background,
-        body: AppLoading(),
+        body: const AppLoading(),
       ),
       error: (error, stackTrace) => Scaffold(
         backgroundColor: AppColors.background,
@@ -437,7 +437,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             onTap: () => Navigator.of(
               context,
               rootNavigator: true,
-            ).push(appPageRoute(const MissionSearchScreen())),
+            ).push(appPageRoute(MissionSearchScreen())),
             child: Container(
               width: 40,
               height: 40,
@@ -449,7 +449,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.search_rounded,
                 color: AppColors.primary,
                 size: 24,
@@ -478,7 +478,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.notifications_none_rounded,
                         color: AppColors.primary,
                         size: 24,
@@ -533,7 +533,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               onTap: () => Navigator.of(
                 context,
                 rootNavigator: true,
-              ).push(appPageRoute(const AllCertificatesPage())),
+              ).push(appPageRoute(AllCertificatesPage())),
             ),
           ),
           const SizedBox(width: AppSpacing.sm + 4),
@@ -729,7 +729,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: Container(
                             width: 32,
                             height: 32,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.accent,
                               shape: BoxShape.circle,
                             ),
@@ -973,7 +973,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     child: Container(
                       width: 140,
                       height: 190,
-                      color: role.tint,
+                      color: role.resolvedTint,
                       child: Stack(
                         children: [
                           Positioned.fill(
@@ -981,7 +981,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               role.penguinIcon,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
-                                color: role.tint,
+                                color: role.resolvedTint,
                                 child: const Center(
                                   child: Icon(Icons.stars_rounded, color: Colors.black12, size: 60),
                                 ),
@@ -1299,7 +1299,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, color: AppColors.primary, size: 20),
+                    child: Icon(Icons.close, color: AppColors.primary, size: 20),
                   ),
                 ),
               ),

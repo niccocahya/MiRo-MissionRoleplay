@@ -111,7 +111,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       barrierColor: Colors.white.withValues(
         alpha: 0.6,
       ), // Cegah layar terlihat terlalu blank
-      builder: (_) => const PopScope(
+      builder: (_) => PopScope(
         canPop: false, // Cegah ditutup pakai tombol back HP
         child: Center(
           child: CircularProgressIndicator(color: AppColors.primary),
@@ -196,7 +196,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               _buildHeader(context, ref, rolesAsync, lang),
               Expanded(
                 child: _isLoadingProgress
-                    ? const Center(
+                    ? Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
                         ),
@@ -234,17 +234,17 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.primary, AppColors.primaryLight],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(40),
           bottomRight: Radius.circular(40),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 16,
@@ -308,7 +308,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             value: role.id,
             child: Text(
               roleText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
@@ -459,9 +459,9 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             height: 80,
             decoration: BoxDecoration(
               gradient: isCurrent
-                  ? const RadialGradient(
-                      center: Alignment(-0.3, -0.3),
-                      colors: [Color(0xFFF58B7A), AppColors.accentDark],
+                  ? RadialGradient(
+                      center: const Alignment(-0.3, -0.3),
+                      colors: [const Color(0xFFF58B7A), AppColors.accentDark],
                     )
                   : isCompleted
                   ? const RadialGradient(
@@ -512,7 +512,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -524,7 +524,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               ),
               child: Text(
                 lang == 'id' ? mission.titleId : mission.titleEn,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -543,8 +543,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               left: -6,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.favorite_rounded, color: AppColors.accent, size: 14),
+                decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
+                child: Icon(Icons.favorite_rounded, color: AppColors.accent, size: 14),
               ),
             ),
         ],
@@ -576,8 +576,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.gold, Color(0xFFE08600)],
+        gradient: LinearGradient(
+          colors: [AppColors.gold, const Color(0xFFE08600)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

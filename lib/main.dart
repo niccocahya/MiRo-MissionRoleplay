@@ -6,6 +6,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/providers/text_size_provider.dart';
+import 'core/providers/theme_mode_provider.dart';
+import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
@@ -40,10 +42,30 @@ class MyApp extends ConsumerWidget {
     ref.watch(languageProvider);
     final textSize = ref.watch(textSizeProvider);
 
+    // Sama pola-nya kaya languageProvider di atas: AppColors.x itu getter
+    // yang baca variabel static, bukan InheritedWidget — jadi biar seluruh
+    // layar ikut ganti warna pas mode-nya diganti, kita HARUS watch
+    // (bukan read) providernya di sini supaya seluruh tree di bawah ini
+    // rebuild, dan set static-nya SEBELUM widget tree-nya dibangun.
+    final themeMode = ref.watch(themeModeProvider);
+    final platformBrightness = MediaQuery.platformBrightnessOf(context);
+    final resolvedBrightness = switch (themeMode) {
+      AppThemeMode.system => platformBrightness,
+      AppThemeMode.light => Brightness.light,
+      AppThemeMode.dark => Brightness.dark,
+    };
+    AppColors.setBrightness(resolvedBrightness);
+
     return MaterialApp.router(
       title: 'MiRO',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: switch (themeMode) {
+        AppThemeMode.system => ThemeMode.system,
+        AppThemeMode.light => ThemeMode.light,
+        AppThemeMode.dark => ThemeMode.dark,
+      },
       routerConfig: router,
 
       // ========================================================
@@ -62,7 +84,11 @@ class MyApp extends ConsumerWidget {
               if (child != null) child,
 
               // 2. Pinguin dibiarkan lepas menguasai Stack!
-              const PenguinChatButton(),
+              // BUKAN const — widget const dikanonikalisasi (objek yang
+              // sama persis tiap kali), jadi Flutter skip rebuild-nya
+              // walau MyApp rebuild pas dark mode di-toggle, dan Mink
+              // bakal "nyangkut" warna lama.
+              PenguinChatButton(),
             ],
           ),
         );

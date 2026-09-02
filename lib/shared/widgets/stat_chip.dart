@@ -11,32 +11,33 @@ class StatChip extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
-    this.color = AppColors.primary,
+    this.color,
     this.background,
   });
 
   final IconData icon;
   final String label;
-  final Color color;
+  final Color? color;
   final Color? background;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor = color ?? AppColors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm + 2,
         vertical: AppSpacing.xs + 2,
       ),
       decoration: BoxDecoration(
-        color: background ?? color.withValues(alpha: 0.1),
+        color: background ?? resolvedColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
+          Icon(icon, size: 16, color: resolvedColor),
           const SizedBox(width: AppSpacing.xs),
-          Text(label, style: AppTextStyles.bodyBold(color: color)),
+          Text(label, style: AppTextStyles.bodyBold(color: resolvedColor)),
         ],
       ),
     );

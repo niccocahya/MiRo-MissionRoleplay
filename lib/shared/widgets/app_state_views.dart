@@ -18,7 +18,7 @@ class AppLoading extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: AppColors.accent),
+          CircularProgressIndicator(color: AppColors.accent),
           if (message != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(message!, style: AppTextStyles.body()),
@@ -45,7 +45,7 @@ class AppErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: AppColors.danger, size: 40),
+            Icon(Icons.error_outline, color: AppColors.danger, size: 40),
             const SizedBox(height: AppSpacing.sm),
             Text(
               message,

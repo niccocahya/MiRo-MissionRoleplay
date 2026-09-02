@@ -461,9 +461,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     final achievementsAsync = ref.watch(childAchievementsProvider(childId));
 
     return childDataAsync.when(
-      loading: () => const Scaffold(
+      loading: () => Scaffold(
         backgroundColor: AppColors.background,
-        body: AppLoading(),
+        body: const AppLoading(),
       ),
       error: (error, stack) => Scaffold(
         backgroundColor: AppColors.background,
@@ -558,7 +558,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         children: [
           Text(
             "${texts['title']} $childName",
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -622,7 +622,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     const SizedBox(height: 8),
                     Text(
                       "$streak",
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
@@ -645,8 +645,8 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primaryTint, Color(0xFFD9EAFA)],
+                  gradient: LinearGradient(
+                    colors: [AppColors.primaryTint, const Color(0xFFD9EAFA)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -666,7 +666,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     const SizedBox(height: 8),
                     Text(
                       "${texts['level']} $level",
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.primary,
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
@@ -680,7 +680,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                         backgroundColor: const Color(
                           0xFF0A264F,
                         ).withValues(alpha: 0.1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
+                        valueColor: AlwaysStoppedAnimation<Color>(
                           AppColors.gold,
                         ),
                         minHeight: 8,
@@ -805,7 +805,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         children: [
           Text(
             texts['skill_trend_title']!,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -892,7 +892,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                             reservedSize: 32,
                             getTitlesWidget: (value, meta) => Text(
                               value.toInt().toString(),
-                              style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                              style: TextStyle(fontSize: 10, color: AppColors.textMuted),
                             ),
                           ),
                         ),
@@ -908,7 +908,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Text(
                                   DateFormat('d/M').format(points[idx].date),
-                                  style: const TextStyle(fontSize: 9, color: AppColors.textMuted),
+                                  style: TextStyle(fontSize: 9, color: AppColors.textMuted),
                                 ),
                               );
                             },
@@ -981,7 +981,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             children: [
               Text(
                 texts['consistency']!,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -998,7 +998,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 ),
                 child: Text(
                   monthName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -1135,7 +1135,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               Expanded(
                 child: Text(
                   texts['mission_history']!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -1168,7 +1168,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.picture_as_pdf_rounded, color: AppColors.accent),
+                    : Icon(Icons.picture_as_pdf_rounded, color: AppColors.accent),
               ),
             ],
           ),
@@ -1249,7 +1249,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         children: [
           Text(
             texts['achievements']!,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -1298,7 +1298,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           children: [
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm + 2),
-              decoration: BoxDecoration(color: role.tint, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: role.resolvedTint, shape: BoxShape.circle),
               child: Text(icon, style: const TextStyle(fontSize: 22)),
             ),
             const SizedBox(width: AppSpacing.sm + 2),
@@ -1339,13 +1339,13 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          icon: const Icon(
+          icon: Icon(
             Icons.keyboard_arrow_down_rounded,
             color: AppColors.primary,
           ),
-          dropdownColor: Colors.white,
+          dropdownColor: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.primary,
             fontSize: 13,
             fontWeight: FontWeight.bold,
@@ -1392,7 +1392,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: role.tint,
+              color: role.resolvedTint,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Image.asset(

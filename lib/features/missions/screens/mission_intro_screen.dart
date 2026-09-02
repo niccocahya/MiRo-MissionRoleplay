@@ -36,7 +36,7 @@ class MissionIntroScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    const Color bgColor = AppColors.background;
+    final Color bgColor = AppColors.background;
 
     // TARIK BAHASA AKTIF DARI PROVIDER
     final lang = ref.watch(languageProvider);
@@ -113,7 +113,7 @@ class MissionIntroScreen extends ConsumerWidget {
                           ),
                           child: Text(
                             (roleName ?? mission.roleId).toUpperCase(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.accentDark,
                               fontSize: 12,
                               fontWeight: FontWeight.w900,
@@ -126,7 +126,7 @@ class MissionIntroScreen extends ConsumerWidget {
                         // JUDUL MISI DINAMIS (ID/EN)
                         Text(
                           lang == 'id' ? mission.titleId : mission.titleEn,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.primary,
                             fontSize: 40,
                             fontWeight: FontWeight.w900,
@@ -195,8 +195,8 @@ class MissionIntroScreen extends ConsumerWidget {
                       ),
                       child: Ink(
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFF58B7A), AppColors.accentDark],
+                          gradient: LinearGradient(
+                            colors: [const Color(0xFFF58B7A), AppColors.accentDark],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -361,7 +361,7 @@ class MissionIntroScreen extends ConsumerWidget {
               ),
               child: Text(
                 material.toString(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -378,7 +378,7 @@ class MissionIntroScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -401,7 +401,7 @@ class MissionIntroScreen extends ConsumerWidget {
           ],
           Text(
             text,
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.w800,
               fontSize: 13,

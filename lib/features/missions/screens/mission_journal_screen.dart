@@ -379,7 +379,7 @@ Future<void> _downloadCollage() async {
     final bool hasPhotos = widget.capturedPhotos.isNotEmpty;
 
     final String role = widget.mission.roleId;
-    final Color badgeColor = (roleVisualById(role) ?? kUnknownRoleVisual).badgeColor;
+    final Color badgeColor = (roleVisualById(role) ?? kUnknownRoleVisual).resolvedBadgeColor;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -391,7 +391,7 @@ Future<void> _downloadCollage() async {
             children: [
               Expanded(
                 child: _isLoading
-                    ? const Center(
+                    ? Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
                         ),
@@ -403,7 +403,7 @@ Future<void> _downloadCollage() async {
                             widget.isViewOnly
                                 ? texts['journal_view']!
                                 : texts['journal_new']!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
@@ -435,14 +435,14 @@ Future<void> _downloadCollage() async {
                                 Expanded(
                                   child: OutlinedButton.icon(
                                     onPressed: _downloadCollage,
-                                    icon: const Icon(
+                                    icon: Icon(
                                       Icons.download_rounded,
                                       color: AppColors.primary,
                                       size: 18,
                                     ),
                                     label: Text(
                                       texts['download']!,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -451,7 +451,7 @@ Future<void> _downloadCollage() async {
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 14,
                                       ),
-                                      side: const BorderSide(
+                                      side: BorderSide(
                                         color: AppColors.primary,
                                         width: 1.5,
                                       ),
@@ -496,7 +496,7 @@ Future<void> _downloadCollage() async {
 
                           Text(
                             texts['skill_prog']!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -591,7 +591,7 @@ Future<void> _downloadCollage() async {
                                       children: [
                                         Text(
                                           texts['new_badge']!,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: AppColors.accent,
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
@@ -605,7 +605,7 @@ Future<void> _downloadCollage() async {
                                                   ''
                                               : _earnedAchievement!['title_en'] ??
                                                   '',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: AppColors.primary,
                                             fontSize: 18,
                                             fontWeight: FontWeight.w900,
@@ -928,7 +928,7 @@ Future<void> _downloadCollage() async {
                 children: [
                   Text(
                     skillName.toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -937,7 +937,7 @@ Future<void> _downloadCollage() async {
                   const SizedBox(width: 8),
                   Text(
                     "↑ +$reward",
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.accent,
                       fontWeight: FontWeight.w900,
                       fontSize: 14,
@@ -947,7 +947,7 @@ Future<void> _downloadCollage() async {
               ),
               Text(
                 "Level $level",
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w900,
                   fontSize: 14,
@@ -960,17 +960,17 @@ Future<void> _downloadCollage() async {
             height: 12,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.border,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: AppColors.border),
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: progressPercent.clamp(0.0, 1.0),
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.gold, Color(0xFFF5B555)],
+                  gradient: LinearGradient(
+                    colors: [AppColors.gold, const Color(0xFFF5B555)],
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),

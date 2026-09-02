@@ -117,11 +117,11 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 0),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(color: AppColors.border),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: const BorderSide(color: AppColors.border),
+                    borderSide: BorderSide(color: AppColors.border),
                   ),
                 ),
               ),
@@ -138,7 +138,7 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
                   ...kRoleVisuals.map(
                     (r) => Padding(
                       padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: _roleChip(r.id, r.name(lang), r.badgeColor),
+                      child: _roleChip(r.id, r.name(lang), r.resolvedBadgeColor),
                     ),
                   ),
                 ],
@@ -289,9 +289,9 @@ class _MissionResultTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: role.tint,
+              color: role.resolvedTint,
               shape: BoxShape.circle,
-              border: Border.all(color: role.badgeColor.withValues(alpha: 0.4)),
+              border: Border.all(color: role.resolvedBadgeColor.withValues(alpha: 0.4)),
             ),
             child: Center(
               child: Text(

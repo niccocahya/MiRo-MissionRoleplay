@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -25,9 +26,9 @@ class AppBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -44,7 +45,7 @@ class AppBottomSheet extends StatelessWidget {
               width: 50,
               height: 5,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: AppColors.border,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),

@@ -336,7 +336,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Hapus', style: TextStyle(color: AppColors.danger)),
+            child: Text('Hapus', style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -558,7 +558,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       const Text("🐧", style: TextStyle(fontSize: 30)),
                 ),
                 const SizedBox(width: 12),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -584,14 +584,14 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                   IconButton(
                     tooltip: 'Hapus histori chat',
                     onPressed: () => _confirmClearHistory(context),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete_outline_rounded,
                       color: AppColors.primary,
                     ),
                   ),
                 IconButton(
                   onPressed: () => setState(() => _isChatOpen = false),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close_rounded,
                     color: AppColors.primary,
                   ),
@@ -599,7 +599,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.border),
+          Divider(height: 1, color: AppColors.border),
           Expanded(
             child: ListView(
               controller: _scrollController,
@@ -675,7 +675,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                               ),
                               child: Text(
                                 q,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.primary,
@@ -692,7 +692,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -704,7 +704,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
             child: TextField(
               controller: _chatController,
               onSubmitted: (_) => _handleSend(childData, activeContext),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: AppColors.primary,
@@ -718,7 +718,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                   onTap: () => _handleSend(childData, activeContext),
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),

@@ -328,11 +328,11 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
       backgroundColor: Colors.transparent,
       body: SizedBox.expand(
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [AppColors.background, Color(0xFFE2EAF4)],
+              colors: [AppColors.background, const Color(0xFFE2EAF4)],
             ),
           ),
           child: SafeArea(
@@ -348,7 +348,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                     children: [
                       Text(
                         texts['how_to_play']!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -419,7 +419,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                           curve: Curves.easeInOut,
                           decoration: BoxDecoration(
                             gradient: isOpen
-                                ? const LinearGradient(
+                                ? LinearGradient(
                                     colors: [
                                       AppColors.primary,
                                       AppColors.primaryLight,
@@ -522,7 +522,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                   alignment: Alignment.center,
                                                   child: Text(
                                                     '${subIdx + 1}',
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       color: AppColors.primary,
                                                       fontWeight:
                                                           FontWeight.bold,

@@ -145,7 +145,7 @@ class CertificateDetailPage extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Text(
                     texts['title']!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,

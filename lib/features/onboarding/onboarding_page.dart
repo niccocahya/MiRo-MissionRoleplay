@@ -252,14 +252,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             Container(color: AppColors.primary)
           else
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
                     AppColors.primaryLighter,
-                    Color(0xFFD3E3F2),
-                    Color(0xFFE9DFCE),
+                    const Color(0xFFD3E3F2),
+                    const Color(0xFFE9DFCE),
                   ],
                 ),
               ),
@@ -398,7 +398,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               children: [
                 Text(
                   texts['lang_title']!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -478,7 +478,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: AppColors.primary,
@@ -495,7 +495,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ),
               ),
               child: isSelected
-                  ? const Center(
+                  ? Center(
                       child: CircleAvatar(
                         radius: 6,
                         backgroundColor: AppColors.accent,
@@ -553,7 +553,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             children: [
               Text(
                 texts['start_welcome']!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
@@ -563,7 +563,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               const SizedBox(height: 8),
               Text(
                 texts['start_title']!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
                   height: 1.15,
@@ -642,7 +642,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 Text(
                   texts['login_welcome']!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -706,7 +706,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 Text(
                   texts['reg_title']!,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -849,7 +849,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           const SizedBox(height: 20),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Divider(color: AppColors.primary, thickness: 1),
               ),
               Padding(
@@ -862,7 +862,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   ),
                 ),
               ),
-              const Expanded(
+              Expanded(
                 child: Divider(color: AppColors.primary, thickness: 1),
               ),
             ],
@@ -877,7 +877,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 isReg
                     ? "${texts['switch_login']!.split('?')[0]}? "
                     : "${texts['switch_reg']!.split('?')[0]}? ",
-                style: const TextStyle(color: AppColors.primary, fontSize: 13),
+                style: TextStyle(color: AppColors.primary, fontSize: 13),
               ),
               GestureDetector(
                 onTap: () => ref.read(onboardingStepProvider.notifier).setStep(
@@ -885,7 +885,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     ),
                 child: Text(
                   isReg ? texts['btn_login']! : texts['btn_register']!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: AppColors.accent,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -913,15 +913,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         ),
         label: Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.primary,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          disabledBackgroundColor: Colors.white,
+          backgroundColor: AppColors.surface,
+          disabledBackgroundColor: AppColors.surface,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -983,7 +983,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
               const SizedBox(width: 8),
               Text(
                 widget.label,
-                style: const TextStyle(
+                style: TextStyle(
                   color: AppColors.primary,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -995,7 +995,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
         TextField(
           controller: widget.controller,
           obscureText: widget.isPassword ? _obscureText : false,
-          style: const TextStyle(color: AppColors.primary),
+          style: TextStyle(color: AppColors.primary),
           decoration: InputDecoration(
             hintText: widget.placeholder,
             hintStyle: TextStyle(
@@ -1003,7 +1003,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
               fontSize: 14,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
+            fillColor: AppColors.surface.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 16,
@@ -1022,7 +1022,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: AppColors.primary,
                 width: 1.5,
               ),
