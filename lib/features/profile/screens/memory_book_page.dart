@@ -150,7 +150,18 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
                     );
                   }
 
-                  final roleIds = allPhotos.map((p) => p.roleId).toSet().toList();
+                  // Urutan chip-nya ngikutin kRoleVisuals (Koki/Dokter/
+                  // Pelukis/dst), bukan urutan kemunculan role di allPhotos
+                  // (yang disortir "terbaru duluan" di provider) -- kalau
+                  // pakai itu langsung, urutan chip-nya acak/nggak konsisten
+                  // tiap kali data foto berubah.
+                  final presentRoleIds = allPhotos.map((p) => p.roleId).toSet();
+                  final roleIds = [
+                    ...kRoleVisuals.map((r) => r.id).where(presentRoleIds.contains),
+                    ...presentRoleIds.where(
+                      (id) => !kRoleVisuals.any((r) => r.id == id),
+                    ),
+                  ];
                   final photos = _selectedRoleId == null
                       ? allPhotos
                       : allPhotos.where((p) => p.roleId == _selectedRoleId).toList();

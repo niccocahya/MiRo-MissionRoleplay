@@ -78,12 +78,27 @@ class AllBadgesPage extends ConsumerWidget {
                     byRole.putIfAbsent(b.roleId, () => []).add(b);
                   }
 
+                  // Urutan SECTION-nya sendiri (Koki/Dokter/Pelukis/dst)
+                  // ngikutin kRoleVisuals -- bukan urutan insersi Map, yang
+                  // kebentuk dari urutan badges (badges disortir "kebuka
+                  // duluan" di provider), jadi tanpa ini urutan section-nya
+                  // acak/nggak konsisten tiap kali data berubah, beda dari
+                  // urutan role yang stabil di layar lain (mission search,
+                  // dst).
+                  final orderedRoleIds = [
+                    ...kRoleVisuals.map((r) => r.id).where(byRole.containsKey),
+                    ...byRole.keys.where(
+                      (id) => !kRoleVisuals.any((r) => r.id == id),
+                    ),
+                  ];
+
                   return ListView(
                     padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
-                    children: byRole.entries.map((entry) {
-                      final role = roleVisualById(entry.key) ?? kUnknownRoleVisual;
+                    children: orderedRoleIds.map((roleId) {
+                      final role = roleVisualById(roleId) ?? kUnknownRoleVisual;
+                      final entryValue = byRole[roleId]!;
                       final unlockedCount =
-                          entry.value.where((b) => b.isUnlocked).length;
+                          entryValue.where((b) => b.isUnlocked).length;
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.lg),
@@ -95,13 +110,13 @@ class AllBadgesPage extends ConsumerWidget {
                                 Text(role.name(lang), style: AppTextStyles.h3()),
                                 const SizedBox(width: AppSpacing.sm),
                                 Text(
-                                  "$unlockedCount/${entry.value.length}",
+                                  "$unlockedCount/${entryValue.length}",
                                   style: AppTextStyles.caption(color: AppColors.textMuted),
                                 ),
                               ],
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            ...entry.value.map(
+                            ...entryValue.map(
                               (b) => Padding(
                                 padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                                 child: _BadgeTile(badge: b, role: role, lang: lang, texts: texts),
