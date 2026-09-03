@@ -591,14 +591,14 @@ class CertificateDetailPage extends ConsumerWidget {
                                       decoration: BoxDecoration(
                                         // STYLING BARU: Warna dasar lencana sedikit transparan untuk kesan premium
                                         color: isLocked
-                                            ? Colors.grey.shade100
+                                            ? AppColors.border
                                             : b['color'].withValues(
                                                 alpha: 0.15,
                                               ),
                                         shape: BoxShape.circle,
                                         border: Border.all(
                                           color: isLocked
-                                              ? Colors.grey.shade300
+                                              ? AppColors.textMuted
                                               : b['color'].withValues(
                                                   alpha: 0.8,
                                                 ),
@@ -619,10 +619,10 @@ class CertificateDetailPage extends ConsumerWidget {
                                       ),
                                       alignment: Alignment.center,
                                       child: isLocked
-                                          ? const Icon(
+                                          ? Icon(
                                               Icons.lock,
                                               size: 24,
-                                              color: Colors.grey,
+                                              color: AppColors.textMuted,
                                             )
                                           : Text(
                                               b['emoji'] ?? '🏅',
@@ -641,10 +641,10 @@ class CertificateDetailPage extends ConsumerWidget {
                                             color: Colors.white,
                                             shape: BoxShape.circle,
                                           ),
-                                          child: const Icon(
+                                          child: Icon(
                                             Icons.lock,
                                             size: 10,
-                                            color: Colors.grey,
+                                            color: AppColors.textMuted,
                                           ),
                                         ),
                                       ),
@@ -687,7 +687,7 @@ class CertificateDetailPage extends ConsumerWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        disabledBackgroundColor: Colors.grey.shade300,
+        disabledBackgroundColor: AppColors.border,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),

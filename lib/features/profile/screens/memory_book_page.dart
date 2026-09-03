@@ -69,9 +69,9 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
                       imageUrl: photo.imageUrl,
                       fit: BoxFit.contain,
                       errorWidget: (c, e, s) => Container(
-                        color: Colors.grey.shade200,
+                        color: AppColors.border,
                         height: 200,
-                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                        child: Icon(Icons.broken_image, color: AppColors.textMuted),
                       ),
                     ),
                   ),
@@ -200,7 +200,7 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
                                   placeholder: (c, u) => Container(color: AppColors.border),
                                   errorWidget: (c, e, s) => Container(
                                     color: AppColors.border,
-                                    child: const Icon(Icons.broken_image, color: Colors.grey),
+                                    child: Icon(Icons.broken_image, color: AppColors.textMuted),
                                   ),
                                 ),
                               ),

@@ -980,7 +980,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
@@ -1042,7 +1042,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                       decoration: BoxDecoration(
                         color: isActive
                             ? AppColors.accent
-                            : Colors.grey.shade100,
+                            : AppColors.border,
                         shape: BoxShape.circle,
                         boxShadow: isActive
                             ? [
@@ -1066,7 +1066,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                           : Text(
                               "$day",
                               style: TextStyle(
-                                color: Colors.grey.shade400,
+                                color: AppColors.textMuted,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1293,9 +1293,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),

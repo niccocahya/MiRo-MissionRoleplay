@@ -326,7 +326,7 @@ class _MissionReflectionScreenState
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.03),

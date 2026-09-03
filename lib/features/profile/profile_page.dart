@@ -721,7 +721,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           decoration: BoxDecoration(
             color: AppColors.background,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: AppColors.border),
           ),
           child: Text(icon, style: const TextStyle(fontSize: 24)),
         ),
@@ -2414,7 +2414,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget _buildMenuItem(String title, IconData icon, VoidCallback onTap) {
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),

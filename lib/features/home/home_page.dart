@@ -589,7 +589,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: InkWell(
         onTap: onTap,
@@ -1171,7 +1171,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 width: 26,
                                 height: 26,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
+                                  color: AppColors.border,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               )

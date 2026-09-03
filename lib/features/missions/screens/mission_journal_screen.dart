@@ -727,7 +727,7 @@ Future<void> _downloadCollage() async {
                             Text(
                               texts['no_photo']!,
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: AppColors.textSecondary,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -828,7 +828,7 @@ Future<void> _downloadCollage() async {
                               child: Text(
                                 texts['no_points']!,
                                 style: TextStyle(
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.textSecondary,
                                   fontStyle: FontStyle.italic,
                                 ),
                               ),
@@ -1051,7 +1051,7 @@ Future<void> _downloadCollage() async {
         height: 380,
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white, 
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           boxShadow: const [
             BoxShadow(
@@ -1245,16 +1245,16 @@ Future<void> _downloadCollage() async {
               imageUrl: url,
               fit: BoxFit.cover,
               errorWidget: (c, e, s) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+                color: AppColors.border,
+                child: Icon(Icons.broken_image, color: AppColors.textMuted),
               ),
             )
           : Image.asset(
               url,
               fit: BoxFit.cover,
               errorBuilder: (c, e, s) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.broken_image, color: Colors.grey),
+                color: AppColors.border,
+                child: Icon(Icons.broken_image, color: AppColors.textMuted),
               ),
             ),
     );

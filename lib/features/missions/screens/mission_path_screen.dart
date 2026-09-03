@@ -464,7 +464,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                   ? AppColors.accentDark.withValues(alpha: 0.5)
                   : isCompleted
                   ? AppColors.success.withValues(alpha: 0.4)
-                  : Colors.grey.shade300.withValues(alpha: 0.5),
+                  : AppColors.border.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
           ),
@@ -485,7 +485,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                     )
                   : RadialGradient(
                       center: Alignment(-0.3, -0.3),
-                      colors: [Colors.grey.shade300, Colors.grey.shade400],
+                      colors: [AppColors.border, AppColors.textMuted],
                     ),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 4),

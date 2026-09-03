@@ -44,7 +44,13 @@ class ComingSoonBadge extends StatelessWidget {
           child: IgnorePointer(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(radius),
-              child: Container(color: Colors.grey.shade200.withValues(alpha: 0.65)),
+              // Warna kainnya ngikut background app, BUKAN abu terang
+              // hardcoded -- di dark mode kain terang justru bikin tombolnya
+              // lebih nyolok dari sekitarnya (kebalik dari maksudnya:
+              // "pudar/nyatu ke belakang").
+              child: Container(
+                color: AppColors.background.withValues(alpha: 0.65),
+              ),
             ),
           ),
         ),

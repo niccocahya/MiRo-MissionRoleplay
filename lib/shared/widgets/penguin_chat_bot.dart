@@ -605,7 +605,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
             width: 40,
             height: 5,
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
+              color: AppColors.border,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -684,7 +684,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       child: Text(
                         "Mink sedang mengetik... 🐧💭",
                         style: TextStyle(
-                          color: Colors.grey.shade500,
+                          color: AppColors.textMuted,
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
                         ),
@@ -774,7 +774,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               ),
               decoration: InputDecoration(
                 hintText: "Tanya Mink di sini...",
-                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 filled: true,
                 fillColor: AppColors.background,
                 suffixIcon: GestureDetector(

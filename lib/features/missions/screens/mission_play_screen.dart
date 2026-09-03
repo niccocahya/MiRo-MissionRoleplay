@@ -378,7 +378,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                               decoration: BoxDecoration(
                                 color: isCompleted || isActive
                                     ? AppColors.primary
-                                    : Colors.grey.shade300,
+                                    : AppColors.border,
                                 borderRadius: BorderRadius.circular(AppRadius.sm),
                                 boxShadow: isActive
                                     ? [
@@ -1012,7 +1012,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: allStepsDone
                                 ? AppColors.primary
-                                : Colors.grey.shade300,
+                                : AppColors.border,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -1023,7 +1023,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                             style: TextStyle(
                               color: allStepsDone
                                   ? Colors.white
-                                  : Colors.grey.shade500,
+                                  : AppColors.textMuted,
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
