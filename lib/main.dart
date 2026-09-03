@@ -6,8 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/providers/text_size_provider.dart';
-import 'core/providers/theme_mode_provider.dart';
-import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
@@ -42,30 +40,15 @@ class MyApp extends ConsumerWidget {
     ref.watch(languageProvider);
     final textSize = ref.watch(textSizeProvider);
 
-    // Sama pola-nya kaya languageProvider di atas: AppColors.x itu getter
-    // yang baca variabel static, bukan InheritedWidget — jadi biar seluruh
-    // layar ikut ganti warna pas mode-nya diganti, kita HARUS watch
-    // (bukan read) providernya di sini supaya seluruh tree di bawah ini
-    // rebuild, dan set static-nya SEBELUM widget tree-nya dibangun.
-    final themeMode = ref.watch(themeModeProvider);
-    final platformBrightness = MediaQuery.platformBrightnessOf(context);
-    final resolvedBrightness = switch (themeMode) {
-      AppThemeMode.system => platformBrightness,
-      AppThemeMode.light => Brightness.light,
-      AppThemeMode.dark => Brightness.dark,
-    };
-    AppColors.setBrightness(resolvedBrightness);
-
+    // App ini SENGAJA satu mode aja (terang) -- dark mode sempat dibangun
+    // penuh lalu diminta dicabut total karena nggak cocok sama identitas
+    // visual MiRO yang colorful/playful. `theme` doang, nggak ada
+    // `darkTheme`/`themeMode` sama sekali, jadi nggak ada jalan buat OS
+    // "memaksa" app ini ke gelap.
     return MaterialApp.router(
       title: 'MiRO',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: switch (themeMode) {
-        AppThemeMode.system => ThemeMode.system,
-        AppThemeMode.light => ThemeMode.light,
-        AppThemeMode.dark => ThemeMode.dark,
-      },
       routerConfig: router,
 
       // ========================================================
@@ -86,8 +69,8 @@ class MyApp extends ConsumerWidget {
               // 2. Pinguin dibiarkan lepas menguasai Stack!
               // BUKAN const — widget const dikanonikalisasi (objek yang
               // sama persis tiap kali), jadi Flutter skip rebuild-nya
-              // walau MyApp rebuild pas dark mode di-toggle, dan Mink
-              // bakal "nyangkut" warna lama.
+              // walau MyApp rebuild pas bahasa diganti, dan Mink bakal
+              // "nyangkut" bahasa lama.
               //
               // Dibungkus Overlay SENDIRI di sini. `child` di atas isinya
               // Navigator (yang punya Overlay bawaannya sendiri), tapi

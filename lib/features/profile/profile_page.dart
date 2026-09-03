@@ -25,7 +25,6 @@ import '../../core/constants/input_limits.dart';
 import '../../core/providers/parent_provider.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/providers/text_size_provider.dart';
-import '../../core/providers/theme_mode_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/utils/level_utils.dart';
 import '../../core/services/account_deletion_service.dart';
@@ -138,7 +137,6 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "App Language",
     'notif_setting': "Push Notifications",
     'display_setting': "Text Size",
-    'theme_setting': "Theme",
     'account_setting': "Account",
     'change_email': "Change Email",
     'change_password': "Change Password",
@@ -238,7 +236,6 @@ const Map<String, Map<String, String>> _t = {
     'lang_setting': "Bahasa Aplikasi",
     'notif_setting': "Notifikasi Aplikasi",
     'display_setting': "Ukuran Teks",
-    'theme_setting': "Tema",
     'account_setting': "Akun",
     'change_email': "Ganti Email",
     'change_password': "Ganti Password",
@@ -915,40 +912,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   const Divider(),
 
-                  // Setting Tema (dark mode) — sebelumnya app cuma punya
-                  // mode terang, nggak ada opsi sama sekali.
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryTint,
-                        borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
-                      ),
-                      child: Icon(Icons.dark_mode_rounded, color: AppColors.primary),
-                    ),
-                    title: Text(texts['theme_setting']!, style: AppTextStyles.bodyBold()),
-                    trailing: Consumer(
-                      builder: (context, ref, _) {
-                        final current = ref.watch(themeModeProvider);
-                        return DropdownButton<AppThemeMode>(
-                          value: current,
-                          underline: const SizedBox(),
-                          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
-                          style: AppTextStyles.bodyBold(),
-                          items: AppThemeMode.values
-                              .map((m) => DropdownMenuItem(value: m, child: Text(m.label(currentLang))))
-                              .toList(),
-                          onChanged: (mode) {
-                            if (mode != null) {
-                              ref.read(themeModeProvider.notifier).setMode(mode);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  const Divider(),
+                  // Setelan Tema (dark mode) dulu ada di sini -- dicabut
+                  // total, app ini sekarang sengaja cuma punya satu mode
+                  // (lihat catatan panjang di app_colors.dart).
 
                   // Bagian Akun — ganti email/password. Sebelumnya nggak
                   // ada cara sama sekali buat orang tua ganti kredensial

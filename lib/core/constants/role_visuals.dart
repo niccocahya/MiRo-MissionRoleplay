@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
 
 /// Skill yang dilatih oleh sebuah role (dipakai di bottom sheet detail role).
 class RoleSkill {
@@ -45,37 +44,24 @@ class RoleVisual {
   final String penguinIcon;
   final String bgImage;
 
-  /// Warna dasar (mode terang) role ini — identitas warna role sendiri,
-  /// independen dari tema app. Di widget, pakai `resolvedTint`/
-  /// `resolvedBadgeColor`, BUKAN field ini langsung.
+  /// Warna identitas role ini.
   final Color tint;
   final Color badgeColor;
 
   String name(String lang) => lang == 'id' ? nameId : nameEn;
   String description(String lang) => lang == 'id' ? descriptionId : descriptionEn;
 
-  /// `tint` dulu pastel-terang doang — di mode gelap keliatan "nempel"
-  /// terang di atas background gelap. Diredupkan (di-blend ke arah
-  /// `AppColors.surface`) tiap kali diakses, bukan cuma sekali pas
-  /// `kRoleVisuals` dibikin — soalnya list-nya cuma dibangun SEKALI (baca
-  /// `AppColors.surface` real-time di sini, bukan field statis, biar ganti
-  /// mode langsung kepakai tanpa perlu rebuild list-nya).
-  Color get resolvedTint => AppColors.isDark
-      ? Color.lerp(tint, AppColors.surface, 0.65)!
-      : tint;
-
-  Color get resolvedBadgeColor => AppColors.isDark
-      ? Color.lerp(badgeColor, AppColors.surface, 0.12)!
-      : badgeColor;
+  // resolvedTint/resolvedBadgeColor dulu meredupkan tint/badgeColor buat
+  // dark mode -- sekarang app ini cuma satu mode, jadi keduanya cuma
+  // nerusin field aslinya. Dibiarkan ada (bukan diganti balik ke
+  // `tint`/`badgeColor` langsung di 10 tempat yang makainya) biar nggak
+  // perlu nyentuh call site manapun kalau suatu saat butuh nge-derive
+  // warna lagi dari sini.
+  Color get resolvedTint => tint;
+  Color get resolvedBadgeColor => badgeColor;
 }
 
-// Nggak lagi `const` — dulu tint/badgeColor sebagian nunjuk ke
-// `AppColors.xTint` yang sekarang getter (bukan const value lagi), jadi
-// list ini nggak bisa jadi compile-time constant. Diganti jadi literal
-// warna mode-terang murni di sini (identitas warna role, independen dari
-// tema), dan versi gelapnya dihitung on-the-fly lewat `resolvedTint`/
-// `resolvedBadgeColor` di atas.
-final List<RoleVisual> kRoleVisuals = [
+const List<RoleVisual> kRoleVisuals = [
   RoleVisual(
     id: 'artist',
     nameId: 'Pelukis',
@@ -165,7 +151,7 @@ RoleVisual? roleVisualById(String? id) {
 }
 
 /// Fallback dipakai kalau role_id dari database nggak ketemu di daftar di atas.
-final RoleVisual kUnknownRoleVisual = RoleVisual(
+const RoleVisual kUnknownRoleVisual = RoleVisual(
   id: 'unknown',
   nameId: 'Penjelajah',
   nameEn: 'Explorer',
@@ -174,6 +160,6 @@ final RoleVisual kUnknownRoleVisual = RoleVisual(
   skills: [],
   penguinIcon: 'assets/images/penguin_head.png',
   bgImage: 'assets/images/frost.png',
-  tint: const Color(0xFFEBF4FA),
-  badgeColor: const Color(0xFF90A4AE),
+  tint: Color(0xFFEBF4FA),
+  badgeColor: Color(0xFF90A4AE),
 );
