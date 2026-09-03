@@ -8,6 +8,7 @@ import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/notification_provider.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/fun_background_decorations.dart';
 import '../../shared/widgets/app_state_views.dart';
 
 // ==========================================
@@ -25,8 +26,10 @@ const Map<String, Map<String, String>> _t = {
     'confirm_clear_desc': "This can't be undone.",
     'cancel': "Cancel",
     'delete': "Delete",
-    'err_mark_all_failed': "Couldn't mark all as read. Check your connection and try again.",
-    'err_clear_all_failed': "Couldn't clear notifications. Check your connection and try again.",
+    'err_mark_all_failed':
+        "Couldn't mark all as read. Check your connection and try again.",
+    'err_clear_all_failed':
+        "Couldn't clear notifications. Check your connection and try again.",
   },
   'id': {
     'title': "Notifikasi",
@@ -38,8 +41,10 @@ const Map<String, Map<String, String>> _t = {
     'confirm_clear_desc': "Nggak bisa dibatalin kalau udah dihapus.",
     'cancel': "Batal",
     'delete': "Hapus",
-    'err_mark_all_failed': "Gagal nandain semua dibaca. Cek koneksimu terus coba lagi.",
-    'err_clear_all_failed': "Gagal hapus notifikasi. Cek koneksimu terus coba lagi.",
+    'err_mark_all_failed':
+        "Gagal nandain semua dibaca. Cek koneksimu terus coba lagi.",
+    'err_clear_all_failed':
+        "Gagal hapus notifikasi. Cek koneksimu terus coba lagi.",
   },
 };
 
@@ -83,6 +88,15 @@ class NotificationsPage extends ConsumerWidget {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
+          // Notifikasi kebanyakan berisi TEKS (daftar padat), jadi sengaja
+          // cuma dikasih 1 sparkle -- dekorasi berat bakal ganggu
+          // keterbacaan daftar.
+          const Positioned(
+            top: 60,
+            right: 20,
+            child: Sparkle(size: 16, color: AppColors.accent),
+          ),
+
           // ==================== KONTEN UTAMA (LIST/EMPTY STATE) ====================
           notifsAsync.when(
             loading: () => const AppLoading(),
@@ -150,14 +164,18 @@ class NotificationsPage extends ConsumerWidget {
               right: 24,
               child: SafeArea(
                 child: PopupMenuButton<String>(
-                  icon: Icon(Icons.more_horiz_rounded, color: AppColors.primary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  icon:
+                      Icon(Icons.more_horiz_rounded, color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                   onSelected: (value) async {
                     if (value == 'mark_all') {
-                      final ok = await ref.read(markAllNotificationsReadProvider)();
+                      final ok =
+                          await ref.read(markAllNotificationsReadProvider)();
                       if (!ok && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(texts['err_mark_all_failed']!)),
+                          SnackBar(
+                              content: Text(texts['err_mark_all_failed']!)),
                         );
                       }
                     } else if (value == 'clear_all') {
@@ -182,10 +200,12 @@ class NotificationsPage extends ConsumerWidget {
                         ),
                       );
                       if (confirmed ?? false) {
-                        final ok = await ref.read(clearAllNotificationsProvider)();
+                        final ok =
+                            await ref.read(clearAllNotificationsProvider)();
                         if (!ok && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(texts['err_clear_all_failed']!)),
+                            SnackBar(
+                                content: Text(texts['err_clear_all_failed']!)),
                           );
                         }
                       }
@@ -220,9 +240,8 @@ class NotificationsPage extends ConsumerWidget {
     final String title = lang == 'id'
         ? (notif['title_id'] ?? 'Notifikasi')
         : (notif['title_en'] ?? 'Notification');
-    final String desc = lang == 'id'
-        ? (notif['desc_id'] ?? '')
-        : (notif['desc_en'] ?? '');
+    final String desc =
+        lang == 'id' ? (notif['desc_id'] ?? '') : (notif['desc_en'] ?? '');
 
     // ANTI-CRASH: Parsing tanggal aman pakai Try-Catch
     String timeFormatted = '-';
@@ -311,9 +330,8 @@ class NotificationsPage extends ConsumerWidget {
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 14,
-                          fontWeight: isRead
-                              ? FontWeight.w600
-                              : FontWeight.bold,
+                          fontWeight:
+                              isRead ? FontWeight.w600 : FontWeight.bold,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

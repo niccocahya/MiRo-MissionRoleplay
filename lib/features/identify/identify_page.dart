@@ -13,6 +13,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/constants/input_limits.dart';
+import '../../shared/widgets/fun_background_decorations.dart';
 import '../../core/theme/app_spacing.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
@@ -289,23 +290,22 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
       }
 
       // 2. Setor semua data (termasuk link foto) ke Repository
-      final String childId = await ref
-          .read(supabaseRepositoryProvider)
-          .submitOnboardingData(
-            // Dipangkas SEBELUM disimpan. Validasi di atas emang udah
-            // pakai trim(), tapi yang dikirim ke database dulu nilai
-            // mentahnya -- jadi nama berspasi di ujung tetap lolos dan
-            // kebawa ke mana-mana: sapaan di Home ("Halo, Jasmine !"),
-            // sertifikat, sampai laporan PDF. Di database sekarang masih
-            // ada satu baris peninggalan ini.
-            name: childName.trim(),
-            age: childAge!,
-            interests: childEnjoys,
-            learningStyles: childLearns,
-            parentGoals: childDevelops,
-            timePreference: bondTime ?? "15_min",
-            avatarUrl: uploadedPhotoUrl,
-          );
+      final String childId =
+          await ref.read(supabaseRepositoryProvider).submitOnboardingData(
+                // Dipangkas SEBELUM disimpan. Validasi di atas emang udah
+                // pakai trim(), tapi yang dikirim ke database dulu nilai
+                // mentahnya -- jadi nama berspasi di ujung tetap lolos dan
+                // kebawa ke mana-mana: sapaan di Home ("Halo, Jasmine !"),
+                // sertifikat, sampai laporan PDF. Di database sekarang masih
+                // ada satu baris peninggalan ini.
+                name: childName.trim(),
+                age: childAge!,
+                interests: childEnjoys,
+                learningStyles: childLearns,
+                parentGoals: childDevelops,
+                timePreference: bondTime ?? "15_min",
+                avatarUrl: uploadedPhotoUrl,
+              );
 
       ref.read(selectedChildIdProvider.notifier).setId(childId);
       if (mounted) context.go('/home');
@@ -321,9 +321,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     final lang = ref.watch(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
     final bool isWhiteBg = step % 2 != 0;
-    final Color mainBgColor = isWhiteBg
-        ? Colors.white
-        : _kIdentifyLightBlue;
+    final Color mainBgColor = isWhiteBg ? Colors.white : _kIdentifyLightBlue;
 
     // 🔥 PENGAMANAN EKSTRA: Paksa hide terus-terusan selama halaman ini di-build!
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -337,6 +335,10 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
+          // Sentuhan ringan -- layar ini udah punya ilustrasi & gradasi
+          // per-langkahnya sendiri, jadi dekorasinya sengaja dikit.
+          const Sparkle(top: 90, right: 20, size: 16, color: AppColors.accent),
+          const Sparkle(top: 160, left: 16, size: 12, color: AppColors.gold),
           Positioned(
             bottom: 0,
             left: 0,
@@ -469,8 +471,8 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               onPressed: isLoading
                   ? null
                   : (isLastStep
-                        ? () => _handleSubmit(texts)
-                        : () => _handleNext(texts)),
+                      ? () => _handleSubmit(texts)
+                      : () => _handleNext(texts)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kIdentifyNavy,
                 padding: const EdgeInsets.symmetric(vertical: 18),
@@ -527,7 +529,9 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             // tetap. buildCounter dimatiin biar teks "0/30" bawaan
             // Flutter nggak nongol dan ngerusak tata letaknya.
             maxLength: kMaxChildNameLength,
-            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
+            buildCounter: (_,
+                    {required currentLength, required isFocused, maxLength}) =>
+                null,
             decoration: InputDecoration(
               hintText: texts['step1_hint']!,
               filled: true,
@@ -781,9 +785,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: isSel
-                        ? AppColors.gold
-                        : const Color(0xFFF4F7FA),
+                    color: isSel ? AppColors.gold : const Color(0xFFF4F7FA),
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                   ),
                   child: Text(
@@ -826,9 +828,8 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           const SizedBox(height: 32),
           ...options.map((item) {
             final String label = texts[item['key']]!;
-            final String? subLabel = item['sub'] != null
-                ? texts[item['sub']]
-                : null;
+            final String? subLabel =
+                item['sub'] != null ? texts[item['sub']] : null;
             final String dbId = item['dbId']!;
 
             return Padding(
@@ -910,12 +911,9 @@ class _OptionCard extends StatelessWidget {
                     label,
                     style: TextStyle(
                       fontSize: 17,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.w600,
-                      color: isSelected
-                          ? AppColors.accent
-                          : _kIdentifyNavy,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.w600,
+                      color: isSelected ? AppColors.accent : _kIdentifyNavy,
                     ),
                   ),
                   if (subLabel != null) ...[
@@ -933,8 +931,7 @@ class _OptionCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (isSelected)
-              Icon(Icons.check_circle, color: AppColors.accent),
+            if (isSelected) Icon(Icons.check_circle, color: AppColors.accent),
           ],
         ),
       ),

@@ -13,6 +13,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/app_choice_chip.dart';
 import '../../../shared/widgets/app_screen_header.dart';
+import '../../../shared/widgets/fun_background_decorations.dart';
 import '../../../shared/widgets/section_header.dart';
 
 const Map<String, Map<String, String>> _t = {
@@ -82,7 +83,13 @@ const Map<String, Map<String, String>> _t = {
   },
 };
 
-const List<String> _kInterestIds = ["Drawing", "Reading", "Speaking", "Music", "Sport"];
+const List<String> _kInterestIds = [
+  "Drawing",
+  "Reading",
+  "Speaking",
+  "Music",
+  "Sport"
+];
 const List<String> _kLearningStyleIds = ["Visual", "Auditori", "Kinestetik"];
 const List<String> _kGoalIds = [
   "Motor skills",
@@ -91,7 +98,13 @@ const List<String> _kGoalIds = [
   "Literacy",
   "Thinking skills",
 ];
-const List<String> _kTimeIds = ["15_min", "30_min", "1_hour", "1_5_hours", "2_hours"];
+const List<String> _kTimeIds = [
+  "15_min",
+  "30_min",
+  "1_hour",
+  "1_5_hours",
+  "2_hours"
+];
 
 /// Isi/edit kuisioner minat & gaya belajar KAPAN AJA setelah onboarding --
 /// sebelumnya data ini (tabel `questionnaires`) cuma pernah ditulis SEKALI
@@ -198,116 +211,124 @@ class _EditQuestionnairePageState extends ConsumerState<EditQuestionnairePage> {
     final texts = _t[lang] ?? _t['en']!;
     final hPad = context.pageHPadding;
 
-    final questionnaireAsync = ref.watch(childQuestionnaireProvider(widget.childId));
+    final questionnaireAsync =
+        ref.watch(childQuestionnaireProvider(widget.childId));
     _prefill(questionnaireAsync.value);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppScreenHeader(title: texts['title']!),
-            Expanded(
-              child: questionnaireAsync.when(
-                loading: () => const AppLoading(),
-                error: (e, s) => AppErrorView(message: "$e"),
-                data: (_) => ListView(
-                  padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
-                  children: [
-                    Text(
-                      texts['desc']!,
-                      style: AppTextStyles.body(color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    SectionHeader(title: texts['section_interests']!),
-                    AppCard(
-                      child: _chipWrap(
-                        _kInterestIds,
-                        _interests,
-                        (id) => 'act_${id.toLowerCase()}',
-                        texts,
-                        onTap: (id) => _toggleMulti(
-                          _interests,
-                          id,
-                          (l) => _interests = l,
+      // Ini layar FORM (edit minat & gaya belajar) -- sentuhan minimal
+      // biar nggak ganggu kolom-kolom pilihan di bawahnya.
+      body: Stack(
+        children: [
+          const Positioned(
+            top: 60,
+            right: 24,
+            child: Sparkle(size: 16, color: AppColors.accent),
+          ),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppScreenHeader(title: texts['title']!),
+                Expanded(
+                  child: questionnaireAsync.when(
+                    loading: () => const AppLoading(),
+                    error: (e, s) => AppErrorView(message: "$e"),
+                    data: (_) => ListView(
+                      padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
+                      children: [
+                        Text(
+                          texts['desc']!,
+                          style: AppTextStyles.body(
+                              color: AppColors.textSecondary),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    SectionHeader(title: texts['section_learning']!),
-                    AppCard(
-                      child: _chipWrap(
-                        _kLearningStyleIds,
-                        _learningStyles,
-                        (id) => switch (id) {
-                          'Visual' => 'style_visual',
-                          'Auditori' => 'style_auditory',
-                          _ => 'style_kinesthetic',
-                        },
-                        texts,
-                        onTap: (id) => setState(
-                          () => _learningStyles = [id],
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(title: texts['section_interests']!),
+                        AppCard(
+                          child: _chipWrap(
+                            _kInterestIds,
+                            _interests,
+                            (id) => 'act_${id.toLowerCase()}',
+                            texts,
+                            onTap: (id) => _toggleMulti(
+                              _interests,
+                              id,
+                              (l) => _interests = l,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    SectionHeader(title: texts['section_goals']!),
-                    AppCard(
-                      child: _chipWrap(
-                        _kGoalIds,
-                        _goals,
-                        (id) => switch (id) {
-                          'Motor skills' => 'skill_motor',
-                          'Creativity' => 'skill_creat',
-                          'Empathy' => 'skill_emp',
-                          'Literacy' => 'skill_lit',
-                          _ => 'skill_think',
-                        },
-                        texts,
-                        onTap: (id) => _toggleMulti(
-                          _goals,
-                          id,
-                          (l) => _goals = l,
-                          max: 3,
-                          maxErrorText: texts['err_max_goals'],
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(title: texts['section_learning']!),
+                        AppCard(
+                          child: _chipWrap(
+                            _kLearningStyleIds,
+                            _learningStyles,
+                            (id) => switch (id) {
+                              'Visual' => 'style_visual',
+                              'Auditori' => 'style_auditory',
+                              _ => 'style_kinesthetic',
+                            },
+                            texts,
+                            onTap: (id) => setState(
+                              () => _learningStyles = [id],
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(title: texts['section_goals']!),
+                        AppCard(
+                          child: _chipWrap(
+                            _kGoalIds,
+                            _goals,
+                            (id) => switch (id) {
+                              'Motor skills' => 'skill_motor',
+                              'Creativity' => 'skill_creat',
+                              'Empathy' => 'skill_emp',
+                              'Literacy' => 'skill_lit',
+                              _ => 'skill_think',
+                            },
+                            texts,
+                            onTap: (id) => _toggleMulti(
+                              _goals,
+                              id,
+                              (l) => _goals = l,
+                              max: 3,
+                              maxErrorText: texts['err_max_goals'],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        SectionHeader(title: texts['section_time']!),
+                        AppCard(
+                          child: _chipWrap(
+                            _kTimeIds,
+                            _timePreference == null ? [] : [_timePreference!],
+                            (id) => switch (id) {
+                              '15_min' => 'time_15m',
+                              '30_min' => 'time_30m',
+                              '1_hour' => 'time_1h',
+                              '1_5_hours' => 'time_1_5h',
+                              _ => 'time_2h',
+                            },
+                            texts,
+                            onTap: (id) => setState(() => _timePreference = id),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        AppButton(
+                          label: texts['btn_save']!,
+                          isLoading: _isSaving,
+                          onPressed: () => _save(texts),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    SectionHeader(title: texts['section_time']!),
-                    AppCard(
-                      child: _chipWrap(
-                        _kTimeIds,
-                        _timePreference == null ? [] : [_timePreference!],
-                        (id) => switch (id) {
-                          '15_min' => 'time_15m',
-                          '30_min' => 'time_30m',
-                          '1_hour' => 'time_1h',
-                          '1_5_hours' => 'time_1_5h',
-                          _ => 'time_2h',
-                        },
-                        texts,
-                        onTap: (id) => setState(() => _timePreference = id),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-
-                    AppButton(
-                      label: texts['btn_save']!,
-                      isLoading: _isSaving,
-                      onPressed: () => _save(texts),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

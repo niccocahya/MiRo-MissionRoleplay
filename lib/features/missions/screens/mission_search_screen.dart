@@ -27,7 +27,8 @@ const Map<String, Map<String, String>> _t = {
     'all_roles': "All",
     'favorites_only': "Favorites",
     'empty': "No missions match your search.",
-    'empty_favorites': "No favorites yet -- tap the heart on a mission's intro to save it here.",
+    'empty_favorites':
+        "No favorites yet -- tap the heart on a mission's intro to save it here.",
     'err': "Failed to load missions: ",
     'status_done': "Completed",
     'status_active': "Active",
@@ -41,7 +42,8 @@ const Map<String, Map<String, String>> _t = {
     'all_roles': "Semua",
     'favorites_only': "Favorit",
     'empty': "Nggak ada misi yang cocok.",
-    'empty_favorites': "Belum ada favorit -- ketuk ikon hati di layar intro misi buat nyimpennya di sini.",
+    'empty_favorites':
+        "Belum ada favorit -- ketuk ikon hati di layar intro misi buat nyimpennya di sini.",
     'err': "Gagal memuat misi: ",
     'status_done': "Selesai",
     'status_active': "Aktif",
@@ -92,136 +94,150 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppScreenHeader(title: texts['title']!),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: hPad),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
-                decoration: InputDecoration(
-                  hintText: texts['hint'],
-                  prefixIcon: const Icon(Icons.search_rounded),
-                  suffixIcon: _query.isEmpty
-                      ? null
-                      : IconButton(
-                          tooltip: texts['clear_search']!,
-                          icon: const Icon(Icons.close_rounded),
-                          onPressed: () => setState(() {
-                            _searchController.clear();
-                            _query = '';
-                          }),
-                        ),
-                  filled: true,
-                  fillColor: AppColors.surface,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: AppColors.border),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    borderSide: BorderSide(color: AppColors.border),
+      // Gradasi tipis SEBAGAI SATU lapis pembungkus -- kotak pencarian
+      // tetap fokus utamanya, ini cuma ngangkat warna dasarnya.
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFEBF4FA), AppColors.background],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppScreenHeader(title: texts['title']!),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: hPad),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (v) =>
+                      setState(() => _query = v.trim().toLowerCase()),
+                  decoration: InputDecoration(
+                    hintText: texts['hint'],
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    suffixIcon: _query.isEmpty
+                        ? null
+                        : IconButton(
+                            tooltip: texts['clear_search']!,
+                            icon: const Icon(Icons.close_rounded),
+                            onPressed: () => setState(() {
+                              _searchController.clear();
+                              _query = '';
+                            }),
+                          ),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm + 2),
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: hPad),
-                children: [
-                  _favoritesChip(texts),
-                  const SizedBox(width: AppSpacing.sm),
-                  _roleChip(null, texts['all_roles']!, AppColors.primary),
-                  const SizedBox(width: AppSpacing.sm),
-                  ...kRoleVisuals.map(
-                    (r) => Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: _roleChip(r.id, r.name(lang), r.resolvedBadgeColor),
+              const SizedBox(height: AppSpacing.sm + 2),
+              SizedBox(
+                height: 40,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: hPad),
+                  children: [
+                    _favoritesChip(texts),
+                    const SizedBox(width: AppSpacing.sm),
+                    _roleChip(null, texts['all_roles']!, AppColors.primary),
+                    const SizedBox(width: AppSpacing.sm),
+                    ...kRoleVisuals.map(
+                      (r) => Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.sm),
+                        child:
+                            _roleChip(r.id, r.name(lang), r.resolvedBadgeColor),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Expanded(
-              child: missionsAsync.when(
-                loading: () => const AppLoading(),
-                error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
-                data: (missions) {
-                  final filtered = missions.where((m) {
-                    if (_favoritesOnly && !favoriteIds.contains(m.id)) {
-                      return false;
+              const SizedBox(height: AppSpacing.sm),
+              Expanded(
+                child: missionsAsync.when(
+                  loading: () => const AppLoading(),
+                  error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
+                  data: (missions) {
+                    final filtered = missions.where((m) {
+                      if (_favoritesOnly && !favoriteIds.contains(m.id)) {
+                        return false;
+                      }
+                      final matchesRole = _selectedRoleId == null ||
+                          m.roleId == _selectedRoleId;
+                      if (!matchesRole) return false;
+                      if (_query.isEmpty) return true;
+                      final title =
+                          (lang == 'id' ? m.titleId : m.titleEn).toLowerCase();
+                      return title.contains(_query);
+                    }).toList();
+
+                    if (filtered.isEmpty) {
+                      return AppEmptyState(
+                        message: _favoritesOnly && favoriteIds.isEmpty
+                            ? texts['empty_favorites']!
+                            : texts['empty']!,
+                        icon: _favoritesOnly
+                            ? Icons.favorite_border_rounded
+                            : Icons.search_off_rounded,
+                      );
                     }
-                    final matchesRole =
-                        _selectedRoleId == null || m.roleId == _selectedRoleId;
-                    if (!matchesRole) return false;
-                    if (_query.isEmpty) return true;
-                    final title = (lang == 'id' ? m.titleId : m.titleEn)
-                        .toLowerCase();
-                    return title.contains(_query);
-                  }).toList();
 
-                  if (filtered.isEmpty) {
-                    return AppEmptyState(
-                      message: _favoritesOnly && favoriteIds.isEmpty
-                          ? texts['empty_favorites']!
-                          : texts['empty']!,
-                      icon: _favoritesOnly
-                          ? Icons.favorite_border_rounded
-                          : Icons.search_off_rounded,
-                    );
-                  }
+                    final unlockedByRole = progressAsync.value ?? {};
 
-                  final unlockedByRole = progressAsync.value ?? {};
+                    return ListView.separated(
+                      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, 100),
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.sm + 2),
+                      itemBuilder: (context, index) {
+                        final mission = filtered[index];
+                        final roleMissions = missions
+                            .where((m) => m.roleId == mission.roleId)
+                            .toList();
+                        final missionIndex = roleMissions.indexWhere(
+                          (m) => m.id == mission.id,
+                        );
+                        final unlockedLevel =
+                            unlockedByRole[mission.roleId] ?? 1;
 
-                  return ListView.separated(
-                    padding: EdgeInsets.fromLTRB(hPad, 0, hPad, 100),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.sm + 2),
-                    itemBuilder: (context, index) {
-                      final mission = filtered[index];
-                      final roleMissions = missions
-                          .where((m) => m.roleId == mission.roleId)
-                          .toList();
-                      final missionIndex = roleMissions.indexWhere(
-                        (m) => m.id == mission.id,
-                      );
-                      final unlockedLevel = unlockedByRole[mission.roleId] ?? 1;
-
-                      return _MissionResultTile(
-                        mission: mission,
-                        lang: lang,
-                        texts: texts,
-                        isCompleted: missionIndex < unlockedLevel - 1,
-                        isCurrent: missionIndex == unlockedLevel - 1,
-                        isLocked: missionIndex > unlockedLevel - 1,
-                        onTap: () {
-                          final role = roleVisualById(mission.roleId) ??
-                              kUnknownRoleVisual;
-                          Navigator.of(context, rootNavigator: true).push(
-                            appPageRoute(
-                              MissionPathScreen(
-                                roleId: mission.roleId,
-                                roleName: role.name(lang),
+                        return _MissionResultTile(
+                          mission: mission,
+                          lang: lang,
+                          texts: texts,
+                          isCompleted: missionIndex < unlockedLevel - 1,
+                          isCurrent: missionIndex == unlockedLevel - 1,
+                          isLocked: missionIndex > unlockedLevel - 1,
+                          onTap: () {
+                            final role = roleVisualById(mission.roleId) ??
+                                kUnknownRoleVisual;
+                            Navigator.of(context, rootNavigator: true).push(
+                              appPageRoute(
+                                MissionPathScreen(
+                                  roleId: mission.roleId,
+                                  roleName: role.name(lang),
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -277,18 +293,18 @@ class _MissionResultTile extends StatelessWidget {
     final Color statusColor = isCompleted
         ? AppColors.success
         : isCurrent
-        ? AppColors.accent
-        : AppColors.textMuted;
+            ? AppColors.accent
+            : AppColors.textMuted;
     final String statusLabel = isCompleted
         ? texts['status_done']!
         : isCurrent
-        ? texts['status_active']!
-        : texts['status_locked']!;
+            ? texts['status_active']!
+            : texts['status_locked']!;
     final IconData statusIcon = isCompleted
         ? Icons.check_circle_rounded
         : isCurrent
-        ? Icons.play_circle_fill_rounded
-        : Icons.lock_rounded;
+            ? Icons.play_circle_fill_rounded
+            : Icons.lock_rounded;
 
     return AppCard(
       onTap: onTap,
@@ -301,7 +317,8 @@ class _MissionResultTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: role.resolvedTint,
               shape: BoxShape.circle,
-              border: Border.all(color: role.resolvedBadgeColor.withValues(alpha: 0.4)),
+              border: Border.all(
+                  color: role.resolvedBadgeColor.withValues(alpha: 0.4)),
             ),
             child: Center(
               child: Text(
