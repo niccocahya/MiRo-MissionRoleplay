@@ -21,11 +21,13 @@ import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/profile_completeness_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
+import '../../core/providers/parent_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/providers/theme_mode_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/utils/level_utils.dart';
 import '../../core/services/account_deletion_service.dart';
+import '../../core/services/child_deletion_service.dart';
 import '../../core/services/data_export_service.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../help/help_center_page.dart';
@@ -112,6 +114,11 @@ const Map<String, Map<String, String>> _t = {
     'edit_profile_title': "Edit Profile",
     'parent_name_label': "Parent's Name",
     'child_name_label': "Child's Name",
+    'child_age_label': "Child's Age",
+    'delete_child': "Remove this child",
+    'delete_child_title': "Remove this child?",
+    'delete_child_desc': "All of their missions, photos, badges and progress will be permanently deleted. This can't be undone.",
+    'delete_child_success': "Child removed.",
     'btn_save': "Save Changes",
     'update_success': "Profile updated successfully!",
     'lang_setting': "App Language",
@@ -206,6 +213,11 @@ const Map<String, Map<String, String>> _t = {
     'edit_profile_title': "Edit Profil",
     'parent_name_label': "Nama Ibu/Bapak",
     'child_name_label': "Nama Anak",
+    'child_age_label': "Umur Anak",
+    'delete_child': "Hapus anak ini",
+    'delete_child_title': "Hapus anak ini?",
+    'delete_child_desc': "Semua misi, foto, lencana, dan progresnya bakal kehapus permanen. Nggak bisa dibatalin.",
+    'delete_child_success': "Anak berhasil dihapus.",
     'btn_save': "Simpan Perubahan",
     'update_success': "Profil berhasil diperbarui!",
     'lang_setting': "Bahasa Aplikasi",
@@ -342,10 +354,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     Map<String, String> texts,
     String currentParentName,
     String currentChildName,
-    String childId,
-  ) {
+    String childId, {
+    int? currentChildAge,
+  }) {
     final parentController = TextEditingController(text: currentParentName);
     final childController = TextEditingController(text: currentChildName);
+    final ageController = TextEditingController(
+      text: currentChildAge?.toString() ?? '',
+    );
 
     showModalBottomSheet(
       context: context,
@@ -367,20 +383,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
               try {
                 final supabase = Supabase.instance.client;
+                final String newParentName = parentController.text.trim();
+                final String? uid = supabase.auth.currentUser?.id;
+
+                // Dulu edit nama CUMA nulis ke user metadata auth, nggak
+                // ke kolom `parents.full_name` -- padahal Home (dan ekspor
+                // data, laporan PDF, dst) bacanya dari kolom itu. Jadi
+                // nama yang diedit di sini nggak pernah muncul di Home.
+                // Sekarang dua-duanya ditulis: tabel `parents` sebagai
+                // sumber utama, metadata auth cuma biar nggak basi.
                 await supabase.auth.updateUser(
-                  UserAttributes(
-                    data: {'full_name': parentController.text.trim()},
-                  ),
+                  UserAttributes(data: {'full_name': newParentName}),
                 );
+                if (uid != null) {
+                  await supabase
+                      .from('parents')
+                      .update({'full_name': newParentName})
+                      .eq('id', uid);
+                }
                 if (childId.isNotEmpty) {
+                  final int? newAge = int.tryParse(ageController.text.trim());
                   await supabase
                       .from('children')
-                      .update({'name': childController.text.trim()})
+                      .update({
+                        'name': childController.text.trim(),
+                        // Cuma ikut dikirim kalau angkanya masuk akal --
+                        // kolom kosong/ketikan ngawur dibiarin apa adanya
+                        // daripada nimpa umur lama sama null.
+                        if (newAge != null && newAge > 0 && newAge < 18)
+                          'age': newAge,
+                      })
                       .eq('id', childId);
                 }
 
                 if (mounted) {
                   ref.invalidate(childDataProvider);
+                  ref.invalidate(parentNameProvider);
                   setState(() {});
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -438,6 +476,26 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: childController,
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md + 4),
+                    // Umur anak dulu cuma bisa diisi SEKALI pas onboarding
+                    // dan nggak ada tempat buat ngubahnya lagi di seluruh
+                    // app -- padahal anak ulang tahun tiap tahun, dan
+                    // umurnya kepakai di data anak & konteks Mink.
+                    Text(
+                      texts['child_age_label']!,
+                      style: AppTextStyles.bodyBold(
+                        color: AppColors.primary.withValues(alpha: 0.7),
+                      ).copyWith(fontSize: 12),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextField(
+                      controller: ageController,
+                      keyboardType: TextInputType.number,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -1251,11 +1309,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final int totalXp = childData['total_xp'] ?? 0;
     final int childLevel = calculateLevel(totalXp);
 
-    final currentUser = Supabase.instance.client.auth.currentUser;
+    // Dulu layar ini baca nama orang tua dari user metadata Supabase Auth,
+    // sementara Home baca dari kolom `parents.full_name` -- dua sumber
+    // beda yang nggak pernah disinkron, jadi bisa nampilin nama yang
+    // beda-beda di dua layar. Sekarang dua-duanya lewat parentNameProvider.
     final String parentName =
-        currentUser?.userMetadata?['full_name'] ??
-        currentUser?.email?.split('@')[0] ??
-        "Guest";
+        ref.watch(parentNameProvider).value?.trim().isNotEmpty == true
+            ? ref.watch(parentNameProvider).value!.trim()
+            : "Guest";
 
     final totalMissionsAsync = ref.watch(
       totalMissionsCompletedProvider(childId),
@@ -1285,6 +1346,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   childName,
                   childId,
                   childData['avatar_url'] as String?,
+                  childData['age'] as int?,
                 ),
                 _buildProfileCompleteness(
                   context,
@@ -1404,6 +1466,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     String childName,
     String childId,
     String? avatarUrl,
+    int? childAge,
   ) {
     final hPad = context.pageHPadding;
     return Padding(
@@ -1429,7 +1492,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ).copyWith(fontSize: 14),
                 ),
                 const SizedBox(height: AppSpacing.sm + 4),
-                _buildEditButton(texts, parentName, childName, childId),
+                _buildEditButton(texts, parentName, childName, childId,
+                    childAge: childAge),
               ],
             ),
           ),
@@ -1535,10 +1599,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     Map<String, String> texts,
     String parentName,
     String childName,
-    String childId,
-  ) {
+    String childId, {
+    int? childAge,
+  }) {
     return GestureDetector(
-      onTap: () => _showEditProfileModal(texts, parentName, childName, childId),
+      onTap: () => _showEditProfileModal(
+        texts,
+        parentName,
+        childName,
+        childId,
+        currentChildAge: childAge,
+      ),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.xs + 2),
         decoration: BoxDecoration(
@@ -1649,6 +1720,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   .setId(c['id'] as String);
                               Navigator.pop(ctx);
                             },
+                            // Hapus cuma ditawarin kalau anaknya LEBIH DARI
+                            // SATU -- akun tanpa anak sama sekali bikin
+                            // hampir semua layar app-nya kosong/nggak
+                            // ketebak, dan buat itu udah ada "Hapus Akun".
+                            onDelete: children.length > 1
+                                ? () => _confirmDeleteChild(ctx, texts, c)
+                                : null,
                           ),
                       ],
                     ),
@@ -1676,6 +1754,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     Map<String, dynamic> child, {
     required bool isSelected,
     required VoidCallback onTap,
+    VoidCallback? onDelete,
   }) {
     final String name = child['name'] ?? texts['default_child']!;
     final String? avatarUrl = child['avatar_url'] as String?;
@@ -1742,10 +1821,82 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
+            if (onDelete != null)
+              IconButton(
+                onPressed: onDelete,
+                tooltip: texts['delete_child']!,
+                icon: Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.textMuted,
+                  size: 20,
+                ),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  /// Konfirmasi hapus SATU anak. Sama kayak hapus akun, ini nggak bisa
+  /// dibatalin (misi, foto, lencana anak itu ikut kehapus permanen), jadi
+  /// dikasih konfirmasi yang nyebut nama anaknya biar nggak salah pencet.
+  Future<void> _confirmDeleteChild(
+    BuildContext sheetCtx,
+    Map<String, String> texts,
+    Map<String, dynamic> child,
+  ) async {
+    final String name = child['name'] ?? texts['default_child']!;
+    final String childId = child['id'] as String;
+
+    final confirmed = await showDialog<bool>(
+      context: sheetCtx,
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(texts['delete_child_title']!),
+        content: Text("${texts['delete_child_desc']!}\n\n$name"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: Text(texts['cancel']!),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            child: Text(
+              texts['btn_delete']!,
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ChildDeletionService.deleteChild(
+        childId: childId,
+        avatarUrl: child['avatar_url'] as String?,
+      );
+
+      // Kalau yang dihapus kebetulan anak yang lagi aktif, lepas dulu
+      // pilihannya -- childDataProvider punya logika fallback yang bakal
+      // milih anak lain yang tersisa begitu id-nya nggak ketemu lagi.
+      if (ref.read(selectedChildIdProvider) == childId) {
+        await ref.read(selectedChildIdProvider.notifier).clear();
+      }
+
+      if (!mounted) return;
+      if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(texts['delete_child_success']!)),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("${texts['err_delete']}$e"),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
   }
 
   Future<void> _changeAvatar(String childId, {String? oldAvatarUrl}) async {

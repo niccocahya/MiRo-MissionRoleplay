@@ -11,6 +11,7 @@ import '../../core/providers/child_role_progress_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
+import '../../core/providers/parent_provider.dart';
 import '../../core/providers/streak_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/utils/date_utils.dart';
@@ -38,20 +39,9 @@ import '../../shared/widgets/section_header.dart';
 // ==========================================
 // 🔥 PROVIDER BARU: MENGAMBIL NAMA ORANG TUA DARI DATABASE
 // ==========================================
-final parentNameProvider = FutureProvider<String>((ref) async {
-  try {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return "";
-    final res = await Supabase.instance.client
-        .from('parents')
-        .select('full_name')
-        .eq('id', user.id)
-        .maybeSingle();
-    return res?['full_name'] ?? "";
-  } catch (e) {
-    return "";
-  }
-});
+// parentNameProvider dipindah ke core/providers/parent_provider.dart --
+// layar Profil juga butuh (dulu Profil baca nama dari sumber LAIN, lihat
+// catatan di file itu).
 
 // ==========================================
 // PROVIDER REAL-TIME 1: MENDENGARKAN TOTAL XP ANAK SECARA LIVE
