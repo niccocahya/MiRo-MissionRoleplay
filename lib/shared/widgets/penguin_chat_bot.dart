@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ⚠️ PASTIKAN IMPORT PROVIDER ANAK INI BENAR SESUAI FOLDERMU
@@ -151,12 +149,24 @@ final currentMissionContextProvider =
 // 🧠 BAGIAN 1: SERVICE GROQ (Tukang Antar Surat ke Server AI)
 // ============================================================================
 class GroqService {
-  // Diisi lewat --dart-define-from-file=env.json (lihat env.example.json).
-  // Key lama yang sempat hardcode di sini sudah HARUS di-revoke di
-  // console.groq.com/keys karena sempat ada di source code.
-  static const String _apiKey = String.fromEnvironment('GROQ_API_KEY');
-  static const String _endpoint =
-      'https://api.groq.com/openai/v1/chat/completions';
+  /// Nama Edge Function yang megang kunci Groq (lihat
+  /// `supabase/functions/mink-chat/index.ts`).
+  ///
+  /// Dulu file ini manggil api.groq.com LANGSUNG pakai kunci dari
+  /// `String.fromEnvironment('GROQ_API_KEY')`. Nilai --dart-define itu
+  /// disisipin ke HASIL BUILD, bukan dibaca pas runtime -- jadi di build
+  /// web kuncinya nangkring di bundel JavaScript dan kebaca lewat
+  /// DevTools, dan di Android/iOS bisa dicungkil dari APK/IPA. Siapa pun
+  /// yang ngambil bisa makai kuota Groq atas tagihan pemilik akun.
+  ///
+  /// Mindahin kunci dari hardcode ke --dart-define (yang sempat
+  /// dilakukan sebelumnya) cuma nutup kebocoran di SOURCE CODE, bukan di
+  /// hasil build. Sekarang kuncinya nggak pernah nyampe ke perangkat
+  /// sama sekali.
+  ///
+  /// Bedain sama SUPABASE_ANON_KEY yang tetap di klien: itu emang kunci
+  /// publik dan RLS yang jagain datanya.
+  static const String _functionName = 'mink-chat';
 
   static Future<String> sendMessage({
     required List<Map<String, String>> chatHistory,
@@ -164,34 +174,26 @@ class GroqService {
     required String lang,
   }) async {
     try {
-      final List<Map<String, String>> messages = [
-        {'role': 'system', 'content': systemPrompt},
-        ...chatHistory,
-      ];
-
-      final response = await http.post(
-        Uri.parse(_endpoint),
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
+      // invoke() otomatis nyertain JWT sesi yang lagi login, dan fungsinya
+      // di sisi server emang minta itu -- jadi cuma orang tua yang udah
+      // masuk yang bisa mancing balasan.
+      final response = await Supabase.instance.client.functions.invoke(
+        _functionName,
+        body: {
+          'systemPrompt': systemPrompt,
+          'chatHistory': chatHistory,
         },
-        body: jsonEncode({
-          "model": "llama-3.1-8b-instant",
-          "messages": messages,
-          "temperature": 0.7,
-          "max_tokens": 1024,
-        }),
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['choices'][0]['message']['content'];
-      } else {
-        debugPrint("❌ GROQ ERROR: ${response.statusCode} - ${response.body}");
-        return _texts(lang)['err_busy']!;
+      final data = response.data;
+      if (response.status == 200 && data is Map && data['reply'] is String) {
+        return data['reply'] as String;
       }
+
+      debugPrint("❌ MINK-CHAT ERROR: ${response.status} - $data");
+      return _texts(lang)['err_busy']!;
     } catch (e) {
-      debugPrint("❌ GROQ EXCEPTION: $e");
+      debugPrint("❌ MINK-CHAT EXCEPTION: $e");
       return _texts(lang)['err_offline']!;
     }
   }

@@ -29,7 +29,6 @@ dependencies:
   intl: ^0.20.2
 
   # ==================== BACKEND & API ====================
-  http: ^1.6.0
   supabase_flutter: ^2.12.4
 
   # ==================== LOCAL STORAGE ====================
