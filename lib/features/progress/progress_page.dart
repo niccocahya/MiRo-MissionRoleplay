@@ -102,9 +102,30 @@ final missionHistoryProvider = StreamProvider.family<List<dynamic>, String>((
       .stream(primaryKey: ['id'])
       .eq('child_id', childId)
       .map((event) {
-        var list = List<dynamic>.from(event);
-        list = list.where((item) {
-          if (item['status'] != 'completed') return false;
+        // Dedupe per misi DULUAN, baru disaring rentang waktu/peran.
+        // Urutannya penting: misi yang penyelesaian aslinya di luar
+        // rentang tapi punya baris dobel DI DALAM rentang nggak boleh
+        // muncul seolah-olah baru diselesaikan. Baris dobel ini sisa
+        // celah lama yang udah ditutup -- lihat catatan di
+        // mission_stats_provider.dart.
+        final Map<String, dynamic> pertamaPerMisi = {};
+        for (final item in event) {
+          if (item['status'] != 'completed') continue;
+          final missionId = item['mission_id'] as String?;
+          if (missionId == null) continue;
+          final tgl = parseDateSafely(item['completed_at'] ?? '');
+          if (tgl == null) continue;
+
+          final sebelumnya = pertamaPerMisi[missionId];
+          final tglSebelumnya = sebelumnya == null
+              ? null
+              : parseDateSafely(sebelumnya['completed_at'] ?? '');
+          if (tglSebelumnya == null || tgl.isBefore(tglSebelumnya)) {
+            pertamaPerMisi[missionId] = item;
+          }
+        }
+
+        var list = pertamaPerMisi.values.where((item) {
           final completedAt = parseDateSafely(item['completed_at'] ?? '');
           if (completedAt == null || completedAt.isBefore(startDate)) {
             return false;

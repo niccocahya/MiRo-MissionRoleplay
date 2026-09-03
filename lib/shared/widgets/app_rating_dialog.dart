@@ -128,10 +128,15 @@ class _AppRatingDialogState extends ConsumerState<AppRatingDialog> {
           onPressed: _submitting
               ? null
               : () async {
+                  // Navigator diambil sebelum await -- sesudahnya dialog
+                  // ini bisa udah nggak ada (mis. misi dibuka dari
+                  // notifikasi), dan nyari Navigator lewat context yang
+                  // udah mati bakal ngelempar.
+                  final navigator = Navigator.of(context);
                   await ref
                       .read(appRatingPromptProvider.notifier)
                       .dismissTemporarily(widget.totalMissionsCompleted);
-                  if (mounted) Navigator.of(context).pop();
+                  if (mounted) navigator.pop();
                 },
           child: Text(texts['later']!, style: TextStyle(color: AppColors.textSecondary)),
         ),

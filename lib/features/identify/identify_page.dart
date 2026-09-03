@@ -203,6 +203,12 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
         setState(() => _imageFile = File(pickedFile.path));
       }
     } catch (e) {
+      // Pemilih gambar itu layar milik SISTEM -- halaman ini bisa aja
+      // udah dilepas pas galatnya balik (orang tuanya keluar dari app,
+      // atau Android ngebunuh activity-nya buat hemat memori). Tanpa
+      // penjaga ini, ScaffoldMessenger dipanggil pakai context yang udah
+      // mati dan app-nya crash, persis di saat yang udah bermasalah.
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('${texts['err_image']}$e')));

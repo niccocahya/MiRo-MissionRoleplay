@@ -103,24 +103,33 @@ final weeklyMissionCountStreamProvider =
           // baris ngirim ulang semuanya.
           .eq('child_id', childId)
           .map((event) {
-        final filteredMissions = event.where(
-          (row) => row['status'] == 'completed',
-        );
+        // Satu misi cuma boleh dihitung SEKALI, di penyelesaian
+        // pertamanya. Di database masih ada baris 'completed' dobel
+        // peninggalan celah lama (sebelum penjaga anti-dobel ada), dan
+        // tanpa dedupe ini batang grafiknya kelihatan lebih tinggi dari
+        // yang sebenarnya dikerjakan. Level, lencana, sama angka "misi
+        // selesai" semuanya udah dihitung per misi unik -- grafik ini
+        // yang terakhir belum ikut.
+        final Map<String, DateTime> pertamaSelesai = {};
+        for (final row in event) {
+          if (row['status'] != 'completed') continue;
+          final missionId = row['mission_id'] as String?;
+          if (missionId == null) continue;
+          final date = parseDateSafely(row['completed_at'] ?? '');
+          if (date == null) continue;
+
+          final sebelumnya = pertamaSelesai[missionId];
+          if (sebelumnya == null || date.isBefore(sebelumnya)) {
+            pertamaSelesai[missionId] = date;
+          }
+        }
 
         Map<int, int> missionsPerDay = {};
 
-        for (var row in filteredMissions) {
-          final completedAt = row['completed_at'];
-
-          if (completedAt != null) {
-            final date = parseDateSafely(completedAt);
-
-            if (date != null &&
-                !date.isBefore(startOfWeek) &&
-                date.isBefore(endOfWeek)) {
-              missionsPerDay[date.weekday] =
-                  (missionsPerDay[date.weekday] ?? 0) + 1;
-            }
+        for (final date in pertamaSelesai.values) {
+          if (!date.isBefore(startOfWeek) && date.isBefore(endOfWeek)) {
+            missionsPerDay[date.weekday] =
+                (missionsPerDay[date.weekday] ?? 0) + 1;
           }
         }
 

@@ -363,6 +363,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       text: currentChildAge?.toString() ?? '',
     );
 
+    // Diambil SEKARANG, dari context halaman, selagi masih hidup.
+    //
+    // Dua jebakan sekaligus di sini. Pertama, `context` di dalam
+    // StatefulBuilder di bawah MEMBAYANGI context halaman ini -- jadi
+    // `ScaffoldMessenger.of(context)` di sana sebenarnya nyari lewat
+    // context modal, bukan halaman. Kedua, pencarian itu terjadi SETELAH
+    // Navigator.pop() nutup modalnya, alias nyari ancestor lewat widget
+    // yang udah dilepas -- persis pola yang bikin Flutter ngelempar
+    // "Looking up a deactivated widget's ancestor is unsafe".
+    final messenger = ScaffoldMessenger.of(context);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -380,6 +391,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               }
 
               setModalState(() => isLoading = true);
+
+              // Sama alasannya sama `messenger` di atas: diambil sebelum
+              // ada await, selagi modalnya masih terpasang.
+              final modalNavigator = Navigator.of(ctx);
 
               try {
                 final supabase = Supabase.instance.client;
@@ -420,8 +435,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ref.invalidate(childDataProvider);
                   ref.invalidate(parentNameProvider);
                   setState(() {});
-                  Navigator.pop(ctx);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  modalNavigator.pop();
+                  messenger.showSnackBar(
                     SnackBar(
                       content: Text(texts['update_success']!),
                       backgroundColor: AppColors.success,
@@ -432,7 +447,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               } catch (e) {
                 if (mounted) {
                   setModalState(() => isLoading = false);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(
                       content: Text("${texts['err_save']}$e"),
                       backgroundColor: AppColors.danger,
