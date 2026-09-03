@@ -88,7 +88,22 @@ class MyApp extends ConsumerWidget {
               // sama persis tiap kali), jadi Flutter skip rebuild-nya
               // walau MyApp rebuild pas dark mode di-toggle, dan Mink
               // bakal "nyangkut" warna lama.
-              PenguinChatButton(),
+              //
+              // Dibungkus Overlay SENDIRI di sini. `child` di atas isinya
+              // Navigator (yang punya Overlay bawaannya sendiri), tapi
+              // PenguinChatButton ini SAUDARA-nya `child` di Stack, bukan
+              // turunan Navigator itu -- jadi dia nggak pernah kebagian
+              // Overlay dari mana pun. Nggak kelihatan selama chatbot cuma
+              // pakai Container/Stack/Positioned biasa, tapi begitu ada
+              // widget yang BUTUH Overlay ancestor (Tooltip di tombol
+              // tutup chat), app-nya crash "No Overlay widget found" pas
+              // jendela chat dibuka. Overlay bisa disarangkan -- yang di
+              // sini nyediain satu khusus buat subtree ini aja.
+              Overlay(
+                initialEntries: [
+                  OverlayEntry(builder: (context) => const PenguinChatButton()),
+                ],
+              ),
             ],
           ),
         );

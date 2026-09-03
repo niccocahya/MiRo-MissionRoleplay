@@ -123,11 +123,22 @@ class _RouteNotFoundPage extends ConsumerWidget {
   }
 }
 
+// Dipakai widget yang dirender DI LUAR tree Navigator utama (Mink
+// penguin_chat_bot.dart, ditaruh sebagai SAUDARA `child` di
+// MaterialApp.builder, bukan turunannya -- lihat catatan panjang di
+// main.dart). Widget begitu nggak kebagian Navigator/Overlay dari mana
+// pun secara alami, jadi showDialog/Navigator.of dari dalamnya bakal
+// error "No Navigator found". Key ini kasih jalan buat manggil
+// `rootNavigatorKey.currentContext!` sebagai context pengganti yang
+// BENERAN turunan Navigator asli.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 // ==================== ROUTER UTAMA ====================
 // Semua rute pakai transisi yang sama (lihat app_page_transition.dart) biar
 // pindah tab & pindah halaman berasa konsisten, bukan potongan kasar di
 // beberapa tempat dan slide di tempat lain.
 final GoRouter router = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/onboarding',
   errorBuilder: (context, state) => const _RouteNotFoundPage(),
   routes: [

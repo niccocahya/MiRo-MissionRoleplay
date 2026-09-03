@@ -8,6 +8,7 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/utils/level_utils.dart';
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/responsive.dart';
@@ -463,8 +464,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
 
   Future<void> _confirmClearHistory(BuildContext context) async {
     final t = _texts(ref.read(languageProvider));
+    // BUKAN `context` lokal punya widget ini -- PenguinChatButton dirender
+    // di luar tree Navigator utama (lihat catatan di app_router.dart soal
+    // rootNavigatorKey), jadi context lokalnya nggak punya Navigator
+    // ancestor sama sekali. showDialog lewat context itu bakal ngelempar
+    // "No Navigator found in context".
+    final navContext = rootNavigatorKey.currentContext;
+    if (navContext == null) return;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: navContext,
       builder: (ctx) => AlertDialog(
         title: Text(t['clear_title']!),
         content: Text(t['clear_body']!),
