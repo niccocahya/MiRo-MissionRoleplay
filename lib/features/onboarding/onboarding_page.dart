@@ -12,6 +12,7 @@ import '../../core/providers/language_provider.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/theme/app_colors.dart';
+import '../../shared/widgets/fun_background_decorations.dart';
 import '../../core/theme/app_spacing.dart';
 import '../legal/legal_page.dart';
 
@@ -65,13 +66,17 @@ const Map<String, Map<String, String>> _t = {
     'divider_signup': 'or Sign up with',
     'divider_login': 'or Login with',
     'err_password_mismatch': "Passwords do not match!",
-    'err_email_taken': "This email is already registered. Try logging in instead.",
+    'err_email_taken':
+        "This email is already registered. Try logging in instead.",
     'err_invalid_credentials': "Incorrect email or password.",
     'err_password_too_short': "Password must be at least 6 characters.",
     'err_invalid_email': "That doesn't look like a valid email address.",
-    'err_auth_generic': "Something went wrong. Please check your connection and try again.",
-    'err_must_agree_terms': "Please check the box to agree to the Terms & Privacy Policy first.",
-    'err_profile_setup_failed': "Your account was created but we couldn't finish setting it up. Please try logging in -- if that doesn't work, try registering again.",
+    'err_auth_generic':
+        "Something went wrong. Please check your connection and try again.",
+    'err_must_agree_terms':
+        "Please check the box to agree to the Terms & Privacy Policy first.",
+    'err_profile_setup_failed':
+        "Your account was created but we couldn't finish setting it up. Please try logging in -- if that doesn't work, try registering again.",
     'recent_accounts': "Recent accounts on this device",
   },
   'id': {
@@ -106,9 +111,12 @@ const Map<String, Map<String, String>> _t = {
     'err_invalid_credentials': "Email atau password salah.",
     'err_password_too_short': "Password minimal 6 karakter.",
     'err_invalid_email': "Format emailnya kayaknya belum bener.",
-    'err_auth_generic': "Ada yang salah. Cek koneksi internetmu terus coba lagi ya.",
-    'err_must_agree_terms': "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
-    'err_profile_setup_failed': "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya -- kalau masih gagal, coba daftar ulang lagi.",
+    'err_auth_generic':
+        "Ada yang salah. Cek koneksi internetmu terus coba lagi ya.",
+    'err_must_agree_terms':
+        "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
+    'err_profile_setup_failed':
+        "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya -- kalau masih gagal, coba daftar ulang lagi.",
     'recent_accounts': "Akun yang pernah login di HP ini",
   },
 };
@@ -230,7 +238,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final String lower = raw.toLowerCase();
     debugPrint("Auth error: $raw");
 
-    if (lower.contains('already registered') || lower.contains('already exists')) {
+    if (lower.contains('already registered') ||
+        lower.contains('already exists')) {
       return texts['err_email_taken']!;
     }
     if (lower.contains('invalid login credentials')) {
@@ -408,6 +417,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               ),
             ),
 
+          // Sentuhan warna & kelap-kelip -- kesan pertama app ini dulu
+          // cuma gradasi biru-tan + snow.png doang, nggak ada apa pun yang
+          // "hidup". Elemen bersama yang sama dipakai di latar peta misi,
+          // dipakai lagi di sini biar bahasa visualnya nyambung dari
+          // detik pertama app dibuka.
+          if (step != OnboardingStep.splash) ...[
+            const ColorBlob(
+                top: -30, right: -40, size: 160, color: AppColors.accent),
+            const ColorBlob(
+                bottom: 60, left: -50, size: 140, color: AppColors.gold),
+            const Sparkle(top: 90, left: 40, size: 18, color: AppColors.accent),
+            const Sparkle(top: 160, right: 60, size: 14, color: AppColors.gold),
+            const Sparkle(
+                bottom: 180, right: 30, size: 16, color: AppColors.accent),
+          ],
+
           SafeArea(child: _buildScreen(step, lang, texts)),
 
           if (_isLoading)
@@ -554,7 +579,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFB5C9DF).withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
+              color: const Color(0xFFB5C9DF)
+                  .withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
               borderRadius: BorderRadius.circular(28),
             ),
             padding: const EdgeInsets.all(24),
@@ -739,7 +765,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl)),
       ),
       child: Text(
         label,
@@ -783,16 +810,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 });
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
                   color: _kOnboardingSurface,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: _kOnboardingNavy.withValues(alpha: 0.3)),
+                  border: Border.all(
+                      color: _kOnboardingNavy.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_outline, size: 14, color: _kOnboardingNavy),
+                    Icon(Icons.person_outline,
+                        size: 14, color: _kOnboardingNavy),
                     const SizedBox(width: 6),
                     Text(
                       label,
@@ -952,7 +982,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     Checkbox(
                       value: _agreedToTerms,
                       activeColor: AppColors.accent,
-                      onChanged: (val) => setState(() => _agreedToTerms = val ?? false),
+                      onChanged: (val) =>
+                          setState(() => _agreedToTerms = val ?? false),
                     ),
                     Expanded(child: _buildLegalAgreementText()),
                   ],
@@ -986,9 +1017,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: TextStyle(color: _kOnboardingNavy.withValues(alpha: 0.6), fontSize: 12),
+          style: TextStyle(
+              color: _kOnboardingNavy.withValues(alpha: 0.6), fontSize: 12),
           children: [
-            TextSpan(text: isId ? 'Dengan mendaftar, kamu setuju dengan ' : 'By signing up, you agree to our '),
+            TextSpan(
+                text: isId
+                    ? 'Dengan mendaftar, kamu setuju dengan '
+                    : 'By signing up, you agree to our '),
             TextSpan(
               text: isId ? 'Syarat & Ketentuan' : 'Terms of Service',
               style: linkStyle,
@@ -996,8 +1031,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 ..onTap = () => Navigator.of(context, rootNavigator: true).push(
                       appPageRoute(
                         LegalPage(
-                          title: isId ? 'Syarat & Ketentuan' : 'Terms of Service',
-                          sections: isId ? kTermsOfServiceId : kTermsOfServiceEn,
+                          title:
+                              isId ? 'Syarat & Ketentuan' : 'Terms of Service',
+                          sections:
+                              isId ? kTermsOfServiceId : kTermsOfServiceEn,
                         ),
                       ),
                     ),
@@ -1223,7 +1260,8 @@ class _CustomTextFieldState extends ConsumerState<_CustomTextField> {
               fontSize: 14,
             ),
             filled: true,
-            fillColor: _kOnboardingSurface.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
+            fillColor:
+                _kOnboardingSurface.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 16,

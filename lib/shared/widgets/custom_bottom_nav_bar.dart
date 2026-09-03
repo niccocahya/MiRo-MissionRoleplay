@@ -43,7 +43,8 @@ class CustomBottomNavBar extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: BorderRadius.circular(36),
         boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 20, offset: Offset(0, 10)),
+          BoxShadow(
+              color: Colors.black26, blurRadius: 20, offset: Offset(0, 10)),
         ],
       ),
       // Dulu tiap ikon punya AnimatedContainer SENDIRI yang cuma nge-fade
@@ -76,7 +77,10 @@ class CustomBottomNavBar extends StatelessWidget {
                     color: AppColors.accent,
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+                      BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 4,
+                          offset: Offset(0, 2)),
                     ],
                   ),
                 ),
