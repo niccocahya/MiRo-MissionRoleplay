@@ -9,6 +9,16 @@ final languageProvider = NotifierProvider<LanguageNotifier, String>(() {
 });
 
 class LanguageNotifier extends Notifier<String> {
+  // Provider ini dibuat SEKALI, jauh di awal (di-watch dari MyApp sejak app
+  // pertama kali render) -- _loadSavedLanguage() di bawah cuma baca
+  // SharedPreferences SEKALI itu juga, saat provider ini pertama kebentuk.
+  // Kalau user manggil setLanguage() (mis. milih bahasa di onboarding)
+  // SEBELUM load awal itu selesai, load yang telat itu bisa nimpa balik
+  // pilihan user yang udah beres duluan -- guard ini yang nyegah itu (sama
+  // persis kayak proteksi yang dulu ada di provider bahasa terpisah punya
+  // onboarding, sebelum provider itu dibubarin & disatuin ke sini).
+  bool _hasManuallySelected = false;
+
   @override
   String build() {
     // Tarik bahasa dari penyimpanan lokal secara asinkron
@@ -23,13 +33,14 @@ class LanguageNotifier extends Notifier<String> {
     // 🔥 PERBAIKAN 2: Gunakan key yang konsisten dengan onboarding: 'lang'
     // Fallback tetap 'en' agar default global Inggris
     final savedLang = prefs.getString('lang') ?? 'en';
-    if (state != savedLang) {
+    if (state != savedLang && !_hasManuallySelected) {
       state = savedLang;
     }
   }
 
   // Fungsi ganti bahasa utama
   Future<void> setLanguage(String code) async {
+    _hasManuallySelected = true;
     state = code;
 
     // 1. Simpan Lokal dengan key 'lang' (konsisten)

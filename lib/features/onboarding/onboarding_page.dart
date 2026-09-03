@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
+import '../../core/providers/language_provider.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/theme/app_colors.dart';
@@ -130,36 +130,21 @@ class OnboardingStepNotifier extends Notifier<OnboardingStep> {
   }
 }
 
-final selectedLanguageProvider = NotifierProvider<LanguageNotifier, String>(() {
-  return LanguageNotifier();
-});
-
-class LanguageNotifier extends Notifier<String> {
-  bool _hasManuallySelected = false;
-
-  @override
-  String build() {
-    _init();
-    return 'en'; // Initial state sementara
-  }
-
-  Future<void> _init() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedLang = prefs.getString('lang');
-
-    // Hanya timpa state JIKA user belum mengeklik tombol bahasa di layar
-    if (savedLang != null && !_hasManuallySelected) {
-      state = savedLang;
-    }
-  }
-
-  Future<void> setLang(String code) async {
-    _hasManuallySelected = true;
-    state = code;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lang', code);
-  }
-}
+// Dulu ada provider bahasa SENDIRI di sini (selectedLanguageProvider +
+// LanguageNotifier lokal), terpisah dari languageProvider yang asli
+// (core/providers/language_provider.dart, dipakai SEMUA layar lain --
+// Home, Profile, Missions, dst). Keduanya nulis ke SharedPreferences key
+// yang sama ('lang'), tapi state RIVERPOD-nya masing-masing nggak pernah
+// saling ngasih tau. languageProvider di-watch dari MyApp sejak app
+// pertama dibuka (jauh sebelum onboarding), jadi state-nya udah
+// kebentuk (nge-load SharedPreferences SEKALI, saat itu masih kosong)
+// SEBELUM user sempat milih bahasa di sini. Pas user pilih Indonesia,
+// yang keupdate cuma SharedPreferences + provider lokal ini --
+// languageProvider yang asli nggak pernah dikasih tau, jadi tetep
+// nyangkut 'en' begitu user keluar dari onboarding ke layar mana pun.
+// Sekarang onboarding langsung pakai languageProvider yang sama persis
+// dipakai seluruh app -- 1 sumber kebenaran, bukan 2 yang keliatan
+// sinkron (sama-sama nulis ke 'lang') tapi sebenernya nggak nyambung.
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
@@ -257,7 +242,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _handleRegister() async {
-    final lang = ref.read(selectedLanguageProvider);
+    final lang = ref.read(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
 
     if (_passwordController.text != _confirmController.text) {
@@ -293,7 +278,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             'id': res.user!.id,
             'email': _emailController.text.trim(),
             'full_name': _nameController.text.trim(),
-            'language_code': ref.read(selectedLanguageProvider),
+            'language_code': ref.read(languageProvider),
           });
           await ref.read(recentAccountsProvider.notifier).remember(
                 _emailController.text,
@@ -316,7 +301,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> _handleLogin() async {
-    final lang = ref.read(selectedLanguageProvider);
+    final lang = ref.read(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
 
     setState(() => _isLoading = true);
@@ -336,7 +321,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         await supabase.from('parents').upsert({
           'id': res.user!.id,
           'email': res.user!.email ?? _emailController.text.trim(),
-          'language_code': ref.read(selectedLanguageProvider),
+          'language_code': ref.read(languageProvider),
         });
 
         // Cek anak milik parent INI (dulu query ini nggak difilter
@@ -373,7 +358,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final step = ref.watch(onboardingStepProvider);
-    final lang = ref.watch(selectedLanguageProvider);
+    final lang = ref.watch(languageProvider);
 
     // 🔥 PERBAIKAN 1: SAFE FALLBACK AGAR TIDAK CRASH JIKA BAHASA ERROR
     final texts = _t[lang] ?? _t['en']!;
@@ -608,7 +593,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Widget _languageOption(String title, String value, String current) {
     final isSelected = current == value;
     return GestureDetector(
-      onTap: () => ref.read(selectedLanguageProvider.notifier).setLang(value),
+      onTap: () => ref.read(languageProvider.notifier).setLang(value),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -982,7 +967,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   // Sebelumnya nggak ada link Syarat & Ketentuan / Kebijakan Privasi di
   // manapun di flow pendaftaran.
   Widget _buildLegalAgreementText() {
-    final lang = ref.read(selectedLanguageProvider);
+    final lang = ref.read(languageProvider);
     final isId = lang == 'id';
     final linkStyle = TextStyle(
       color: _kOnboardingNavy,
