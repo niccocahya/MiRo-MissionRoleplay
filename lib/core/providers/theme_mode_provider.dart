@@ -2,9 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Preferensi tema (dark mode) — sebelumnya app cuma punya mode terang,
-/// nggak ada opsi sama sekali. Default `system` biar user baru otomatis
-/// dapat dark mode kalau HP-nya emang di-set dark, tanpa perlu ngatur
-/// manual.
+/// nggak ada opsi sama sekali.
+///
+/// Default `light` (BUKAN `system`) -- awalnya dicoba `system` biar user
+/// baru otomatis dapat dark mode kalau HP-nya di-set dark, tapi layar
+/// onboarding/login (background gradasi pastel-nya sengaja SELALU terang,
+/// nggak ikut tema) belum di-migrasi ke token warna yang reaktif ke dark
+/// mode -- jadinya teks & kotak input di situ ikut kepakein warna dark
+/// mode di atas background yang tetep terang, kontrasnya jadi rusak
+/// (teks nyaris nggak keliatan). Default balik ke `light` biar user baru
+/// nggak nemuin itu duluan; dark mode masih bisa dipilih manual di
+/// Pengaturan.
 enum AppThemeMode { system, light, dark }
 
 extension AppThemeModeX on AppThemeMode {
@@ -21,7 +29,7 @@ class ThemeModeNotifier extends Notifier<AppThemeMode> {
   @override
   AppThemeMode build() {
     _load();
-    return AppThemeMode.system;
+    return AppThemeMode.light;
   }
 
   Future<void> _load() async {
@@ -30,7 +38,7 @@ class ThemeModeNotifier extends Notifier<AppThemeMode> {
     if (saved == null) return;
     state = AppThemeMode.values.firstWhere(
       (e) => e.name == saved,
-      orElse: () => AppThemeMode.system,
+      orElse: () => AppThemeMode.light,
     );
   }
 

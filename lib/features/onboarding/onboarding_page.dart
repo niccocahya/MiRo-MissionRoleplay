@@ -17,6 +17,21 @@ import '../legal/legal_page.dart';
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT
 import '../../shared/widgets/penguin_chat_bot.dart';
 
+// Warna TETAP, BUKAN AppColors.x -- seluruh flow onboarding (pilih bahasa,
+// login, daftar) duduk di atas gradasi pastel yang emang sengaja SELALU
+// terang, nggak ikut dark mode (lihat _buildScreen/build() di bawah: cuma
+// splash yang beda). Dulu teks & kotak input di sini masih mereferensi
+// AppColors.primary/.surface yang REAKTIF ke dark mode -- begitu dark mode
+// aktif (baik dipilih manual atau ngikutin sistem), warnanya ganti jadi
+// versi gelap padahal background di baliknya tetep terang, jadi kontrasnya
+// rusak (teks nyaris nggak keliatan, kelihatan di screenshot bug report).
+// Nilai di bawah ini persis sama dengan versi LIGHT mode AppColors.primary/
+// .primaryLighter/.surface -- dikunci di sini biar layar ini gambarnya
+// selalu sama persis kayak yang aslinya didesain, apa pun tema app-nya.
+const Color _kOnboardingNavy = Color(0xFF0A264F);
+const Color _kOnboardingLightBlue = Color(0xFFA5CBEB);
+const Color _kOnboardingSurface = Colors.white;
+
 // ==========================================
 // 1. DICTIONARY (KAMUS BAHASA) - ENGLISH DEFAULT
 // ==========================================
@@ -376,7 +391,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         children: [
           // Background (Menjaga Styling Aslimu)
           if (step == OnboardingStep.splash)
-            Container(color: AppColors.primary)
+            Container(color: _kOnboardingNavy)
           else
             Container(
               decoration: BoxDecoration(
@@ -384,7 +399,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.primaryLighter,
+                    _kOnboardingLightBlue,
                     const Color(0xFFD3E3F2),
                     const Color(0xFFE9DFCE),
                   ],
@@ -528,7 +543,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: _kOnboardingNavy,
                     height: 1.1,
                   ),
                 ),
@@ -537,7 +552,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   texts['lang_desc']!,
                   style: TextStyle(
                     fontSize: 15,
-                    color: AppColors.primary.withValues(alpha: 0.6),
+                    color: _kOnboardingNavy.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -570,7 +585,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 .read(onboardingStepProvider.notifier)
                 .setStep(OnboardingStep.startJourney),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: _kOnboardingNavy,
               minimumSize: const Size(double.infinity, 60),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -608,7 +623,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                color: _kOnboardingNavy,
               ),
             ),
             Container(
@@ -684,7 +699,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
-                  color: AppColors.primary,
+                  color: _kOnboardingNavy,
                 ),
               ),
               const SizedBox(height: 8),
@@ -694,7 +709,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   fontSize: 38,
                   fontWeight: FontWeight.bold,
                   height: 1.15,
-                  color: AppColors.primary,
+                  color: _kOnboardingNavy,
                 ),
               ),
               const SizedBox(height: 40),
@@ -713,7 +728,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   Expanded(
                     child: _authChoiceBtn(
                       texts['btn_register']!,
-                      AppColors.primary,
+                      _kOnboardingNavy,
                       () => ref
                           .read(onboardingStepProvider.notifier)
                           .setStep(OnboardingStep.register),
@@ -757,7 +772,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         Text(
           texts['recent_accounts']!,
           style: TextStyle(
-            color: AppColors.primary.withValues(alpha: 0.6),
+            color: _kOnboardingNavy.withValues(alpha: 0.6),
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
@@ -780,18 +795,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: _kOnboardingSurface,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                  border: Border.all(color: _kOnboardingNavy.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.person_outline, size: 14, color: AppColors.primary),
+                    Icon(Icons.person_outline, size: 14, color: _kOnboardingNavy),
                     const SizedBox(width: 6),
                     Text(
                       label,
-                      style: TextStyle(color: AppColors.primary, fontSize: 13),
+                      style: TextStyle(color: _kOnboardingNavy, fontSize: 13),
                     ),
                   ],
                 ),
@@ -830,7 +845,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   texts['login_welcome']!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: _kOnboardingNavy,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -839,7 +854,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   texts['login_desc']!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.6),
+                    color: _kOnboardingNavy.withValues(alpha: 0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -896,7 +911,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   texts['reg_title']!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: _kOnboardingNavy,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -905,7 +920,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   texts['reg_desc']!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.6),
+                    color: _kOnboardingNavy.withValues(alpha: 0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -970,7 +985,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final lang = ref.read(selectedLanguageProvider);
     final isId = lang == 'id';
     final linkStyle = TextStyle(
-      color: AppColors.primary,
+      color: _kOnboardingNavy,
       fontSize: 12,
       fontWeight: FontWeight.bold,
       decoration: TextDecoration.underline,
@@ -980,7 +995,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
-          style: TextStyle(color: AppColors.primary.withValues(alpha: 0.6), fontSize: 12),
+          style: TextStyle(color: _kOnboardingNavy.withValues(alpha: 0.6), fontSize: 12),
           children: [
             TextSpan(text: isId ? 'Dengan mendaftar, kamu setuju dengan ' : 'By signing up, you agree to our '),
             TextSpan(
@@ -1030,7 +1045,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ElevatedButton(
             onPressed: onPrimary,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: _kOnboardingNavy,
               minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -1049,20 +1064,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           Row(
             children: [
               Expanded(
-                child: Divider(color: AppColors.primary, thickness: 1),
+                child: Divider(color: _kOnboardingNavy, thickness: 1),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
                   isReg ? texts['divider_signup']! : texts['divider_login']!,
                   style: TextStyle(
-                    color: AppColors.primary.withValues(alpha: 0.6),
+                    color: _kOnboardingNavy.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                 ),
               ),
               Expanded(
-                child: Divider(color: AppColors.primary, thickness: 1),
+                child: Divider(color: _kOnboardingNavy, thickness: 1),
               ),
             ],
           ),
@@ -1076,7 +1091,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 isReg
                     ? "${texts['switch_login']!.split('?')[0]}? "
                     : "${texts['switch_reg']!.split('?')[0]}? ",
-                style: TextStyle(color: AppColors.primary, fontSize: 13),
+                style: TextStyle(color: _kOnboardingNavy, fontSize: 13),
               ),
               GestureDetector(
                 onTap: () => ref.read(onboardingStepProvider.notifier).setStep(
@@ -1113,14 +1128,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         label: Text(
           label,
           style: TextStyle(
-            color: AppColors.primary,
+            color: _kOnboardingNavy,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.surface,
-          disabledBackgroundColor: AppColors.surface,
+          backgroundColor: _kOnboardingSurface,
+          disabledBackgroundColor: _kOnboardingSurface,
           minimumSize: const Size(double.infinity, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -1178,12 +1193,12 @@ class _CustomTextFieldState extends State<_CustomTextField> {
           padding: const EdgeInsets.only(left: 8, bottom: 8),
           child: Row(
             children: [
-              Icon(widget.icon, size: 16, color: AppColors.primary),
+              Icon(widget.icon, size: 16, color: _kOnboardingNavy),
               const SizedBox(width: 8),
               Text(
                 widget.label,
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: _kOnboardingNavy,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1194,15 +1209,15 @@ class _CustomTextFieldState extends State<_CustomTextField> {
         TextField(
           controller: widget.controller,
           obscureText: widget.isPassword ? _obscureText : false,
-          style: TextStyle(color: AppColors.primary),
+          style: TextStyle(color: _kOnboardingNavy),
           decoration: InputDecoration(
             hintText: widget.placeholder,
             hintStyle: TextStyle(
-              color: AppColors.primary.withValues(alpha: 0.4),
+              color: _kOnboardingNavy.withValues(alpha: 0.4),
               fontSize: 14,
             ),
             filled: true,
-            fillColor: AppColors.surface.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
+            fillColor: _kOnboardingSurface.withValues(alpha: 0.5), // 🔥 PERBAIKAN 3
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
               vertical: 16,
@@ -1210,19 +1225,19 @@ class _CustomTextFieldState extends State<_CustomTextField> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: _kOnboardingNavy.withValues(alpha: 0.3),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: _kOnboardingNavy.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.xl),
               borderSide: BorderSide(
-                color: AppColors.primary,
+                color: _kOnboardingNavy,
                 width: 1.5,
               ),
             ),
@@ -1232,7 +1247,7 @@ class _CustomTextFieldState extends State<_CustomTextField> {
                       _obscureText
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
-                      color: AppColors.primary.withValues(alpha: 0.6),
+                      color: _kOnboardingNavy.withValues(alpha: 0.6),
                       size: 20,
                     ),
                     onPressed: () =>

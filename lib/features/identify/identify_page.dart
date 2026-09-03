@@ -17,6 +17,16 @@ import '../../core/theme/app_spacing.dart';
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
 import '../../shared/widgets/penguin_chat_bot.dart';
 
+// Warna TETAP, BUKAN AppColors.x -- layar identify (nama/usia/minat/foto
+// anak) ini, sama kayak onboarding_page.dart, sengaja SELALU terang nggak
+// peduli tema app-nya. Sama alasannya: dulu _kIdentifyNavy/.primaryLighter/
+// .surface di sini reaktif ke dark mode, jadi pas dark mode aktif teksnya
+// bisa nabrak kontras sama background yang beberapa step-nya tetep putih
+// polos (Colors.white, nggak ikut tema).
+const Color _kIdentifyNavy = Color(0xFF0A264F);
+const Color _kIdentifyLightBlue = Color(0xFFA5CBEB);
+const Color _kIdentifySurface = Colors.white;
+
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
 // ==========================================
@@ -300,7 +310,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
     final bool isWhiteBg = step % 2 != 0;
     final Color mainBgColor = isWhiteBg
         ? Colors.white
-        : AppColors.primaryLighter;
+        : _kIdentifyLightBlue;
 
     // 🔥 PENGAMANAN EKSTRA: Paksa hide terus-terusan selama halaman ini di-build!
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -383,7 +393,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             Container(
               color: Colors.black26,
               child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
+                child: CircularProgressIndicator(color: _kIdentifyNavy),
               ),
             ),
         ],
@@ -449,7 +459,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                         ? () => _handleSubmit(texts)
                         : () => _handleNext(texts)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: _kIdentifyNavy,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -482,7 +492,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             texts['step1_title']!,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: AppColors.primary,
+              color: _kIdentifyNavy,
               fontSize: 24,
               fontWeight: FontWeight.bold,
               height: 1.2,
@@ -501,7 +511,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             decoration: InputDecoration(
               hintText: texts['step1_hint']!,
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: _kIdentifySurface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppRadius.xl),
               ),
@@ -511,7 +521,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
           Text(
             texts['step1_age']!,
             style: TextStyle(
-              color: AppColors.primary,
+              color: _kIdentifyNavy,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -537,7 +547,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               color: const Color(0xFFF0F4F8),
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: _kIdentifyNavy.withValues(alpha: 0.1),
                 width: 4,
               ),
             ),
@@ -591,19 +601,19 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               width: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSel ? AppColors.primary : Colors.transparent,
+                color: isSel ? _kIdentifyNavy : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSel
-                      ? AppColors.primary
-                      : AppColors.primary.withValues(alpha: 0.4),
+                      ? _kIdentifyNavy
+                      : _kIdentifyNavy.withValues(alpha: 0.4),
                 ),
               ),
               child: Text(
                 age.toString(),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: isSel ? Colors.white : AppColors.primary,
+                  color: isSel ? Colors.white : _kIdentifyNavy,
                 ),
               ),
             ),
@@ -729,7 +739,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: _kIdentifyNavy,
             ),
           ),
           const SizedBox(height: 40),
@@ -760,7 +770,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
                     label,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isSel ? Colors.white : AppColors.primary,
+                      color: isSel ? Colors.white : _kIdentifyNavy,
                     ),
                   ),
                 ),
@@ -790,7 +800,7 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: _kIdentifyNavy,
             ),
           ),
           const SizedBox(height: 32),
@@ -885,7 +895,7 @@ class _OptionCard extends StatelessWidget {
                           : FontWeight.w600,
                       color: isSelected
                           ? AppColors.accent
-                          : AppColors.primary,
+                          : _kIdentifyNavy,
                     ),
                   ),
                   if (subLabel != null) ...[
@@ -896,7 +906,7 @@ class _OptionCard extends StatelessWidget {
                         fontSize: 13,
                         color: isSelected
                             ? AppColors.accent.withValues(alpha: 0.8)
-                            : AppColors.primary.withValues(alpha: 0.6),
+                            : _kIdentifyNavy.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
