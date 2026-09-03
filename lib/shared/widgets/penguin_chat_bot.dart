@@ -336,6 +336,18 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  @override
+  void dispose() {
+    // Dulu nggak ada dispose() sama sekali di sini -- nggak kerasa
+    // sekarang karena PenguinChatButton dipasang sekali di level
+    // MaterialApp.builder dan hidup seumur app, tapi tetep leak beneran
+    // kalau widget ini pernah di-unmount (hot restart pas dev, atau
+    // refactor nanti yang bikin ini conditional).
+    _chatController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {

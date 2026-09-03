@@ -108,6 +108,7 @@ const Map<String, Map<String, String>> _t = {
     'logout': "Log Out",
     'confirm_logout_title': "Log out?",
     'confirm_logout_desc': "You'll need to log in again to access this account.",
+    'cancel': "Cancel",
     'edit_profile_title': "Edit Profile",
     'parent_name_label': "Parent's Name",
     'child_name_label': "Child's Name",
@@ -201,6 +202,7 @@ const Map<String, Map<String, String>> _t = {
     'logout': "Keluar",
     'confirm_logout_title': "Keluar dari akun?",
     'confirm_logout_desc': "Kamu perlu login lagi buat masuk ke akun ini.",
+    'cancel': "Batal",
     'edit_profile_title': "Edit Profil",
     'parent_name_label': "Nama Ibu/Bapak",
     'child_name_label': "Nama Anak",
@@ -290,7 +292,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(texts['cancel'] ?? 'Cancel'),
+            child: Text(texts['cancel']!),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
