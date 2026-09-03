@@ -11,7 +11,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
-import '../../../shared/widgets/back_button.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
+import '../../../shared/widgets/app_screen_header.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
@@ -126,18 +127,7 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(texts['title']!, style: AppTextStyles.h2()),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: texts['title']!),
             Expanded(
               child: photosAsync.when(
                 loading: () => const AppLoading(),
@@ -230,24 +220,11 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
   }
 
   Widget _roleChip(String? roleId, String label, Color color) {
-    final bool selected = _selectedRoleId == roleId;
-    return GestureDetector(
+    return AppChoiceChip(
+      label: label,
+      color: color,
+      selected: _selectedRoleId == roleId,
       onTap: () => setState(() => _selectedRoleId = roleId),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? color : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(color: selected ? color : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.bodyBold(
-            color: selected ? Colors.white : AppColors.textPrimary,
-          ).copyWith(fontSize: 13),
-        ),
-      ),
     );
   }
 }

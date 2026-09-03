@@ -17,10 +17,12 @@ import 'mission_reflection_screen.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/mission_reflection_provider.dart';
+import '../../../core/constants/feeling_emojis.dart';
 import '../../../core/constants/role_visuals.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/star_rating_row.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -165,22 +167,10 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: List.generate(5, (i) {
-            final int starValue = i + 1;
-            final bool filled = (_rating ?? 0) >= starValue;
-            return GestureDetector(
-              onTap: () => _saveRating(starValue),
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: Icon(
-                  filled ? Icons.star_rounded : Icons.star_border_rounded,
-                  color: filled ? AppColors.gold : AppColors.textMuted,
-                  size: 34,
-                ),
-              ),
-            );
-          }),
+        StarRatingRow(
+          rating: _rating ?? 0,
+          size: 34,
+          onRate: _saveRating,
         ),
       ],
     );
@@ -191,8 +181,6 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   // ditampilin lagi di mana pun. Sekarang muncul lagi pas jurnal ini
   // dibuka ulang (replay dari Progress/Buku Kenangan), jadi ngisinya nggak
   // sia-sia.
-  static const List<String> _feelingEmojis = ["😞", "😐", "🙂", "😀", "🤩"];
-
   Widget _buildReflectionCard(Map<String, String> texts) {
     if (_generatedMissionLogId == null) return const SizedBox.shrink();
 
@@ -264,10 +252,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   }
 
   Widget _feelingChip(String label, int? feelingIndex) {
-    final String emoji =
-        (feelingIndex != null && feelingIndex >= 0 && feelingIndex < _feelingEmojis.length)
-            ? _feelingEmojis[feelingIndex]
-            : '❓';
+    final String emoji = feelingEmoji(feelingIndex);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

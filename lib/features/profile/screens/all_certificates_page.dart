@@ -11,7 +11,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
-import '../../../shared/widgets/back_button.dart'; // Wajib panggil tombol kembali estetik
+import '../../../shared/widgets/app_screen_header.dart';
 
 // allCertificatesProvider & certificateProgressProvider sekarang di
 // ../data/certificate_provider.dart (dulu ada salinan identik dari
@@ -62,26 +62,14 @@ class AllCertificatesPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          // HEADER SEDERHANA
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 40, 24, 16),
-            child: Row(
-              children: [
-                CustomBackButton(onPressed: () => Navigator.of(context).pop()),
-                const SizedBox(width: 8),
-                Text(
-                  texts['title']!,
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
+      // Dulu layar ini NGGAK dibungkus SafeArea sama sekali -- header-nya
+      // "ngakalin" status bar pakai padding atas 40px hardcoded, yang
+      // ketinggian/kependekan tergantung HP-nya (notch beda-beda) dan
+      // kelebihan di web. Sekarang ikut SafeArea kayak layar detail lain.
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppScreenHeader(title: texts['title']!),
 
           // LIST SEMUA SERTIFIKAT DINAMIS
           Expanded(
@@ -128,10 +116,11 @@ class AllCertificatesPage extends ConsumerWidget {
                     );
                   },
                 );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

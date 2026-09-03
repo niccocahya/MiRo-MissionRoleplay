@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../shared/widgets/back_button.dart';
+import '../../shared/widgets/app_screen_header.dart';
 
 /// Halaman teks legal generik (dipakai buat Syarat & Ketentuan dan
 /// Kebijakan Privasi) — sebelumnya nggak ada link ke keduanya di
@@ -22,23 +22,7 @@ class LegalPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: AppTextStyles.h2(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: title),
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),

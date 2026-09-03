@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // JALUR IMPORT
 import '../data/mission_model.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
+import '../../../core/constants/feeling_emojis.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 
@@ -56,7 +57,10 @@ class _MissionReflectionScreenState
   int? parentFeeling;
   int? childFeeling;
   final TextEditingController _notesController = TextEditingController();
-  final List<String> emojis = ["😞", "😐", "🙂", "😀", "🤩"];
+  // Daftar emoji-nya dipindah ke core/constants/feeling_emojis.dart --
+  // indeks di daftar ini yang kesimpen ke database, dan layar jurnal misi
+  // baca balik pakai daftar yang sama.
+  final List<String> emojis = kFeelingEmojis;
 
   bool _isSaving = false;
 

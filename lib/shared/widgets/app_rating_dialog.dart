@@ -9,6 +9,7 @@ import '../../core/providers/language_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'star_rating_row.dart';
 import '../../features/help/help_center_page.dart';
 
 const Map<String, Map<String, String>> _t = {
@@ -109,19 +110,16 @@ class _AppRatingDialogState extends ConsumerState<AppRatingDialog> {
         children: [
           Text(texts['desc']!, style: AppTextStyles.body()),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (i) {
-              final int starValue = i + 1;
-              return IconButton(
-                onPressed: _submitting ? null : () => _submit(starValue, texts),
-                icon: Icon(
-                  Icons.star_rounded,
-                  color: AppColors.gold,
-                  size: 32,
-                ),
-              );
-            }),
+          // Dulu 5 bintangnya SELALU keisi emas walau belum dipilih --
+          // keliatan kayak udah dinilai 5 dari sananya. Sekarang kosong
+          // (outline) sampai beneran diketuk, sama kayak baris bintang di
+          // jurnal misi & Pusat Bantuan.
+          Center(
+            child: StarRatingRow(
+              rating: 0,
+              enabled: !_submitting,
+              onRate: (stars) => _submit(stars, texts),
+            ),
           ),
         ],
       ),

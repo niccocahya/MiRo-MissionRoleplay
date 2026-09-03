@@ -20,6 +20,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_choice_chip.dart';
 import '../../shared/widgets/app_state_views.dart';
 // IMPORT BARU UNTUK MEMBUKA JURNAL
 import '../missions/data/mission_model.dart';
@@ -798,38 +799,24 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 34,
+            // 34 -> 40: AppChoiceChip tingginya ditentukan padding-nya
+            // sendiri (biar seragam sama chip di layar lain), sedikit
+            // lebih tinggi dari kotak lama yang dipatok pas-pasan.
+            height: 40,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: _trendSkillKeys.map((key) {
-                final selected = _selectedTrendSkill == key;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => setState(() => _selectedTrendSkill = key),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: selected ? AppColors.accent : Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: selected ? AppColors.accent : AppColors.border,
-                        ),
-                      ),
-                      child: Text(
-                        texts[key]!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: selected ? Colors.white : AppColors.primary,
-                        ),
+              children: _trendSkillKeys
+                  .map(
+                    (key) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: AppChoiceChip(
+                        label: texts[key]!,
+                        selected: _selectedTrendSkill == key,
+                        onTap: () => setState(() => _selectedTrendSkill = key),
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
+                  )
+                  .toList(),
             ),
           ),
           const SizedBox(height: 16),

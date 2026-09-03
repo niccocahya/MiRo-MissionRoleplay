@@ -16,7 +16,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_state_views.dart';
-import '../../../shared/widgets/back_button.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
+import '../../../shared/widgets/app_screen_header.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
@@ -93,18 +94,7 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(texts['title']!, style: AppTextStyles.h2()),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: texts['title']!),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: hPad),
               child: TextField(
@@ -235,56 +225,22 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
   }
 
   Widget _roleChip(String? roleId, String label, Color color) {
-    final bool selected = _selectedRoleId == roleId;
-    return GestureDetector(
+    return AppChoiceChip(
+      label: label,
+      color: color,
+      selected: _selectedRoleId == roleId,
       onTap: () => setState(() => _selectedRoleId = roleId),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? color : AppColors.surface,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: selected ? color : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.bodyBold(
-            color: selected ? Colors.white : AppColors.textPrimary,
-          ).copyWith(fontSize: 13),
-        ),
-      ),
     );
   }
 
   Widget _favoritesChip(Map<String, String> texts) {
-    return GestureDetector(
+    return AppChoiceChip(
+      label: texts['favorites_only']!,
+      icon: _favoritesOnly
+          ? Icons.favorite_rounded
+          : Icons.favorite_border_rounded,
+      selected: _favoritesOnly,
       onTap: () => setState(() => _favoritesOnly = !_favoritesOnly),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: _favoritesOnly ? AppColors.accent : AppColors.surface,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: _favoritesOnly ? AppColors.accent : AppColors.border),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _favoritesOnly ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              size: 14,
-              color: _favoritesOnly ? Colors.white : AppColors.textPrimary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              texts['favorites_only']!,
-              style: AppTextStyles.bodyBold(
-                color: _favoritesOnly ? Colors.white : AppColors.textPrimary,
-              ).copyWith(fontSize: 13),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

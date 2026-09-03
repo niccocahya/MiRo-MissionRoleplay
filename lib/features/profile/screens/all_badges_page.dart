@@ -11,7 +11,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_state_views.dart';
-import '../../../shared/widgets/back_button.dart';
+import '../../../shared/widgets/app_screen_header.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
@@ -50,18 +50,7 @@ class AllBadgesPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(texts['title']!, style: AppTextStyles.h2()),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: texts['title']!),
             Expanded(
               child: badgesAsync.when(
                 loading: () => const AppLoading(),

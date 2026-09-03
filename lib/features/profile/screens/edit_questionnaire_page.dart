@@ -11,7 +11,8 @@ import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_state_views.dart';
-import '../../../shared/widgets/back_button.dart';
+import '../../../shared/widgets/app_choice_chip.dart';
+import '../../../shared/widgets/app_screen_header.dart';
 import '../../../shared/widgets/section_header.dart';
 
 const Map<String, Map<String, String>> _t = {
@@ -206,18 +207,7 @@ class _EditQuestionnairePageState extends ConsumerState<EditQuestionnairePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(texts['title']!, style: AppTextStyles.h2()),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: texts['title']!),
             Expanded(
               child: questionnaireAsync.when(
                 loading: () => const AppLoading(),
@@ -332,29 +322,16 @@ class _EditQuestionnairePageState extends ConsumerState<EditQuestionnairePage> {
     return Wrap(
       spacing: AppSpacing.sm,
       runSpacing: AppSpacing.sm,
-      children: ids.map((id) {
-        final bool isSelected = selected.contains(id);
-        return GestureDetector(
-          onTap: () => onTap(id),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.accentTint : AppColors.background,
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(
-                color: isSelected ? AppColors.accent : AppColors.border,
-              ),
+      children: ids
+          .map(
+            (id) => AppChoiceChip(
+              label: texts[labelKeyOf(id)] ?? id,
+              selected: selected.contains(id),
+              style: AppChipStyle.soft,
+              onTap: () => onTap(id),
             ),
-            child: Text(
-              texts[labelKeyOf(id)] ?? id,
-              style: AppTextStyles.bodyBold(
-                color: isSelected ? AppColors.accent : AppColors.textPrimary,
-              ).copyWith(fontSize: 13),
-            ),
-          ),
-        );
-      }).toList(),
+          )
+          .toList(),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +36,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_bottom_sheet.dart';
 import '../../shared/widgets/app_button.dart';
+import '../../shared/widgets/child_avatar.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
@@ -1581,30 +1581,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.accentTint,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
-            ),
-            alignment: Alignment.center,
-            clipBehavior: Clip.antiAlias,
-            child: (avatarUrl == null || avatarUrl.isEmpty)
-                ? const Text("👦🏻", style: TextStyle(fontSize: 36))
-                : ClipOval(
-                    child: CachedNetworkImage(
-                      imageUrl: avatarUrl,
-                      width: 72,
-                      height: 72,
-                      fit: BoxFit.cover,
-                      errorWidget: (_, __, ___) =>
-                          const Text("👦🏻", style: TextStyle(fontSize: 36)),
-                    ),
-                  ),
-          ),
+          ChildAvatar(avatarUrl: avatarUrl, size: 72, showShadow: true),
           Positioned(
             bottom: -2,
             right: -2,
@@ -1715,29 +1692,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.accentTint,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.antiAlias,
-                  child: (avatarUrl == null || avatarUrl.isEmpty)
-                      ? const Text("👦🏻", style: TextStyle(fontSize: 24))
-                      : ClipOval(
-                          child: CachedNetworkImage(
-                            imageUrl: avatarUrl,
-                            width: 48,
-                            height: 48,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) =>
-                                const Text("👦🏻", style: TextStyle(fontSize: 24)),
-                          ),
-                        ),
-                ),
+                ChildAvatar(avatarUrl: avatarUrl, size: 48),
                 // Ganti foto cuma dari baris anak yang lagi aktif — buat
                 // anak lain, pindah dulu baru bisa ganti fotonya.
                 if (isSelected)

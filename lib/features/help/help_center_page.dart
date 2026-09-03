@@ -12,7 +12,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
-import '../../shared/widgets/back_button.dart';
+import '../../shared/widgets/app_screen_header.dart';
+import '../../shared/widgets/star_rating_row.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
 import '../../shared/widgets/section_header.dart';
 
@@ -174,18 +175,7 @@ class _HelpCenterPageState extends ConsumerState<HelpCenterPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(hPad, 16, hPad, 8),
-              child: Row(
-                children: [
-                  CustomBackButton(onPressed: () => Navigator.pop(context)),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(texts['title']!, style: AppTextStyles.h2()),
-                  ),
-                ],
-              ),
-            ),
+            AppScreenHeader(title: texts['title']!),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
@@ -300,21 +290,10 @@ class _HelpCenterPageState extends ConsumerState<HelpCenterPage> {
                             style: AppTextStyles.bodyBold().copyWith(fontSize: 13),
                           ),
                           const SizedBox(height: AppSpacing.xs),
-                          Row(
-                            children: List.generate(5, (i) {
-                              final filled = i < _rating;
-                              return GestureDetector(
-                                onTap: () => setState(() => _rating = i + 1),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 4),
-                                  child: Icon(
-                                    filled ? Icons.star_rounded : Icons.star_outline_rounded,
-                                    color: AppColors.gold,
-                                    size: 30,
-                                  ),
-                                ),
-                              );
-                            }),
+                          StarRatingRow(
+                            rating: _rating,
+                            size: 30,
+                            onRate: (v) => setState(() => _rating = v),
                           ),
                         ],
                         const SizedBox(height: AppSpacing.md),
