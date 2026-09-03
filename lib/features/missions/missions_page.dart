@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/mission_provider.dart';
 import 'screens/mission_path_screen.dart';
 import '../../core/providers/language_provider.dart';
-import '../../core/providers/last_viewed_role_provider.dart';
+import '../../core/providers/last_played_role_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/app_state_views.dart';
 
@@ -40,22 +40,25 @@ class MissionsPage extends ConsumerWidget {
           }
 
           // Prioritas: query param role (dari kartu Home/hasil pencarian)
-          // > role terakhir yang dibuka (dari tab bottom nav, lihat
-          // lastViewedRoleProvider) > role pertama yang punya misi
-          // (fallback lama, buat kunjungan paling pertama).
+          // > role TERAKHIR BENERAN DIMAINKAN (lihat lastPlayedRoleProvider
+          // -- cuma keupdate pas tombol "Mulai Misi" dipencet, bukan cuma
+          // pas tab ini dibuka) > role pertama yang punya misi (fallback
+          // lama, buat kunjungan paling pertama).
+          //
+          // Sengaja CUMA dibaca di sini, nggak ditulis. Dulu ada
+          // addPostFrameCallback yang nyimpen `resolvedRoleId` tiap kali
+          // halaman ini kebuka -- efeknya, orang tua/anak yang cuma
+          // ngintip role lain lewat pemilih (tanpa beneran mulai misi)
+          // ikut ngegeser "default" berikutnya ke role yang cuma dilirik.
           final availableRoleIds = missions.map((m) => m.roleId).toSet();
-          final lastViewedRoleId = ref.read(lastViewedRoleProvider);
+          final lastPlayedRoleId = ref.read(lastPlayedRoleProvider);
           final resolvedRoleId =
               (roleId != null && availableRoleIds.contains(roleId))
               ? roleId!
-              : (lastViewedRoleId != null &&
-                      availableRoleIds.contains(lastViewedRoleId))
-                  ? lastViewedRoleId
+              : (lastPlayedRoleId != null &&
+                      availableRoleIds.contains(lastPlayedRoleId))
+                  ? lastPlayedRoleId
                   : missions.first.roleId;
-
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(lastViewedRoleProvider.notifier).setRole(resolvedRoleId);
-          });
 
           final roleName = rolesAsync.maybeWhen(
             data: (roles) {

@@ -11,10 +11,11 @@ import 'mission_intro_screen.dart';
 import 'mission_journal_screen.dart';
 import '../../../core/providers/child_provider.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib import otak bahasanya!
-import '../../../core/providers/last_viewed_role_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/favorite_missions_service.dart';
+import '../../../core/constants/role_visuals.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../shared/widgets/app_bottom_sheet.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP HALAMAN PATH)
@@ -268,7 +269,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       ),
       child: Center(
         child: rolesAsync.maybeWhen(
-          data: (roles) => _buildRolePillDropdown(context, roles, lang),
+          data: (roles) => _buildRolePillDropdown(context, ref, roles, lang),
           orElse: () => Text(
             widget.roleName,
             style: const TextStyle(
@@ -284,6 +285,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
 
   Widget _buildRolePillDropdown(
     BuildContext context,
+    WidgetRef ref,
     List<RoleModel> roles,
     String lang,
   ) {
@@ -295,76 +297,142 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     );
     final displayName = lang == 'id' ? currentRole.nameId : currentRole.nameEn;
 
-    return PopupMenuButton<String>(
-      offset: const Offset(0, 50),
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      onSelected: (newRoleId) {
-        if (newRoleId != widget.roleId) {
-          final selectedRole = roles.firstWhere((r) => r.id == newRoleId);
-          ref.read(lastViewedRoleProvider.notifier).setRole(newRoleId);
-          Navigator.pushReplacement(
-            context,
-            appPageRoute(
-              MissionPathScreen(
-                roleId: selectedRole.id,
-                roleName: lang == 'id'
-                    ? selectedRole.nameId
-                    : selectedRole.nameEn,
+    // Dulu `PopupMenuButton` -- animasi bukaannya nggak konsisten: kadang
+    // "tumbuh" dari bawah ke atas kalau ruang di bawah pil ini kehabisan
+    // (Flutter otomatis ngebalik posisi menu kalau nggak muat), jadi
+    // kelihatan aneh dibanding dropdown biasa yang buka ke bawah. Ganti ke
+    // bottom sheet -- animasinya SELALU geser dari bawah layar, konsisten
+    // di device apa pun, dan itu pola yang sama dipakai di seluruh app ini
+    // buat semua pemilih (AppBottomSheet).
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(30),
+        onTap: () => _showRolePicker(context, ref, roles, lang),
+        child: SizedBox(
+          width: double.infinity,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.2,
               ),
             ),
-          );
-        }
-      },
-      itemBuilder: (BuildContext context) {
-        return roles.map((role) {
-          final roleText = lang == 'id' ? role.nameId : role.nameEn;
-          return PopupMenuItem<String>(
-            value: role.id,
-            child: Text(
-              roleText,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-          );
-        }).toList();
-      },
-      child: SizedBox(
-        width: double.infinity,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1.2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.explore_rounded, color: Colors.white, size: 22),
+                const SizedBox(width: 10),
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
+              ],
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.explore_rounded, color: Colors.white, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                displayName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void _showRolePicker(
+    BuildContext context,
+    WidgetRef ref,
+    List<RoleModel> roles,
+    String lang,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => AppBottomSheet(
+        title: lang == 'id' ? 'Pilih Peran' : 'Choose a Role',
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: roles.map((role) {
+            final isSelected = role.id == widget.roleId;
+            final visual = roleVisualById(role.id) ?? kUnknownRoleVisual;
+            final roleText = lang == 'id' ? role.nameId : role.nameEn;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Material(
+                color: isSelected ? AppColors.primaryTint : AppColors.background,
+                borderRadius: BorderRadius.circular(18),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () {
+                    // Sheet-nya ditutup pakai context PUNYA SHEET ITU
+                    // SENDIRI, bukan context halaman -- setelah ini
+                    // route sheet-nya udah nggak ada, jadi navigasi
+                    // berikutnya (kalau perlu) pakai context halaman
+                    // yang dikirim dari luar tadi.
+                    Navigator.pop(sheetContext);
+                    if (role.id == widget.roleId) return;
+                    // Sengaja NGGAK nyimpen ke lastPlayedRoleProvider di
+                    // sini -- ganti role lewat pemilih ini masih sebatas
+                    // "ngintip", bukan "main". Provider itu cuma keupdate
+                    // pas tombol "Mulai Misi" beneran dipencet (lihat
+                    // mission_intro_screen.dart).
+                    if (!context.mounted) return;
+                    Navigator.pushReplacement(
+                      context,
+                      appPageRoute(
+                        MissionPathScreen(roleId: role.id, roleName: roleText),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: visual.resolvedBadgeColor.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.explore_rounded,
+                            color: visual.resolvedBadgeColor,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            roleText,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          Icon(Icons.check_circle_rounded, color: AppColors.accent, size: 22),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 6),
-              const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ],
-          ),
+            );
+          }).toList(),
         ),
       ),
     );

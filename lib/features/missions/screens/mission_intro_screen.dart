@@ -7,6 +7,7 @@ import '../data/mission_model.dart';
 import 'mission_play_screen.dart';
 import '../../../core/constants/skills.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/providers/last_played_role_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -181,6 +182,15 @@ class MissionIntroScreen extends ConsumerWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
+                        // Ini titik SATU-SATUNYA yang nandain "role ini
+                        // beneran dimainkan" (bukan cuma dilirik) -- lihat
+                        // catatan panjang di last_played_role_provider.dart.
+                        // Dipakai buat nentuin default role pas tab Misi
+                        // dibuka lagi lewat bottom nav.
+                        ref
+                            .read(lastPlayedRoleProvider.notifier)
+                            .setRole(mission.roleId);
+
                         // KUNCI HILANGKAN NAVBAR DI HALAMAN SELANJUTNYA
                         //
                         // pushReplacement, BUKAN push — dulu ini push biasa,
