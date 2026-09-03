@@ -22,6 +22,7 @@ import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/profile_completeness_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/parent_provider.dart';
+import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/providers/text_size_provider.dart';
 import '../../core/providers/theme_mode_provider.dart';
 import '../../core/providers/streak_provider.dart';
@@ -1273,7 +1274,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Future<void> confirmDelete() async {
               setState(() => isDeleting = true);
               try {
+                // Email-nya dicatat SEBELUM akunnya dihapus -- sesudah
+                // signOut di dalam deleteAccount(), currentUser udah null
+                // dan email-nya nggak bisa diambil lagi.
+                final String? emailTerhapus =
+                    Supabase.instance.client.auth.currentUser?.email;
+
                 await AccountDeletionService.deleteAccount();
+
+                // Dua sisa yang dulu ketinggalan di device setelah akun
+                // dihapus. Keduanya cuma bikin bingung, bukan bocor data:
+                // baris anaknya udah nggak ada dan RLS nutup aksesnya.
+                //
+                // 1. id anak yang ke-persist masih nunjuk anak yang udah
+                //    ikut kehapus. Sebenernya nanti sembuh sendiri di
+                //    childDataProvider (id yang nggak match dibuang), tapi
+                //    nggak ada alasan buat ninggalin sampah ini.
+                // 2. email tadi masih nongol di daftar "akun terakhir" di
+                //    layar Login -- orang tuanya ngetuk email itu, ngisi
+                //    password, dan cuma dapat error login yang nggak
+                //    jelas kenapa, padahal akunnya emang udah nggak ada.
+                await ref.read(selectedChildIdProvider.notifier).clear();
+                if (emailTerhapus != null && emailTerhapus.isNotEmpty) {
+                  await ref
+                      .read(recentAccountsProvider.notifier)
+                      .forget(emailTerhapus);
+                }
+
                 if (!ctx.mounted) return;
                 Navigator.pop(ctx);
                 if (!mounted) return;
