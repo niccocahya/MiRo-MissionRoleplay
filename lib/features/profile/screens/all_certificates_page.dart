@@ -282,9 +282,15 @@ class AllCertificatesPage extends ConsumerWidget {
                         var badge = entry.value;
                         bool isUnlocked = index < unlockedCount;
 
+                        // Ukuran dipatok (bukan padding + tinggi baris emoji)
+                        // -- kartunya tinggi tetap 180px, dan tinggi baris
+                        // emoji beda antar platform, jadi kalau dibiarkan
+                        // ngikut isi bisa overflow beberapa piksel. Sama
+                        // kayak kartu sertifikat di profile_page.dart.
                         return Container(
                           margin: const EdgeInsets.only(right: 8),
-                          padding: const EdgeInsets.all(8),
+                          width: 34,
+                          height: 34,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(

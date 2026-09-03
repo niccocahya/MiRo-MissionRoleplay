@@ -28,17 +28,18 @@ class ComingSoonBadge extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Dulu pudarnya pakai Opacity() ngebungkus seluruh child -- buat
-        // tombol berwarna solid + teks kontras tinggi (mis. background
-        // navy + teks putih), itu bisa bikin tombolnya kelihatan jadi 1
-        // kotak abu-abu rata tanpa teks sama sekali kalau ke-compile ke
-        // 1 layer (kejadian pas dicoba di Edge/web) -- teks & background-
-        // nya sama-sama numpuk jadi 1 warna abu pas di-render sebagai
-        // satu potongan. Sekarang child-nya digambar UTUH di layer-nya
-        // sendiri (kontras aslinya kejaga), terus dilapis kain abu-abu
-        // semi-transparan di ATASnya buat kesan "pudar" -- teknik yang
-        // jauh lebih aman lintas-platform daripada ngerender ulang whole
-        // subtree di opacity rendah.
+        // Pudarnya pakai lapisan kain semi-transparan di ATAS child yang
+        // digambar utuh, BUKAN Opacity() yang ngebungkus seluruh child.
+        // Bedanya: Opacity nurunin kontras internal child-nya juga (teks
+        // vs background tombol sama-sama ditarik ke warna belakangnya),
+        // sedangkan kain cuma nutupin di atas jadi kontras aslinya kejaga.
+        //
+        // Catatan koreksi: laporan "tombol jadi kotak abu tanpa teks" yang
+        // bikin ini diubah TERNYATA bukan gara-gara Opacity -- penyebab
+        // aslinya `disabledForegroundColor` yang nggak pernah di-set di
+        // tombolnya (lihat _buildSubscriptionSection di profile_page.dart).
+        // Cara kain ini tetep dipertahankan karena memang lebih aman, tapi
+        // dia bukan yang benerin bug itu.
         IgnorePointer(child: child),
         Positioned.fill(
           child: IgnorePointer(

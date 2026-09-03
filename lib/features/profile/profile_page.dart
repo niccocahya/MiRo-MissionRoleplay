@@ -547,15 +547,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
+      // Tanpa ini tinggi sheet dijatah maksimal ~50% layar, jadi isi yang
+      // panjang overflow (garis kuning-hitam) walau AppBottomSheet-nya
+      // udah bisa scroll.
+      isScrollControlled: true,
       builder: (ctx) {
         return AppBottomSheet(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: AppColors.accentTint,
-                child: Text("👦🏻", style: TextStyle(fontSize: 40)),
+              // Dulu ini CircleAvatar dengan emoji HARDCODE -- foto anak yang
+              // udah diunggah nggak pernah kelihatan di sini, selalu emoji,
+              // padahal kolom `avatar_url`-nya ada. Sekarang pakai
+              // ChildAvatar yang sama dipakai header Profil & switcher.
+              ChildAvatar(
+                avatarUrl: childData['avatar_url'] as String?,
+                size: 80,
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
@@ -742,6 +749,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
+      // Tanpa ini tinggi sheet dijatah maksimal ~50% layar, jadi isi yang
+      // panjang overflow (garis kuning-hitam) walau AppBottomSheet-nya
+      // udah bisa scroll.
+      isScrollControlled: true,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -1022,6 +1033,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
+      // Tanpa ini tinggi sheet dijatah maksimal ~50% layar, jadi isi yang
+      // panjang overflow (garis kuning-hitam) walau AppBottomSheet-nya
+      // udah bisa scroll.
+      isScrollControlled: true,
       builder: (ctx) {
         bool isSaving = false;
         return StatefulBuilder(
@@ -1097,6 +1112,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
+      // Tanpa ini tinggi sheet dijatah maksimal ~50% layar, jadi isi yang
+      // panjang overflow (garis kuning-hitam) walau AppBottomSheet-nya
+      // udah bisa scroll.
+      isScrollControlled: true,
       builder: (ctx) {
         bool isSaving = false;
         String? errorText;
@@ -1224,6 +1243,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
+      // Tanpa ini tinggi sheet dijatah maksimal ~50% layar, jadi isi yang
+      // panjang overflow (garis kuning-hitam) walau AppBottomSheet-nya
+      // udah bisa scroll.
+      isScrollControlled: true,
       builder: (ctx) {
         bool isDeleting = false;
         String confirmText = '';
@@ -1647,27 +1670,38 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     String childId,
     String? avatarUrl,
   ) {
-    return GestureDetector(
-      onTap: () => _showChildSwitcherModal(texts),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ChildAvatar(avatarUrl: avatarUrl, size: 72, showShadow: true),
-          Positioned(
-            bottom: -2,
-            right: -2,
+    // Dulu SELURUH tumpukan ini (termasuk lencana kameranya) cuma punya 1
+    // aksi: buka switcher ganti-anak. Jadi ikon kamera -- yang di mana-mana
+    // artinya "ketuk buat ganti foto" -- malah nggak ganti foto, dan tombol
+    // ganti foto yang asli kesempil jadi ikon 10px di dalam switcher.
+    // Sekarang dipisah: badan avatar = ganti anak, lencana kamera = ganti
+    // foto, sesuai yang dijanjiin ikonnya masing-masing.
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: () => _showChildSwitcherModal(texts),
+          child: ChildAvatar(avatarUrl: avatarUrl, size: 72, showShadow: true),
+        ),
+        Positioned(
+          bottom: -2,
+          right: -2,
+          child: GestureDetector(
+            onTap: () => _changeAvatar(childId, oldAvatarUrl: avatarUrl),
+            // Padding lebih lega dari sebelumnya (5 -> 7) biar area
+            // ketuknya nggak kekecilan buat jempol.
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(7),
               decoration: BoxDecoration(
                 color: AppColors.accent,
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2),
               ),
-              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 12),
+              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -1783,14 +1817,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         child['id'] as String,
                         oldAvatarUrl: avatarUrl,
                       ),
+                      // 4/10 -> 6/13: area ketuknya kekecilan, susah kena
+                      // jempol (ikon 10px di lingkaran ~18px).
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: AppColors.accent,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
-                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 10),
+                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 13),
                       ),
                     ),
                   ),
@@ -2050,6 +2086,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           // Belum ada sistem paket/pembayaran beneran, jadi 2 tombol ini
           // ditandain jelas belum bisa dipencet — sebelumnya keliatan aktif
           // tapi diem aja pas ditekan.
+          //
+          // `disabledForegroundColor` WAJIB di-set bareng
+          // `disabledBackgroundColor`: styleFrom cuma nerapin
+          // `foregroundColor` ke state AKTIF. Pas onPressed null, warna
+          // teksnya jatuh ke bawaan Material (abu ~38% transparan) -- di
+          // atas tombol navy hasilnya teksnya ilang total (kelihatan cuma
+          // kotak abu polos), persis yang kejadian di laporan bug.
           Row(
             children: [
               Expanded(
@@ -2060,6 +2103,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       backgroundColor: Colors.white,
                       disabledBackgroundColor: Colors.white,
                       foregroundColor: AppColors.primary,
+                      disabledForegroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
                       elevation: 2,
@@ -2077,6 +2121,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       backgroundColor: AppColors.primary,
                       disabledBackgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
                       elevation: 4,
@@ -2235,9 +2280,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         var badge = entry.value;
                         bool isUnlocked = index < displayUnlocked;
 
+                        // Ukuran lingkarannya DIPATOK, bukan ngikut padding +
+                        // tinggi baris emoji di dalamnya. Tinggi baris emoji
+                        // beda-beda antar platform (di web/Edge lebih jangkung
+                        // dari di HP), dan karena kartunya dipatok 180px,
+                        // selisih beberapa piksel itu langsung bikin
+                        // "BOTTOM OVERFLOWED BY 2.0 PIXELS".
                         return Container(
                           margin: const EdgeInsets.only(right: AppSpacing.sm),
-                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          width: 34,
+                          height: 34,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
