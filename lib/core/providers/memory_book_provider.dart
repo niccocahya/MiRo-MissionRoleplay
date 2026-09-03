@@ -26,10 +26,15 @@ class MemoryPhoto {
   String missionTitle(String lang) => lang == 'id' ? missionTitleId : missionTitleEn;
 }
 
-/// `mission_logs.mission_id` nggak punya foreign key ke `missions_master`
-/// (beda dari child_id yang beneran FK) jadi PostgREST nggak bisa embed-join
-/// otomatis di sini -- 3 query terpisah + gabung manual di client, sama
-/// pola yang dipakai fitur replay misi di progress_page.dart.
+/// Ambil datanya lewat 3 query terpisah lalu digabung di client, sama pola
+/// dengan fitur replay misi di progress_page.dart.
+///
+/// Dulu ini TERPAKSA begitu: `mission_logs.mission_id` bertipe text
+/// sementara `missions_master.id` uuid, jadi nggak ada foreign key di
+/// antara keduanya dan PostgREST nggak bisa embed-join otomatis. Sekarang
+/// FK-nya udah ada (lihat migrasi `add_missing_content_foreign_keys`), jadi
+/// embed-join sebenarnya sudah mungkin -- tetap dibiarkan 3 query karena
+/// sudah jalan dan teruji, bukan lagi karena nggak bisa.
 final memoryBookProvider =
     FutureProvider.family<List<MemoryPhoto>, String>((ref, childId) async {
   if (childId.isEmpty) return [];
