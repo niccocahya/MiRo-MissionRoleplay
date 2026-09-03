@@ -13,6 +13,7 @@ import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/parent_provider.dart';
 import '../../core/providers/streak_provider.dart';
+import '../../core/services/achievement_repair_service.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/level_utils.dart';
@@ -54,13 +55,15 @@ final childRealtimeXpProvider = StreamProvider.family<int, String>((
   return Supabase.instance.client
       .from('children')
       .stream(primaryKey: ['id'])
+      // Disaring di SERVER. Dulu stream ini narik SELURUH baris `children`
+      // yang boleh dilihat akun ini, terus nyari anaknya satu-satu di Dart
+      // -- tiap perubahan di anak MANA PUN mengirim ulang seluruh daftar
+      // dan bikin Home rebuild. 12 stream lain di app ini udah pakai
+      // `.eq()`, cuma yang ini sama yang di bawah yang ketinggalan.
+      .eq('id', childId)
       .map((event) {
-        try {
-          final childRow = event.firstWhere((row) => row['id'] == childId);
-          return childRow['total_xp'] as int? ?? 0;
-        } catch (e) {
-          return 0;
-        }
+        if (event.isEmpty) return 0;
+        return event.first['total_xp'] as int? ?? 0;
       });
 });
 
@@ -91,11 +94,17 @@ final weeklyMissionCountStreamProvider =
 
       final endOfWeek = startOfWeek.add(const Duration(days: 7));
 
-      return supabase.from('mission_logs').stream(primaryKey: ['id']).map((
-        event,
-      ) {
+      return supabase
+          .from('mission_logs')
+          .stream(primaryKey: ['id'])
+          // Sama kayak childRealtimeXpProvider di atas: dulu ini narik
+          // SELURUH tabel mission_logs terus disaring di Dart. Makin banyak
+          // misi yang diselesaikan, makin berat -- dan tiap perubahan satu
+          // baris ngirim ulang semuanya.
+          .eq('child_id', childId)
+          .map((event) {
         final filteredMissions = event.where(
-          (row) => row['child_id'] == childId && row['status'] == 'completed',
+          (row) => row['status'] == 'completed',
         );
 
         Map<int, int> missionsPerDay = {};
@@ -253,6 +262,10 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
+  // Anak-anak yang lencananya udah dicek di sesi ini, biar penambalan
+  // nggak jalan berulang tiap Home rebuild.
+  final Set<String> _badgesRepairChecked = {};
+
   @override
   void initState() {
     super.initState();
@@ -260,6 +273,17 @@ class _HomePageState extends ConsumerState<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(showChatbotGlobalProvider.notifier).show();
     });
+  }
+
+  /// Sekali per anak per sesi: cek apakah ada lencana yang seharusnya udah
+  /// didapat tapi nggak tercatat (mis. gara-gara koneksi putus tepat pas
+  /// misinya diselesaikan), terus tambal. Lihat AchievementRepairService --
+  /// tanpa ini lencana yang kelewat hilang permanen, karena cuma pernah
+  /// diberikan sekali di detik misi selesai.
+  void _repairBadgesOnce(String childId) {
+    if (childId.isEmpty || _badgesRepairChecked.contains(childId)) return;
+    _badgesRepairChecked.add(childId);
+    AchievementRepairService.repairMissing(childId);
   }
 
   // calculateLevelInfo() dipindah ke core/utils/level_utils.dart — dulu
@@ -309,6 +333,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       data: (data) {
         final String childId = data?['id'] ?? '';
+        _repairBadgesOnce(childId);
         final String childName = data?['name'] ?? "Anak Hebat";
 
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
