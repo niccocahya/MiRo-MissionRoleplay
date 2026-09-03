@@ -27,6 +27,19 @@ extension ResponsiveContext on BuildContext {
     if (isTablet) return 32;
     return 20;
   }
+
+  /// Tinggi tetap yang ikut membesar kalau ukuran teks dinaikkan.
+  ///
+  /// App ini punya setelan "Ukuran Teks" sendiri (Kecil/Sedang/Besar =
+  /// 0.9/1.0/1.15). Kartu-kartu yang tingginya dipatok angka mati (mis.
+  /// kartu sertifikat 180px) isinya ikut membesar pas setelan itu
+  /// dinaikkan, tapi kotaknya nggak -- ujungnya overflow (garis
+  /// kuning-hitam). Pakai ini buat tinggi yang isinya teks: kotaknya ikut
+  /// tumbuh seiring teksnya.
+  double scaledHeight(double base) {
+    final textScale = MediaQuery.textScalerOf(this).scale(1.0).clamp(1.0, 1.3);
+    return base * textScale;
+  }
 }
 
 /// Bungkus konten dengan lebar maksimum di layar besar (tablet/web) supaya

@@ -73,12 +73,17 @@ final weeklyMissionCountStreamProvider =
 
       final supabase = Supabase.instance.client;
 
-      // 🔥 PAKAI UTC AGAR SAMA DENGAN DATABASE
-      final now = DateTime.now().toUtc();
+      // WAKTU LOKAL, bukan UTC. Dulu batas minggunya dihitung di UTC --
+      // buat WIB (UTC+7) itu artinya "minggu" versi grafik ini mulai jam
+      // 07:00 pagi Senin, bukan tengah malam. Misi yang dikerjain
+      // 00:00-06:59 WIB masuk ke kotak hari SEBELUMNYA, dan misi Minggu
+      // malam bisa kehitung minggu berikutnya. parseDateSafely sekarang
+      // balikin waktu lokal, jadi batasnya harus lokal juga biar nyambung.
+      final now = DateTime.now();
 
       final int daysSinceSunday = now.weekday == 7 ? 0 : now.weekday;
 
-      final startOfWeek = DateTime.utc(
+      final startOfWeek = DateTime(
         now.year,
         now.month,
         now.day,

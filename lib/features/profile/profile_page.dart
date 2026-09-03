@@ -1402,7 +1402,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           if (certs.isEmpty) return const SizedBox();
 
                           return SizedBox(
-                            height: 190, // Beri sedikit extra height untuk shadow
+                            // +10 buat ruang bayangan; ikut skala teks biar
+                            // tetap muat pas "Ukuran Teks" dibesarin.
+                            height: context.scaledHeight(190),
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               physics: const BouncingScrollPhysics(),
@@ -2170,12 +2172,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ? cert['cardTitleId']
         : cert['cardTitleEn'];
 
+    // Tinggi ikut setelan "Ukuran Teks" -- isinya teks semua, kalau
+    // kotaknya dipatok 180 mati sementara teksnya membesar, ujungnya
+    // overflow.
+    final double cardHeight = context.scaledHeight(180);
+
     return SizedBox(
-      height: 180,
+      height: cardHeight,
       width: cardWidth,
       child: Container(
         width: cardWidth,
-        height: 180,
+        height: cardHeight,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,

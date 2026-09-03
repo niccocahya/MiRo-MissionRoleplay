@@ -36,6 +36,10 @@ const Map<String, Map<String, String>> _t = {
     'tips': "Tips for Parents",
     'back': "Back",
     'next': "Next",
+    'leave_title': "Leave this mission?",
+    'leave_desc': "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
+    'leave_stay': "Keep going",
+    'leave_confirm': "Leave",
   },
   'id': {
     'img_failed': "Gambar gagal dimuat",
@@ -52,6 +56,10 @@ const Map<String, Map<String, String>> _t = {
     'tips': "Tips untuk Orang Tua",
     'back': "Kembali",
     'next': "Lanjut",
+    'leave_title': "Keluar dari misi ini?",
+    'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
+    'leave_stay': "Lanjut Main",
+    'leave_confirm': "Keluar",
   },
 };
 
@@ -336,6 +344,60 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
         : widget.mission.stepsEn;
     final bool allStepsDone = completedSteps >= steps.length;
 
+    return PopScope(
+      // Dulu keluar dari misi yang lagi jalan sama sekali nggak dicegat --
+      // tombol "Kembali" di bawah nempel persis di sebelah "Lanjut" (gampang
+      // kepencet, apalagi kalau HP-nya lagi dipegang anak), dan tombol back
+      // HP juga langsung nutup. Semua progres langkah + foto yang UDAH
+      // terunggah ke storage ikut hilang tanpa peringatan: misinya nggak
+      // kecatat selesai, dan fotonya nyangkut selamanya di storage karena
+      // nggak akan pernah ada baris `journals` yang nunjuk ke situ.
+      canPop: !_hasUnsavedProgress,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final leave = await _confirmLeaveMission(texts);
+        if (leave && context.mounted) Navigator.pop(context);
+      },
+      child: _buildScaffold(context, texts, lang, steps, allStepsDone),
+    );
+  }
+
+  /// Ada yang bakal hilang kalau layar ini ditutup sekarang?
+  bool get _hasUnsavedProgress =>
+      _stepPhotos.isNotEmpty || completedSteps > 0;
+
+  Future<bool> _confirmLeaveMission(Map<String, String> texts) async {
+    if (!_hasUnsavedProgress) return true;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(texts['leave_title']!),
+        content: Text(texts['leave_desc']!),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(texts['leave_stay']!),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              texts['leave_confirm']!,
+              style: TextStyle(color: AppColors.danger),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    Map<String, String> texts,
+    String lang,
+    List steps,
+    bool allStepsDone,
+  ) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SizedBox.expand(
@@ -970,9 +1032,15 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             flutterTts.stop();
-                            Navigator.pop(context);
+                            // Lewat konfirmasi yang sama kayak tombol back
+                            // HP -- tombol ini nempel di sebelah "Lanjut",
+                            // paling gampang kepencet nggak sengaja.
+                            final leave = await _confirmLeaveMission(texts);
+                            if (leave && context.mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.accent,

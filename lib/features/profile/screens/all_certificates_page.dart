@@ -157,10 +157,13 @@ class AllCertificatesPage extends ConsumerWidget {
         : cert['cardTitleEn'];
 
     // Langsung tembak Center dan Container kartunya aja!
+    // Tingginya ikut setelan "Ukuran Teks" (lihat context.scaledHeight):
+    // isinya teks semua, kotak mati 180px bakal overflow pas teksnya
+    // dibesarin.
     return Center(
       child: Container(
         width: cardWidth,
-        height: 180,
+        height: context.scaledHeight(180),
         decoration: BoxDecoration(
           // BACKGROUND DINAMIS DARI DATABASE
           gradient: LinearGradient(
