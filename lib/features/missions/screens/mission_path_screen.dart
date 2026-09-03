@@ -196,13 +196,27 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     final missionsAsync = ref.watch(missionsByRoleProvider(widget.roleId));
     final rolesAsync = ref.watch(rolesProvider);
 
+    // Dulu abu-kebiruan datar (`Color(0xFFF0F4F8)` -> `Color(0xFFD9E2EC)`)
+    // buat SEMUA role -- persis keluhan "polos banget, cuma abu-abu, kek
+    // hambar". Sekarang tiap role punya "biome" warnanya sendiri (biru buat
+    // Koki, hijau buat Dokter, peach buat Pelukis, dst -- warna yang SAMA
+    // yang udah dipakai buat identitas role itu di Home/Progress), jadi
+    // peta misinya kerasa hidup dan beda-beda tiap kali ganti role, bukan
+    // satu template abu yang sama terus-terusan.
+    final visual = roleVisualById(widget.roleId) ?? kUnknownRoleVisual;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF0F4F8), Color(0xFFD9E2EC)],
+            colors: [
+              Color.lerp(visual.tint, Colors.white, 0.3)!,
+              visual.tint,
+              Color.lerp(visual.tint, visual.badgeColor, 0.35)!,
+            ],
+            stops: const [0.0, 0.45, 1.0],
           ),
         ),
         child: SafeArea(
@@ -444,43 +458,141 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     String lang,
     Map<String, String> texts,
   ) {
+    final visual = roleVisualById(widget.roleId) ?? kUnknownRoleVisual;
+
     return Stack(
       children: [
-        _buildCloudDecorator(top: 50, left: -10, size: 90),
-        _buildCloudDecorator(top: 280, right: -20, size: 110),
-        _buildCloudDecorator(bottom: 120, left: 30, size: 70),
+        // Dulu 3 icon awan datar (`Icons.cloud` @ 6% opacity) -- nyaris
+        // nggak keliatan, dan nggak ada elemen dekoratif lain sama sekali.
+        // Sekarang campuran awan yang beneran punya bentuk (2 lapis
+        // lingkaran, bukan 1 icon pipih) + gelembung warna + kelap-kelip
+        // bintang, semuanya ngambil warna dari role-nya sendiri biar
+        // nyambung sama gradasi background di atas.
+        ..._buildPathDecorations(visual),
 
-        ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(vertical: 50),
-          itemCount: missions.length,
-          itemBuilder: (context, index) {
-            final mission = missions[index];
-            final double alignX = math.sin(index * 1.5) * 0.5;
+        // Dibungkus LayoutBuilder buat tau lebar SEBENARNYA yang tersedia
+        // -- dipakai buat ngitung posisi piksel titik-titik jejak di bawah
+        // (rumus yang SAMA persis dipakai Flutter sendiri buat nempatin
+        // `Align(alignment: Alignment(alignX, 0))` pada tiap node, biar
+        // jejaknya beneran nyambung ke pusat lingkaran node, bukan
+        // ngasal/kira-kira).
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final double trackWidth = constraints.maxWidth;
 
-            // LOGIKA 3 STATUS MISI BERSANDARKAN DATABASE
-            final bool isCompleted = index < _unlockedLevel - 1;
-            final bool isCurrent = index == _unlockedLevel - 1;
-            final bool isLocked = index > _unlockedLevel - 1;
+            return ListView.builder(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 50),
+              itemCount: missions.length,
+              itemBuilder: (context, index) {
+                final mission = missions[index];
+                final double alignX = math.sin(index * 1.5) * 0.5;
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 60),
-              child: Align(
-                alignment: Alignment(alignX, 0),
-                child: _buildLevelNode(
-                  context,
-                  mission,
-                  isCompleted,
-                  isCurrent,
-                  isLocked,
-                  lang,
-                  texts,
-                ),
-              ),
+                // LOGIKA 3 STATUS MISI BERSANDARKAN DATABASE
+                final bool isCompleted = index < _unlockedLevel - 1;
+                final bool isCurrent = index == _unlockedLevel - 1;
+                final bool isLocked = index > _unlockedLevel - 1;
+
+                // Item SATU baris di ListView ini tingginya SELALU 140
+                // (node 80 + jarak bawah 60, lihat Padding di bawah) --
+                // dipakai buat ngitung titik pusat node BERIKUTNYA
+                // (yang ada di item selanjutnya, 140px lebih ke bawah)
+                // tanpa perlu nunggu item itu beneran ke-render.
+                const double itemHeight = 140;
+                const double nodeSize = 80;
+                double nodeCenterX(double alignment) =>
+                    (trackWidth - nodeSize) / 2 * (1 + alignment) +
+                    nodeSize / 2;
+
+                final bool hasNext = index < missions.length - 1;
+                final double nextAlignX = hasNext
+                    ? math.sin((index + 1) * 1.5) * 0.5
+                    : alignX;
+                // Jejak menuju node BERIKUTNYA diwarnai berdasarkan status
+                // node TUJUANNYA -- berwarna/hidup kalau node berikutnya
+                // udah kebuka (ngasih rasa "jalan yang udah/lagi dilalui"),
+                // abu-abu pudar kalau masih terkunci (Duolingo persis
+                // gini: rutenya tetep keliatan penuh, cuma bagian yang
+                // belum boleh dijalanin diredupkan).
+                final bool nextIsLocked = hasNext && index + 1 > _unlockedLevel - 1;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 60),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      if (hasNext)
+                        _buildDottedTrail(
+                          fromX: nodeCenterX(alignX),
+                          toX: nodeCenterX(nextAlignX),
+                          fromY: nodeSize / 2,
+                          toY: itemHeight + nodeSize / 2,
+                          muted: nextIsLocked,
+                          color: visual.resolvedBadgeColor,
+                        ),
+                      Align(
+                        alignment: Alignment(alignX, 0),
+                        child: _buildLevelNode(
+                          context,
+                          mission,
+                          isCompleted,
+                          isCurrent,
+                          isLocked,
+                          lang,
+                          texts,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             );
           },
         ),
       ],
+    );
+  }
+
+  /// Jejak titik-titik dari 1 node ke node berikutnya -- garis putus-putus
+  /// "digambar tangan" pakai deretan lingkaran kecil (bukan CustomPainter
+  /// custom), diinterpolasi lurus dari (fromX,fromY) ke (toX,toY). Dot
+  /// bukan garis solid SENGAJA -- lebih gampang keliatan rapi walau
+  /// posisinya nggak 100% presisi ke piksel, dan emang gaya khas jalan
+  /// setapak di game/app kek gini.
+  Widget _buildDottedTrail({
+    required double fromX,
+    required double toX,
+    required double fromY,
+    required double toY,
+    required bool muted,
+    required Color color,
+  }) {
+    const int dotCount = 7;
+    final Color dotColor = muted
+        ? AppColors.textMuted.withValues(alpha: 0.35)
+        : color.withValues(alpha: 0.55);
+
+    return IgnorePointer(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: List.generate(dotCount, (i) {
+          // Titik di ujung-ujung banget (t=0 / t=1) sengaja dilewatin --
+          // itu udah ketutup badan node-nya sendiri, nggak perlu digambar.
+          final double t = (i + 1) / (dotCount + 1);
+          final double x = fromX + (toX - fromX) * t;
+          final double y = fromY + (toY - fromY) * t;
+          const double dotSize = 7;
+          return Positioned(
+            left: x - dotSize / 2,
+            top: y - dotSize / 2,
+            child: Container(
+              width: dotSize,
+              height: dotSize,
+              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -635,7 +747,100 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
     );
   }
 
-  Widget _buildCloudDecorator({
+  /// Seluruh lapisan dekorasi latar peta misi. Dulu cuma 3x panggilan
+  /// `_buildCloudDecorator` yang masing-masing gambar SATU icon awan
+  /// pipih di opacity 6% (nyaris nggak keliatan) -- itu sumber keluhan
+  /// "polos banget, awan gajelas, hambar". Sekarang: awan yang beneran
+  /// punya bentuk (dilapis dari beberapa lingkaran, bukan 1 icon), plus
+  /// gelembung warna & kelap-kelip bintang yang nggak ada sebelumnya sama
+  /// sekali -- semuanya ngambil warna role aktif biar nyambung ke gradasi
+  /// background barusan.
+  List<Widget> _buildPathDecorations(RoleVisual visual) {
+    return [
+      _buildColorBlob(top: 160, right: -40, size: 140, color: visual.resolvedBadgeColor),
+      _buildColorBlob(bottom: 260, left: -55, size: 170, color: visual.resolvedBadgeColor),
+      _buildColorBlob(top: 480, left: 30, size: 80, color: AppColors.gold),
+
+      _buildPuffyCloud(top: 40, left: -20, scale: 1.0),
+      _buildPuffyCloud(top: 260, right: -30, scale: 1.3),
+      _buildPuffyCloud(bottom: 140, left: 10, scale: 0.75),
+      _buildPuffyCloud(top: 560, right: 10, scale: 0.9),
+
+      _buildSparkle(top: 120, left: 60, size: 16),
+      _buildSparkle(top: 340, right: 70, size: 12),
+      _buildSparkle(bottom: 200, left: 100, size: 14),
+      _buildSparkle(top: 620, right: 50, size: 18),
+    ];
+  }
+
+  /// Awan "dilapis tangan" dari 3 lingkaran putih semi-transparan yang
+  /// saling tumpang tindih -- bentuknya jadi beneran kebaca sebagai awan
+  /// (gumpalan nggak rata), bukan lingkaran/icon tunggal yang keliatan
+  /// digital banget.
+  Widget _buildPuffyCloud({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+    double scale = 1.0,
+  }) {
+    Widget puff(double size) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.55),
+            shape: BoxShape.circle,
+          ),
+        );
+
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: SizedBox(
+        width: 100 * scale,
+        height: 60 * scale,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(left: 10 * scale, top: 10 * scale, child: puff(50 * scale)),
+            Positioned(left: 0, top: 20 * scale, child: puff(38 * scale)),
+            Positioned(left: 42 * scale, top: 16 * scale, child: puff(42 * scale)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Gelembung warna lembut -- elemen baru yang nggak ada sebelumnya,
+  /// ngasih "tekstur" ke background tanpa perlu gambar/asset tambahan.
+  Widget _buildColorBlob({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+    required double size,
+    required Color color,
+  }) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.18),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  /// Kelap-kelip kecil -- nuansa "petualangan seru" ala game, elemen baru.
+  Widget _buildSparkle({
     double? top,
     double? left,
     double? right,
@@ -648,8 +853,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
       right: right,
       bottom: bottom,
       child: Icon(
-        Icons.cloud,
-        color: AppColors.primary.withValues(alpha: 0.06),
+        Icons.auto_awesome_rounded,
+        color: Colors.white.withValues(alpha: 0.75),
         size: size,
       ),
     );
