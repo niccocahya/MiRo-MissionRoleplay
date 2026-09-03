@@ -7,21 +7,86 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ⚠️ PASTIKAN IMPORT PROVIDER ANAK INI BENAR SESUAI FOLDERMU
 import '../../core/providers/child_provider.dart';
+import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/utils/level_utils.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/responsive.dart';
 
+/// Seluruh teks Mink, dua bahasa.
+///
+/// Dulu file ini SATU-SATUNYA bagian app yang nggak nyentuh
+/// `languageProvider` sama sekali -- 879 baris tanpa satu pun rujukan ke
+/// bahasa. Efeknya buat orang tua yang milih English: tombol, sapaan,
+/// dialog, chip saran, sampai balasan AI-nya sendiri semua tetap Bahasa
+/// Indonesia, karena prompt sistemnya pun ditulis dalam Indonesia.
+const Map<String, Map<String, String>> _t = {
+  'en': {
+    'status_online': "Online • Ready to help",
+    'typing': "Mink is typing... 🐧💭",
+    'hint': "Ask Mink here...",
+    'clear_tooltip': "Clear chat history",
+    'clear_title': "Clear chat history?",
+    'clear_body': "Every conversation with Mink will be deleted. This can't be undone.",
+    'clear_cancel': "Cancel",
+    'clear_confirm': "Delete",
+    'err_busy': "Oops, Mink's head is spinning. Try asking again! 🐧💦",
+    'err_offline': "Sorry, Mink seems to have lost the connection. 📶🐧",
+    'no_badges': "No new badges yet.",
+    'greet_morning': "Good Morning",
+    'greet_noon': "Good Afternoon",
+    'greet_evening': "Good Evening",
+    'greet_night': "Good Night",
+    'chip_first_step': "What's the first step?",
+    'chip_materials': "What do we need to prepare?",
+    'chip_why': "Why does this mission matter?",
+    'chip_recommend': "Recommend a mission for today",
+    'chip_xp': "How do XP & levels work?",
+    'chip_progress': "Tell me about my child's progress",
+    // {g} = sapaan waktu, {n} = nama anak.
+    'greet_mission': "{g}! Stuck anywhere in this mission? Just ask Mink! 🐧",
+    'greet_home': "{g}! Need a mission suggestion, or want to talk about how {n} is doing today? Ask Mink! 🐧✨",
+  },
+  'id': {
+    'status_online': "Online • Siap membantu",
+    'typing': "Mink sedang mengetik... 🐧💭",
+    'hint': "Tanya Mink di sini...",
+    'clear_tooltip': "Hapus histori chat",
+    'clear_title': "Hapus histori chat?",
+    'clear_body': "Semua percakapan sama Mink bakal dihapus. Nggak bisa dibatalin.",
+    'clear_cancel': "Batal",
+    'clear_confirm': "Hapus",
+    'err_busy': "Waduh, Mink lagi pusing nih. Coba tanya lagi ya, Bunda! 🐧💦",
+    'err_offline': "Maaf, koneksi internet Mink sepertinya terputus. 📶🐧",
+    'no_badges': "Belum ada lencana baru.",
+    'greet_morning': "Selamat Pagi",
+    'greet_noon': "Selamat Siang",
+    'greet_evening': "Selamat Sore",
+    'greet_night': "Selamat Malam",
+    'chip_first_step': "Apa langkah pertamanya?",
+    'chip_materials': "Bahan apa aja yang perlu disiapkan?",
+    'chip_why': "Kenapa misi ini penting?",
+    'chip_recommend': "Rekomendasi misi hari ini",
+    'chip_xp': "Gimana cara kerja XP & level?",
+    'chip_progress': "Ceritain progres anakku",
+    'greet_mission': "{g} Bunda! Ada yang bingung pas ngerjain misi ini? Tanya Mink aja! 🐧",
+    'greet_home': "{g} Bunda! Butuh rekomendasi misi atau mau bahas perkembangan {n} hari ini? Tanya Mink ya! 🐧✨",
+  },
+};
+
+Map<String, String> _texts(String lang) => _t[lang] ?? _t['id']!;
+
 /// Sapaan berdasarkan jam saat ini. Sebelumnya if/else-chain ini ditulis
 /// ulang persis sama 2x di file ini (pas kirim pesan ke AI & pas buka
 /// jendela chat).
-String _timeGreeting() {
+String _timeGreeting(String lang) {
+  final t = _texts(lang);
   final hour = DateTime.now().hour;
-  if (hour >= 5 && hour < 11) return "Selamat Pagi";
-  if (hour >= 11 && hour < 15) return "Selamat Siang";
-  if (hour >= 15 && hour < 18) return "Selamat Sore";
-  return "Selamat Malam";
+  if (hour >= 5 && hour < 11) return t['greet_morning']!;
+  if (hour >= 11 && hour < 15) return t['greet_noon']!;
+  if (hour >= 15 && hour < 18) return t['greet_evening']!;
+  return t['greet_night']!;
 }
 
 // ============================================================================
@@ -92,6 +157,7 @@ class GroqService {
   static Future<String> sendMessage({
     required List<Map<String, String>> chatHistory,
     required String systemPrompt,
+    required String lang,
   }) async {
     try {
       final List<Map<String, String>> messages = [
@@ -118,11 +184,11 @@ class GroqService {
         return data['choices'][0]['message']['content'];
       } else {
         debugPrint("❌ GROQ ERROR: ${response.statusCode} - ${response.body}");
-        return "Waduh, Mink lagi pusing nih. Coba tanya lagi ya, Bunda! 🐧💦";
+        return _texts(lang)['err_busy']!;
       }
     } catch (e) {
       debugPrint("❌ GROQ EXCEPTION: $e");
-      return "Maaf, koneksi internet Mink sepertinya terputus. 📶🐧";
+      return _texts(lang)['err_offline']!;
     }
   }
 }
@@ -248,6 +314,7 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     required String? missionContext,
     required Map<String, dynamic> childFullData,
     required List<Map<String, dynamic>> recentAchievements,
+    required String lang,
   }) async {
     // Dulu nggak ada penjaga apa pun di sini -- ngetuk kirim 2x cepat
     // (atau nekan Enter sambil nge-tap tombol) nembak 2 panggilan Groq
@@ -263,7 +330,7 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     );
     unawaited(_saveMessage('user', userMessage));
 
-    final String timeGreeting = _timeGreeting();
+    final String timeGreeting = _timeGreeting(lang);
 
     final int xp = childFullData['total_xp'] ?? 0;
     // Bukan `childFullData['current_level']` — kolom itu di DB nggak
@@ -275,12 +342,39 @@ class ChatbotNotifier extends Notifier<ChatbotState> {
     final double lit = (childFullData['literacy_score'] ?? 0).toDouble();
     final double mot = (childFullData['motoric_score'] ?? 0).toDouble();
 
+    // Judul lencana ikut bahasa yang dipilih. Dulu selalu `title_id`,
+    // jadi walau nanti Mink jawab pakai Inggris, nama-nama lencananya
+    // tetap kebaca Indonesia di tengah kalimat.
+    final String badgeTitleKey = lang == 'en' ? 'title_en' : 'title_id';
     String badgesString = recentAchievements.isEmpty
-        ? "Belum ada lencana baru."
-        : recentAchievements.map((b) => "- ${b['title_id']}").join("\n");
+        ? _texts(lang)['no_badges']!
+        : recentAchievements
+            .map((b) => "- ${b[badgeTitleKey] ?? b['title_id']}")
+            .join("\n");
 
-    final String systemPrompt =
-        """
+    // Prompt sistemnya sendiri yang nentuin Mink jawab pakai bahasa apa.
+    // Selama ini cuma ada versi Indonesia, jadi orang tua yang milih
+    // English tetap dibalas Indonesia -- setelan bahasanya nggak pernah
+    // nyampe ke sini sama sekali.
+    final String systemPrompt = lang == 'en'
+        ? """
+You are Mink, a cheerful virtual parenting-assistant penguin. Greet with "$timeGreeting!".
+The MiRO app has 5 offline mission roles (Chef, Doctor, Painter, Athlete, Teacher) that train 5 skills without screen time.
+
+[CURRENT CHILD DATA]
+- Name: $childName (Level $level, XP $xp)
+- Skill radar: Cognitive ($cog), Empathy ($emp), Creativity ($cre), Literacy ($lit), Motoric ($mot).
+- Badges: $badgesString
+
+[CURRENT PAGE CONTEXT]
+${missionContext != null ? "MISSION CURRENTLY IN PROGRESS:\n$missionContext\n\nIf the parent asks about the mission, guide them using the information above." : "The parent is on the main menu."}
+
+[RULES]
+- Answer in English. Keep it short, use bullet points (-), bold the important parts.
+- Stay strictly on parenting/MiRO topics. Never give medical diagnoses.
+- Use emoji 🐧✨.
+"""
+        : """
 Kamu adalah Mink, Pinguin asisten parenting virtual yang ceria. Sapa dengan "$timeGreeting Bunda/Ayah!".
 Aplikasi MiRO punya 5 peran misi offline (Koki, Dokter, Pelukis, Atlet, Guru) untuk melatih 5 skill tanpa layar HP.
 
@@ -293,7 +387,7 @@ Aplikasi MiRO punya 5 peran misi offline (Koki, Dokter, Pelukis, Atlet, Guru) un
 ${missionContext != null ? "INFORMASI MISI YANG SEDANG DIKERJAKAN:\n$missionContext\n\nJika pengguna bertanya tentang misi, pandu mereka berdasarkan informasi di atas." : "Bunda sedang berada di menu utama."}
 
 [ATURAN]
-- Jawab singkat, pakai bullet points (-), tebalkan teks penting.
+- Jawab dalam Bahasa Indonesia. Jawab singkat, pakai bullet points (-), tebalkan teks penting.
 - Dilarang bahas di luar parenting/MiRO. Dilarang diagnosa medis.
 - Gunakan emoji 🐧✨.
 """;
@@ -301,6 +395,7 @@ ${missionContext != null ? "INFORMASI MISI YANG SEDANG DIKERJAKAN:\n$missionCont
     final aiResponse = await GroqService.sendMessage(
       chatHistory: state.messages,
       systemPrompt: systemPrompt,
+      lang: lang,
     );
 
     state = state.copyWith(
@@ -361,21 +456,23 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
   }
 
   Future<void> _confirmClearHistory(BuildContext context) async {
+    final t = _texts(ref.read(languageProvider));
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus histori chat?'),
-        content: const Text(
-          'Semua percakapan sama Mink bakal dihapus. Nggak bisa dibatalin.',
-        ),
+        title: Text(t['clear_title']!),
+        content: Text(t['clear_body']!),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
+            child: Text(t['clear_cancel']!),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Hapus', style: TextStyle(color: AppColors.danger)),
+            child: Text(
+              t['clear_confirm']!,
+              style: TextStyle(color: AppColors.danger),
+            ),
           ),
         ],
       ),
@@ -434,6 +531,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
           missionContext: activeContext,
           childFullData: childFullData,
           recentAchievements: recentAchievements,
+          lang: ref.read(languageProvider),
         );
 
     _scrollToBottom();
@@ -576,11 +674,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     Map<String, dynamic> childData,
     String? activeContext,
   ) {
-    final String timeGreeting = _timeGreeting();
+    final String lang = ref.watch(languageProvider);
+    final t = _texts(lang);
+    final String timeGreeting = _timeGreeting(lang);
 
-    final String botGreeting = activeContext != null
-        ? "$timeGreeting Bunda! Ada yang bingung pas ngerjain misi ini? Tanya Mink aja! 🐧"
-        : "$timeGreeting Bunda! Butuh rekomendasi misi atau mau bahas perkembangan $childName hari ini? Tanya Mink ya! 🐧✨";
+    final String botGreeting = (activeContext != null
+            ? t['greet_mission']!
+            : t['greet_home']!)
+        .replaceAll('{g}', timeGreeting)
+        .replaceAll('{n}', childName);
 
     return Container(
       constraints: BoxConstraints(
@@ -633,7 +735,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                       ),
                     ),
                     Text(
-                      "Online • Siap membantu",
+                      t['status_online']!,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
@@ -645,7 +747,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                 const Spacer(),
                 if (chatState.messages.isNotEmpty)
                   IconButton(
-                    tooltip: 'Hapus histori chat',
+                    tooltip: t['clear_tooltip']!,
                     onPressed: () => _confirmClearHistory(context),
                     icon: Icon(
                       Icons.delete_outline_rounded,
@@ -682,7 +784,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
-                        "Mink sedang mengetik... 🐧💭",
+                        t['typing']!,
                         style: TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 12,
@@ -708,15 +810,15 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   children: (activeContext != null
-                          ? const [
-                              "Apa langkah pertamanya?",
-                              "Bahan apa aja yang perlu disiapkan?",
-                              "Kenapa misi ini penting?",
+                          ? [
+                              t['chip_first_step']!,
+                              t['chip_materials']!,
+                              t['chip_why']!,
                             ]
-                          : const [
-                              "Rekomendasi misi hari ini",
-                              "Gimana cara kerja XP & level?",
-                              "Ceritain progres anakku",
+                          : [
+                              t['chip_recommend']!,
+                              t['chip_xp']!,
+                              t['chip_progress']!,
                             ])
                       .map(
                         (q) => Padding(
@@ -773,7 +875,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                 color: AppColors.primary,
               ),
               decoration: InputDecoration(
-                hintText: "Tanya Mink di sini...",
+                hintText: t['hint']!,
                 hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 filled: true,
                 fillColor: AppColors.background,

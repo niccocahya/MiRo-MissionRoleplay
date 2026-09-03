@@ -138,6 +138,7 @@ const Map<String, Map<String, String>> _t = {
         "Check your new email inbox to confirm the change.",
     'password_updated': "Password updated successfully.",
     'err_update': "Failed to update: ",
+    'err_photo': "Failed to change photo: ",
     'err_password_mismatch': "Passwords don't match.",
     'err_password_short': "Password must be at least 6 characters.",
     'danger_zone': "Danger Zone",
@@ -237,6 +238,7 @@ const Map<String, Map<String, String>> _t = {
         "Cek inbox email barumu buat konfirmasi perubahan.",
     'password_updated': "Password berhasil diperbarui.",
     'err_update': "Gagal memperbarui: ",
+    'err_photo': "Gagal ganti foto: ",
     'err_password_mismatch': "Password tidak cocok.",
     'err_password_short': "Password minimal 6 karakter.",
     'danger_zone': "Zona Berbahaya",
@@ -358,6 +360,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     String childId, {
     int? currentChildAge,
   }) {
+    // Keempat modal di file ini bikin TextEditingController-nya sendiri
+    // dan dulu nggak pernah ngelepas satu pun -- tiap kali orang tua buka
+    // modal ini, controller-nya (plus listener internal + node fokusnya)
+    // ditinggal nyangkut selamanya. Nggak keliatan di pemakaian sebentar,
+    // tapi numpuk terus di sesi panjang. whenComplete dipilih (bukan
+    // dispose() State) karena umurnya ngikut sheet-nya, bukan halamannya.
     final parentController = TextEditingController(text: currentParentName);
     final childController = TextEditingController(text: currentChildName);
     final ageController = TextEditingController(
@@ -549,7 +557,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       },
-    );
+    ).whenComplete(() {
+      parentController.dispose();
+      childController.dispose();
+      ageController.dispose();
+    });
   }
 
   void _showChildDataModal(
@@ -1116,7 +1128,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       },
-    );
+    ).whenComplete(() {
+      emailController.dispose();
+    });
   }
 
   /// Ganti password login lewat `updateUser` bawaan Supabase Auth.
@@ -1223,7 +1237,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       },
-    );
+    ).whenComplete(() {
+      passwordController.dispose();
+      confirmController.dispose();
+    });
   }
 
   /// Ekspor semua data akun jadi 1 file JSON lalu buka share sheet OS.
@@ -1354,7 +1371,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           },
         );
       },
-    );
+    ).whenComplete(() {
+      confirmController.dispose();
+    });
   }
 
   // calculateLevel()/calculateLevelInfo() dipindah ke
@@ -2002,8 +2021,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       unawaited(StorageUploadService.deleteProfilePhoto(oldAvatarUrl));
     } catch (e) {
       if (mounted) {
+        // Dulu pesan ini ditulis langsung dalam Bahasa Indonesia, jadi
+        // orang tua yang milih English tetap dapat teks Indonesia pas
+        // ganti fotonya gagal.
+        final texts = _t[ref.read(languageProvider)] ?? _t['en']!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal ganti foto: $e'), backgroundColor: AppColors.danger),
+          SnackBar(
+            content: Text("${texts['err_photo']}$e"),
+            backgroundColor: AppColors.danger,
+          ),
         );
       }
     }
