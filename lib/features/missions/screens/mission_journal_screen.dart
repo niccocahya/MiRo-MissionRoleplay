@@ -19,6 +19,7 @@ import '../../../core/providers/language_provider.dart';
 import '../../../core/providers/mission_reflection_provider.dart';
 import '../../../core/constants/feeling_emojis.dart';
 import '../../../core/constants/role_visuals.dart';
+import '../../../core/constants/skills.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -503,20 +504,12 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
             .eq('child_id', childId)
             .maybeSingle();
 
-        String getDbColumnName(String key) {
-          String k = key.toLowerCase();
-          if (k == 'kognitif' || k == 'cognitive') return 'cognitive_score';
-          if (k == 'empati' || k == 'empathy') return 'empathy_score';
-          if (k == 'kreativitas' || k == 'creativity') return 'creativity_score';
-          if (k == 'literasi' || k == 'literacy') return 'literacy_score';
-          if (k == 'motorik' || k == 'motoric') return 'motoric_score';
-          return '${k}_score';
-        }
-
         if (statsRes != null) {
           Map<String, dynamic> updates = {};
           widget.mission.skillsReward.forEach((key, value) {
-            String dbCol = getDbColumnName(key);
+            // Pemetaan key -> kolom child_stats (termasuk varian ejaan
+            // Indonesia) dipindah ke core/constants/skills.dart.
+            String dbCol = skillStatColumn(key);
             updates[dbCol] = (statsRes[dbCol] as int? ?? 0) + (value as int);
           });
           if (updates.isNotEmpty) {
@@ -528,7 +521,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
         } else {
           Map<String, dynamic> inserts = {'child_id': childId};
           widget.mission.skillsReward.forEach((key, value) {
-            String dbCol = getDbColumnName(key);
+            String dbCol = skillStatColumn(key);
             inserts[dbCol] = value;
           });
           await supabase.from('child_stats').insert(inserts);

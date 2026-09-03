@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 
 import '../app_info.dart';
 import '../constants/role_visuals.dart';
+import '../constants/skills.dart';
 
 /// Laporan PDF perkembangan anak — sebelumnya nggak ada cara sama sekali
 /// buat orang tua nyimpen/nge-print/ngirim rangkuman progres anaknya ke
@@ -54,21 +55,12 @@ Future<void> exportProgressReportPdf({
   final dateFmt = DateFormat('dd MMM yyyy');
   String fmtDate(DateTime? d) => d == null ? '-' : dateFmt.format(d);
 
-  final skillLabels = id
-      ? {
-          'cognitive': 'Kognitif',
-          'empathy': 'Empati',
-          'creativity': 'Kreativitas',
-          'literacy': 'Literasi',
-          'motoric': 'Motorik',
-        }
-      : {
-          'cognitive': 'Cognitive',
-          'empathy': 'Empathy',
-          'creativity': 'Creativity',
-          'literacy': 'Literacy',
-          'motoric': 'Motoric',
-        };
+  // Label skill-nya dari core/constants/skills.dart -- dulu file ini punya
+  // salinan sendiri, jadi nambah/ganti skill harus diinget diubah di sini
+  // juga (gampang kelewat: skill baru muncul di app tapi hilang di PDF).
+  final Map<String, String> skillLabels = {
+    for (final s in kSkills) s.key: s.name(id ? 'id' : 'en'),
+  };
 
   final double maxSkill = data.skillScores.values.isEmpty
       ? 1

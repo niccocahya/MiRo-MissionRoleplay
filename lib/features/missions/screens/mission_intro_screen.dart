@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/widgets/back_button.dart';
 import '../data/mission_model.dart';
 import 'mission_play_screen.dart';
+import '../../../core/constants/skills.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/theme/app_colors.dart';
@@ -321,7 +322,7 @@ class MissionIntroScreen extends ConsumerWidget {
           return _buildBadge(
             "${skill.key.toUpperCase()} +${skill.value}",
             null,
-            emoji: _getSkillEmoji(skill.key),
+            emoji: skillEmoji(skill.key),
           );
         }),
       ],
@@ -423,20 +424,4 @@ class MissionIntroScreen extends ConsumerWidget {
     );
   }
 
-  String _getSkillEmoji(String skillKey) {
-    switch (skillKey.toLowerCase()) {
-      case 'motoric':
-        return '🧩';
-      case 'cognitive':
-        return '🧠';
-      case 'creativity':
-        return '🎨';
-      case 'literacy':
-        return '📚';
-      case 'empathy':
-        return '💗';
-      default:
-        return '🌟';
-    }
-  }
 }

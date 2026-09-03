@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../constants/skills.dart';
 import '../utils/date_utils.dart';
 
 /// Satu titik di grafik tren: total kumulatif tiap skill SAMPAI misi ini
@@ -29,13 +30,9 @@ final skillTrendProvider =
       .eq('status', 'completed')
       .order('completed_at', ascending: true);
 
-  final Map<String, double> running = {
-    'cognitive': 0,
-    'empathy': 0,
-    'creativity': 0,
-    'literacy': 0,
-    'motoric': 0,
-  };
+  // Daftar skill-nya dari core/constants/skills.dart (dulu ditulis ulang
+  // di sini) -- biar skill baru otomatis kebawa ke grafik tren juga.
+  final Map<String, double> running = {for (final s in kSkills) s.key: 0};
 
   final List<SkillTrendPoint> points = [];
   for (final row in rows) {

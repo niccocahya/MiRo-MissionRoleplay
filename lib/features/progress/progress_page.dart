@@ -14,6 +14,7 @@ import '../../core/services/report_pdf_service.dart';
 import '../../core/providers/skill_trend_provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/role_visuals.dart';
+import '../../core/constants/skills.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -761,13 +762,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     );
   }
 
-  static const List<String> _trendSkillKeys = [
-    'cognitive',
-    'empathy',
-    'creativity',
-    'literacy',
-    'motoric',
-  ];
+  // Daftar key-nya dari core/constants/skills.dart (dulu ditulis ulang
+  // di sini). Dipertahankan sebagai field biar sisa kodenya nggak berubah.
+  static final List<String> _trendSkillKeys = kSkillKeys;
 
   /// Tren skor skill dari waktu ke waktu — `child_stats` cuma nyimpen
   /// snapshot skor SAAT INI, jadi sebelumnya nggak ada cara buat orang tua
