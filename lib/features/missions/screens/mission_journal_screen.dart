@@ -53,11 +53,13 @@ const Map<String, Map<String, String>> _t = {
     'save_fail': "Failed to save photo.",
     'preparing': "Preparing photo...",
     'share_text': "Look at my child's exciting mission on MiRO! 🐧✨",
-    'sync_failed': "Failed to save this mission's progress. Your XP/skills weren't recorded yet.",
+    'sync_failed':
+        "Failed to save this mission's progress. Your XP/skills weren't recorded yet.",
     'btn_retry': "Try Again",
     'rate_mission': "How fun was this mission?",
     'btn_replay': "Play This Mission Again",
-    'replay_note': "Replaying won't earn extra XP or badges -- it's just for fun!",
+    'replay_note':
+        "Replaying won't earn extra XP or badges -- it's just for fun!",
     'reflection_title': "How you both felt",
     'reflection_parent': "Parent",
     'reflection_child': "Child",
@@ -86,11 +88,13 @@ const Map<String, Map<String, String>> _t = {
     'save_fail': "Gagal menyimpan foto.",
     'preparing': "Menyiapkan foto...",
     'share_text': "Yuk lihat keseruan misi anakku di MiRO! 🐧✨",
-    'sync_failed': "Gagal nyimpen progres misi ini. XP/skill-nya belum kecatat.",
+    'sync_failed':
+        "Gagal nyimpen progres misi ini. XP/skill-nya belum kecatat.",
     'btn_retry': "Coba Lagi",
     'rate_mission': "Seberapa seru misi ini?",
     'btn_replay': "Ulangi Misi Ini",
-    'replay_note': "Ulangi misi nggak nambah XP/lencana lagi -- ini cuma buat seru-seruan!",
+    'replay_note':
+        "Ulangi misi nggak nambah XP/lencana lagi -- ini cuma buat seru-seruan!",
     'reflection_title': "Gimana perasaan kalian",
     'reflection_parent': "Orang Tua",
     'reflection_child': "Anak",
@@ -301,8 +305,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
     try {
       await Supabase.instance.client
           .from('mission_logs')
-          .update({'rating': stars})
-          .eq('id', _generatedMissionLogId!);
+          .update({'rating': stars}).eq('id', _generatedMissionLogId!);
     } catch (e) {
       debugPrint("Gagal simpan rating: $e");
     }
@@ -453,7 +456,8 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
         // misi) explicitly filter status == 'completed', jadi baris
         // 'replayed' otomatis nggak kehitung di mana pun -- nggak ada
         // celah buat farming XP dari replay.
-        debugPrint("⚠️ Misi ini udah pernah selesai — catat sbg replay, nggak dobel XP.");
+        debugPrint(
+            "⚠️ Misi ini udah pernah selesai — catat sbg replay, nggak dobel XP.");
         try {
           final replayLog = await supabase
               .from('mission_logs')
@@ -520,13 +524,10 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
             .select('total_xp')
             .eq('id', childId)
             .single();
-        await supabase
-            .from('children')
-            .update({
-              'total_xp': (freshChild['total_xp'] as int? ?? 0) +
-                  widget.mission.xpReward,
-            })
-            .eq('id', childId);
+        await supabase.from('children').update({
+          'total_xp':
+              (freshChild['total_xp'] as int? ?? 0) + widget.mission.xpReward,
+        }).eq('id', childId);
         _stepXpApplied = true;
       }
 
@@ -628,8 +629,8 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   // =========================================================================
   Future<Uint8List?> _captureCollage() async {
     try {
-      RenderRepaintBoundary boundary =
-          _collageKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      RenderRepaintBoundary boundary = _collageKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
@@ -640,57 +641,62 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
     }
   }
 
-Future<void> _downloadCollage() async {
-      final lang = ref.read(languageProvider);
-      final texts = _t[lang] ?? _t['en']!;
+  Future<void> _downloadCollage() async {
+    final lang = ref.read(languageProvider);
+    final texts = _t[lang] ?? _t['en']!;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(texts['saving']!), duration: const Duration(seconds: 1)),
-      );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(texts['saving']!),
+          duration: const Duration(seconds: 1)),
+    );
 
-      final bytes = await _captureCollage();
-      if (bytes != null) {
-        try {
-          // 1. Simpan bytes ke file sementara (Temporary File)
-          final tempDir = await getTemporaryDirectory();
-          final tempFile = File('${tempDir.path}/MiRO_Mission_${DateTime.now().millisecondsSinceEpoch}.png');
-          await tempFile.writeAsBytes(bytes);
+    final bytes = await _captureCollage();
+    if (bytes != null) {
+      try {
+        // 1. Simpan bytes ke file sementara (Temporary File)
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File(
+            '${tempDir.path}/MiRO_Mission_${DateTime.now().millisecondsSinceEpoch}.png');
+        await tempFile.writeAsBytes(bytes);
 
-          // 2. Minta izin ke HP pengguna (Sangat penting di Android/iOS modern!)
-          final hasAccess = await Gal.hasAccess();
-          if (!hasAccess) {
-             await Gal.requestAccess();
-          }
-
-          // 3. Simpan file sementara tadi ke Galeri pakai package 'gal'
-          await Gal.putImage(tempFile.path);
-
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(texts['save_success']!),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } catch (e) {
-          debugPrint("Gagal menyimpan ke galeri: $e");
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(texts['save_fail']!),
-              backgroundColor: Colors.red,
-            ),
-          );
+        // 2. Minta izin ke HP pengguna (Sangat penting di Android/iOS modern!)
+        final hasAccess = await Gal.hasAccess();
+        if (!hasAccess) {
+          await Gal.requestAccess();
         }
+
+        // 3. Simpan file sementara tadi ke Galeri pakai package 'gal'
+        await Gal.putImage(tempFile.path);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(texts['save_success']!),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        debugPrint("Gagal menyimpan ke galeri: $e");
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(texts['save_fail']!),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
-    
+  }
+
   Future<void> _shareCollage() async {
     final lang = ref.read(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(texts['preparing']!), duration: const Duration(seconds: 1)),
+      SnackBar(
+          content: Text(texts['preparing']!),
+          duration: const Duration(seconds: 1)),
     );
 
     final bytes = await _captureCollage();
@@ -698,7 +704,7 @@ Future<void> _downloadCollage() async {
       final tempDir = await getTemporaryDirectory();
       final file = await File('${tempDir.path}/miro_mission.png').create();
       await file.writeAsBytes(bytes);
-      
+
       await SharePlus.instance.share(
         ShareParams(files: [XFile(file.path)], text: texts['share_text']!),
       );
@@ -712,390 +718,419 @@ Future<void> _downloadCollage() async {
     final bool hasPhotos = widget.capturedPhotos.isNotEmpty;
 
     final String role = widget.mission.roleId;
-    final Color badgeColor = (roleVisualById(role) ?? kUnknownRoleVisual).resolvedBadgeColor;
+    final Color badgeColor =
+        (roleVisualById(role) ?? kUnknownRoleVisual).resolvedBadgeColor;
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _isLoading
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      )
-                    : ListView(
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          Text(
-                            widget.isViewOnly
-                                ? texts['journal_view']!
-                                : texts['journal_new']!,
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              height: 1.2,
-                            ),
+      // Ganti dari flat AppColors.background ke gradasi tipis bertema warna
+      // role -- SENGAJA cuma nambah 1 lapis Container di sini (bukan
+      // ngerombak jadi Stack + dekorasi kayak layar lain), biar 380 baris
+      // konten di dalam SafeArea di bawah ini nggak perlu digeser ulang
+      // indentasinya. Layar ini nyimpen logika penting (penanda
+      // anti-dobel buat XP/lencana dari perbaikan sebelumnya) -- makin
+      // dikit yang disentuh strukturnya, makin kecil risiko kegeser.
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.lerp(badgeColor, Colors.white, 0.85)!,
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _isLoading
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
                           ),
-                          const SizedBox(height: 16),
-
-                          if (_syncFailed && !widget.isViewOnly) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.dangerTint,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                        )
+                      : ListView(
+                          physics: const BouncingScrollPhysics(),
+                          children: [
+                            Text(
+                              widget.isViewOnly
+                                  ? texts['journal_view']!
+                                  : texts['journal_new']!,
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
+                                height: 1.2,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.error_outline_rounded, color: AppColors.danger, size: 20),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Text(
-                                          texts['sync_failed']!,
-                                          style: TextStyle(
-                                            color: AppColors.danger,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
+                            ),
+                            const SizedBox(height: 16),
+                            if (_syncFailed && !widget.isViewOnly) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.dangerTint,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                      color: AppColors.danger
+                                          .withValues(alpha: 0.3)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(Icons.error_outline_rounded,
+                                            color: AppColors.danger, size: 20),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            texts['sync_failed']!,
+                                            style: TextStyle(
+                                              color: AppColors.danger,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: OutlinedButton(
-                                      onPressed: () => _syncToDatabase(_pendingAchievementId),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: AppColors.danger,
-                                        side: BorderSide(color: AppColors.danger),
-                                      ),
-                                      child: Text(texts['btn_retry']!),
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-
-                          if (!hasPhotos) ...[
-                            Text(
-                              texts['no_photo']!,
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                          ] else ...[
-                            // ==========================================
-                            // MEMANGGIL KOLASE ESTETIK DI SINI
-                            // ==========================================
-                            _buildCollageCard(lang, texts, badgeColor, role),
-                            const SizedBox(height: 24),
-
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton.icon(
-                                    onPressed: _downloadCollage,
-                                    icon: Icon(
-                                      Icons.download_rounded,
-                                      color: AppColors.primary,
-                                      size: 18,
-                                    ),
-                                    label: Text(
-                                      texts['download']!,
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: OutlinedButton(
+                                        onPressed: () => _syncToDatabase(
+                                            _pendingAchievementId),
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColors.danger,
+                                          side: BorderSide(
+                                              color: AppColors.danger),
+                                        ),
+                                        child: Text(texts['btn_retry']!),
                                       ),
                                     ),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      side: BorderSide(
-                                        color: AppColors.primary,
-                                        width: 1.5,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: _shareCollage,
-                                    icon: const Icon(
-                                      Icons.share_rounded,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                    label: Text(
-                                      texts['share']!,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primary,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      elevation: 0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 40),
-                          ],
-
-                          _buildRatingRow(texts),
-                          if (widget.isViewOnly) _buildReflectionCard(texts),
-                          const SizedBox(height: 32),
-
-                          Text(
-                            texts['skill_prog']!,
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          if (_updatedSkillsData.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                top: 10,
-                                bottom: 20,
-                              ),
-                              child: Text(
-                                texts['no_points']!,
-                                style: TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            )
-                          else
-                            ..._updatedSkillsData.entries.map((skillEntry) {
-                              return _buildSkillProgressRow(
-                                skillEntry.key,
-                                skillEntry.value,
-                                lang,
-                              );
-                            }),
-
-                          if (_earnedAchievement != null) ...[
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFFFFF4E5),
-                                    Color(0xFFFFE8CC),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(AppRadius.sm + 10),
-                                border: Border.all(
-                                  color: AppColors.gold.withValues(alpha: 0.3),
-                                  width: 2,
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                            if (!hasPhotos) ...[
+                              Text(
+                                texts['no_photo']!,
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
+                              ),
+                              const SizedBox(height: 32),
+                            ] else ...[
+                              // ==========================================
+                              // MEMANGGIL KOLASE ESTETIK DI SINI
+                              // ==========================================
+                              _buildCollageCard(lang, texts, badgeColor, role),
+                              const SizedBox(height: 24),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      onPressed: _downloadCollage,
+                                      icon: Icon(
+                                        Icons.download_rounded,
+                                        color: AppColors.primary,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        texts['download']!,
+                                        style: TextStyle(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        side: BorderSide(
+                                          color: AppColors.primary,
+                                          width: 1.5,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      onPressed: _shareCollage,
+                                      icon: const Icon(
+                                        Icons.share_rounded,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        texts['share']!,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        elevation: 0,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 60,
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      color: badgeColor.withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: badgeColor.withValues(
-                                          alpha: 0.8,
-                                        ),
-                                        width: 2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: badgeColor.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          blurRadius: 8,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      _earnedAchievement!['icon_url'] ?? '🏅',
-                                      style: const TextStyle(fontSize: 28),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          texts['new_badge']!,
-                                          style: TextStyle(
-                                            color: AppColors.accent,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 1,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          lang == 'id'
-                                              ? _earnedAchievement!['title_id'] ??
-                                                  ''
-                                              : _earnedAchievement!['title_en'] ??
-                                                  '',
-                                          style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                              const SizedBox(height: 40),
+                            ],
+                            _buildRatingRow(texts),
+                            if (widget.isViewOnly) _buildReflectionCard(texts),
+                            const SizedBox(height: 32),
+                            Text(
+                              texts['skill_prog']!,
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
+                            if (_updatedSkillsData.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 10,
+                                  bottom: 20,
+                                ),
+                                child: Text(
+                                  texts['no_points']!,
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              )
+                            else
+                              ..._updatedSkillsData.entries.map((skillEntry) {
+                                return _buildSkillProgressRow(
+                                  skillEntry.key,
+                                  skillEntry.value,
+                                  lang,
+                                );
+                              }),
+                            if (_earnedAchievement != null) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Color(0xFFFFF4E5),
+                                      Color(0xFFFFE8CC),
+                                    ],
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.sm + 10),
+                                  border: Border.all(
+                                    color:
+                                        AppColors.gold.withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 10,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            badgeColor.withValues(alpha: 0.15),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: badgeColor.withValues(
+                                            alpha: 0.8,
+                                          ),
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: badgeColor.withValues(
+                                              alpha: 0.3,
+                                            ),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        _earnedAchievement!['icon_url'] ?? '🏅',
+                                        style: const TextStyle(fontSize: 28),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            texts['new_badge']!,
+                                            style: TextStyle(
+                                              color: AppColors.accent,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            lang == 'id'
+                                                ? _earnedAchievement![
+                                                        'title_id'] ??
+                                                    ''
+                                                : _earnedAchievement![
+                                                        'title_en'] ??
+                                                    '',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w900,
+                                              height: 1.2,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                           ],
-                        ],
+                        ),
+                ),
+                if (widget.isViewOnly) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      texts['replay_note']!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
                       ),
-              ),
-              if (widget.isViewOnly) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    texts['replay_note']!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 11,
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true).push(
-                          appPageRoute(
-                            MissionIntroScreen(mission: widget.mission),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context, rootNavigator: true).push(
+                            appPageRoute(
+                              MissionIntroScreen(mission: widget.mission),
+                            ),
+                          );
+                        },
+                        icon: Icon(Icons.replay_rounded,
+                            color: AppColors.primary, size: 18),
+                        label: Text(
+                          texts['btn_replay']!,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
                           ),
-                        );
-                      },
-                      icon: Icon(Icons.replay_rounded, color: AppColors.primary, size: 18),
-                      label: Text(
-                        texts['btn_replay']!,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side:
+                              BorderSide(color: AppColors.primary, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: BorderSide(color: AppColors.primary, width: 1.5),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
+                    ),
+                  ),
+                ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: ElevatedButton(
+                    // Tombol ini ada DI LUAR penjaga `_isLoading` di atas, jadi
+                    // dulu bisa dipencet pas sinkronisasi misi masih jalan --
+                    // `_generatedMissionLogId` masih null, dan refleksi yang
+                    // diisi setelahnya kesimpen TANPA penghubung ke misinya:
+                    // nggak akan pernah bisa ditampilin lagi. Di database ini
+                    // ada 19 baris refleksi yatim kayak gitu (semua dari masa
+                    // sebelum id-nya dialirkan dengan benar). Sekarang tombolnya
+                    // nunggu sampai id-nya siap.
+                    onPressed:
+                        (!widget.isViewOnly && _generatedMissionLogId == null)
+                            ? null
+                            : () {
+                                if (widget.isViewOnly) {
+                                  Navigator.pop(context);
+                                } else {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    appPageRoute(
+                                      MissionReflectionScreen(
+                                        mission: widget.mission,
+                                        missionLogId: _generatedMissionLogId,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      minimumSize: const Size(double.infinity, 60),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: Text(
+                      widget.isViewOnly ? texts['back']! : texts['continue']!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ],
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: ElevatedButton(
-                  // Tombol ini ada DI LUAR penjaga `_isLoading` di atas, jadi
-                  // dulu bisa dipencet pas sinkronisasi misi masih jalan --
-                  // `_generatedMissionLogId` masih null, dan refleksi yang
-                  // diisi setelahnya kesimpen TANPA penghubung ke misinya:
-                  // nggak akan pernah bisa ditampilin lagi. Di database ini
-                  // ada 19 baris refleksi yatim kayak gitu (semua dari masa
-                  // sebelum id-nya dialirkan dengan benar). Sekarang tombolnya
-                  // nunggu sampai id-nya siap.
-                  onPressed: (!widget.isViewOnly && _generatedMissionLogId == null)
-                      ? null
-                      : () {
-                    if (widget.isViewOnly) {
-                      Navigator.pop(context);
-                    } else {
-                      Navigator.pushReplacement(
-                        context,
-                        appPageRoute(
-                          MissionReflectionScreen(
-                            mission: widget.mission,
-                            missionLogId: _generatedMissionLogId,
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    minimumSize: const Size(double.infinity, 60),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 4,
-                  ),
-                  child: Text(
-                    widget.isViewOnly ? texts['back']! : texts['continue']!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -1116,9 +1151,8 @@ Future<void> _downloadCollage() async {
     // 🔥 FIX PENGUIN: Menggunakan format _trans.png seperti permintaan Bos!
     String penguinAsset = 'assets/images/${role}_trans.png';
 
-    final String missionTitle = lang == 'id'
-        ? widget.mission.titleId
-        : widget.mission.titleEn;
+    final String missionTitle =
+        lang == 'id' ? widget.mission.titleId : widget.mission.titleEn;
 
     final String roleLabel = texts['role_$role'] ?? role.toUpperCase();
 
@@ -1190,7 +1224,7 @@ Future<void> _downloadCollage() async {
                     Positioned(
                       bottom: 20,
                       left: 20,
-                      right: 100, 
+                      right: 100,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1239,7 +1273,7 @@ Future<void> _downloadCollage() async {
               ),
             ),
 
-            // PENGUIN PEEK! 
+            // PENGUIN PEEK!
             Positioned(
               bottom: -15,
               right: -15,

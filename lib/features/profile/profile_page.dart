@@ -42,6 +42,7 @@ import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/child_avatar.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
+import '../../shared/widgets/fun_background_decorations.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
 
 // totalMissionsCompletedProvider sekarang di
@@ -122,7 +123,8 @@ const Map<String, Map<String, String>> _t = {
     'menu_memory_book': "Memory Book",
     'logout': "Log Out",
     'confirm_logout_title': "Log out?",
-    'confirm_logout_desc': "You'll need to log in again to access this account.",
+    'confirm_logout_desc':
+        "You'll need to log in again to access this account.",
     'cancel': "Cancel",
     'edit_profile_title': "Edit Profile",
     'parent_name_label': "Parent's Name",
@@ -130,7 +132,8 @@ const Map<String, Map<String, String>> _t = {
     'child_age_label': "Child's Age",
     'delete_child': "Remove this child",
     'delete_child_title': "Remove this child?",
-    'delete_child_desc': "All of their missions, photos, badges and progress will be permanently deleted. This can't be undone.",
+    'delete_child_desc':
+        "All of their missions, photos, badges and progress will be permanently deleted. This can't be undone.",
     'delete_child_success': "Child removed.",
     'btn_save': "Save Changes",
     'update_success': "Profile updated successfully!",
@@ -145,8 +148,7 @@ const Map<String, Map<String, String>> _t = {
     'new_password_label': "New password",
     'confirm_password_label': "Confirm new password",
     'btn_update': "Update",
-    'email_update_sent':
-        "Check your new email inbox to confirm the change.",
+    'email_update_sent': "Check your new email inbox to confirm the change.",
     'password_updated': "Password updated successfully.",
     'err_update': "Failed to update: ",
     'err_photo': "Failed to change photo: ",
@@ -154,10 +156,12 @@ const Map<String, Map<String, String>> _t = {
     'err_password_short': "Password must be at least 6 characters.",
     'danger_zone': "Danger Zone",
     'download_data': "Download My Data",
-    'download_data_desc': "Get a copy of everything saved under your account, as a JSON file.",
+    'download_data_desc':
+        "Get a copy of everything saved under your account, as a JSON file.",
     'download_success': "Export ready — check your share sheet.",
     'delete_account': "Delete Account",
-    'delete_account_desc': "Permanently deletes your account and all your children's data. This cannot be undone.",
+    'delete_account_desc':
+        "Permanently deletes your account and all your children's data. This cannot be undone.",
     'delete_confirm_title': "Delete your account?",
     'delete_confirm_desc':
         "This permanently deletes your account, all children's profiles, mission history, photos, and chat history. This cannot be undone.",
@@ -229,7 +233,8 @@ const Map<String, Map<String, String>> _t = {
     'child_age_label': "Umur Anak",
     'delete_child': "Hapus anak ini",
     'delete_child_title': "Hapus anak ini?",
-    'delete_child_desc': "Semua misi, foto, lencana, dan progresnya bakal kehapus permanen. Nggak bisa dibatalin.",
+    'delete_child_desc':
+        "Semua misi, foto, lencana, dan progresnya bakal kehapus permanen. Nggak bisa dibatalin.",
     'delete_child_success': "Anak berhasil dihapus.",
     'btn_save': "Simpan Perubahan",
     'update_success': "Profil berhasil diperbarui!",
@@ -244,8 +249,7 @@ const Map<String, Map<String, String>> _t = {
     'new_password_label': "Password baru",
     'confirm_password_label': "Konfirmasi password baru",
     'btn_update': "Perbarui",
-    'email_update_sent':
-        "Cek inbox email barumu buat konfirmasi perubahan.",
+    'email_update_sent': "Cek inbox email barumu buat konfirmasi perubahan.",
     'password_updated': "Password berhasil diperbarui.",
     'err_update': "Gagal memperbarui: ",
     'err_photo': "Gagal ganti foto: ",
@@ -253,10 +257,12 @@ const Map<String, Map<String, String>> _t = {
     'err_password_short': "Password minimal 6 karakter.",
     'danger_zone': "Zona Berbahaya",
     'download_data': "Unduh Data Saya",
-    'download_data_desc': "Dapatkan salinan semua data di akunmu dalam bentuk file JSON.",
+    'download_data_desc':
+        "Dapatkan salinan semua data di akunmu dalam bentuk file JSON.",
     'download_success': "Ekspor siap — cek menu bagikan yang muncul.",
     'delete_account': "Hapus Akun",
-    'delete_account_desc': "Menghapus akun dan semua data anak secara permanen. Nggak bisa dibatalin.",
+    'delete_account_desc':
+        "Menghapus akun dan semua data anak secara permanen. Nggak bisa dibatalin.",
     'delete_confirm_title': "Hapus akun kamu?",
     'delete_confirm_desc':
         "Ini bakal hapus akun, semua profil anak, riwayat misi, foto, dan riwayat chat secara PERMANEN. Nggak bisa dibatalin.",
@@ -432,22 +438,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 if (uid != null) {
                   await supabase
                       .from('parents')
-                      .update({'full_name': newParentName})
-                      .eq('id', uid);
+                      .update({'full_name': newParentName}).eq('id', uid);
                 }
                 if (childId.isNotEmpty) {
                   final int? newAge = int.tryParse(ageController.text.trim());
-                  await supabase
-                      .from('children')
-                      .update({
-                        'name': childController.text.trim(),
-                        // Cuma ikut dikirim kalau angkanya masuk akal --
-                        // kolom kosong/ketikan ngawur dibiarin apa adanya
-                        // daripada nimpa umur lama sama null.
-                        if (newAge != null && newAge > 0 && newAge < 18)
-                          'age': newAge,
-                      })
-                      .eq('id', childId);
+                  await supabase.from('children').update({
+                    'name': childController.text.trim(),
+                    // Cuma ikut dikirim kalau angkanya masuk akal --
+                    // kolom kosong/ketikan ngawur dibiarin apa adanya
+                    // daripada nimpa umur lama sama null.
+                    if (newAge != null && newAge > 0 && newAge < 18)
+                      'age': newAge,
+                  }).eq('id', childId);
                 }
 
                 if (mounted) {
@@ -551,8 +553,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: ElevatedButton(
                         onPressed: isLoading ? null : saveProfile,
                         style: ElevatedButton.styleFrom(
-                          disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.5),
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                          disabledBackgroundColor:
+                              AppColors.accent.withValues(alpha: 0.5),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.md),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
@@ -567,7 +571,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                   strokeWidth: 3,
                                 ),
                               )
-                            : Text(texts['btn_save']!, style: AppTextStyles.button().copyWith(fontSize: 16)),
+                            : Text(texts['btn_save']!,
+                                style: AppTextStyles.button()
+                                    .copyWith(fontSize: 16)),
                       ),
                     ),
                   ],
@@ -759,7 +765,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   label,
                   style: AppTextStyles.caption(color: AppColors.textMuted),
                 ),
-                Text(value, style: AppTextStyles.bodyBold().copyWith(fontSize: 13)),
+                Text(value,
+                    style: AppTextStyles.bodyBold().copyWith(fontSize: 13)),
               ],
             ),
           ),
@@ -815,7 +822,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   // connect ke apa pun (hilang tiap modal ditutup).
                   Text(
                     texts['notif_setting']!.toUpperCase(),
-                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: AppTextStyles.caption().copyWith(
+                        fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Consumer(
@@ -829,7 +837,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             dense: true,
                             title: Text(
                               cat.label(currentLang),
-                              style: AppTextStyles.body().copyWith(fontSize: 13),
+                              style:
+                                  AppTextStyles.body().copyWith(fontSize: 13),
                             ),
                             trailing: Switch(
                               value: enabled,
@@ -854,13 +863,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         color: AppColors.accentTint,
                         borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
-                      child: Icon(Icons.language_rounded, color: AppColors.gold),
+                      child:
+                          Icon(Icons.language_rounded, color: AppColors.gold),
                     ),
-                    title: Text(texts['lang_setting']!, style: AppTextStyles.bodyBold()),
+                    title: Text(texts['lang_setting']!,
+                        style: AppTextStyles.bodyBold()),
                     trailing: DropdownButton<String>(
                       value: currentLang,
                       underline: const SizedBox(),
-                      icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                      icon: Icon(Icons.keyboard_arrow_down,
+                          color: AppColors.primary),
                       style: AppTextStyles.bodyBold(),
                       items: const [
                         DropdownMenuItem(value: 'id', child: Text("🇮🇩 IND")),
@@ -887,19 +899,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         color: AppColors.successTint,
                         borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                       ),
-                      child: Icon(Icons.format_size_rounded, color: AppColors.success),
+                      child: Icon(Icons.format_size_rounded,
+                          color: AppColors.success),
                     ),
-                    title: Text(texts['display_setting']!, style: AppTextStyles.bodyBold()),
+                    title: Text(texts['display_setting']!,
+                        style: AppTextStyles.bodyBold()),
                     trailing: Consumer(
                       builder: (context, ref, _) {
                         final current = ref.watch(textSizeProvider);
                         return DropdownButton<AppTextSize>(
                           value: current,
                           underline: const SizedBox(),
-                          icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                          icon: Icon(Icons.keyboard_arrow_down,
+                              color: AppColors.primary),
                           style: AppTextStyles.bodyBold(),
                           items: AppTextSize.values
-                              .map((s) => DropdownMenuItem(value: s, child: Text(s.label(currentLang))))
+                              .map((s) => DropdownMenuItem(
+                                  value: s, child: Text(s.label(currentLang))))
                               .toList(),
                           onChanged: (size) {
                             if (size != null) {
@@ -921,23 +937,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   // login sendiri dari dalam app.
                   Text(
                     texts['account_setting']!.toUpperCase(),
-                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: AppTextStyles.caption().copyWith(
+                        fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: Icon(Icons.email_outlined, size: 20, color: AppColors.primary),
-                    title: Text(texts['change_email']!, style: AppTextStyles.body()),
-                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    leading: Icon(Icons.email_outlined,
+                        size: 20, color: AppColors.primary),
+                    title: Text(texts['change_email']!,
+                        style: AppTextStyles.body()),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        size: 18, color: AppColors.textMuted),
                     onTap: () => _showChangeEmailModal(texts),
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primary),
-                    title: Text(texts['change_password']!, style: AppTextStyles.body()),
-                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    leading: Icon(Icons.lock_outline_rounded,
+                        size: 20, color: AppColors.primary),
+                    title: Text(texts['change_password']!,
+                        style: AppTextStyles.body()),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        size: 18, color: AppColors.textMuted),
                     onTap: () => _showChangePasswordModal(texts),
                   ),
                   const Divider(),
@@ -947,25 +970,33 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   // nggak ada satupun link legal di manapun di app.
                   Text(
                     texts['about_setting']!.toUpperCase(),
-                    style: AppTextStyles.caption().copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: AppTextStyles.caption().copyWith(
+                        fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: Text(texts['app_version']!, style: AppTextStyles.body()),
-                    trailing: Text('v$kAppVersion', style: AppTextStyles.caption()),
+                    title: Text(texts['app_version']!,
+                        style: AppTextStyles.body()),
+                    trailing:
+                        Text('v$kAppVersion', style: AppTextStyles.caption()),
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: Text(texts['terms_of_service']!, style: AppTextStyles.body()),
-                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
-                    onTap: () => Navigator.of(context, rootNavigator: true).push(
+                    title: Text(texts['terms_of_service']!,
+                        style: AppTextStyles.body()),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        size: 18, color: AppColors.textMuted),
+                    onTap: () =>
+                        Navigator.of(context, rootNavigator: true).push(
                       appPageRoute(
                         LegalPage(
                           title: texts['terms_of_service']!,
-                          sections: currentLang == 'id' ? kTermsOfServiceId : kTermsOfServiceEn,
+                          sections: currentLang == 'id'
+                              ? kTermsOfServiceId
+                              : kTermsOfServiceEn,
                         ),
                       ),
                     ),
@@ -973,13 +1004,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: Text(texts['privacy_policy']!, style: AppTextStyles.body()),
-                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
-                    onTap: () => Navigator.of(context, rootNavigator: true).push(
+                    title: Text(texts['privacy_policy']!,
+                        style: AppTextStyles.body()),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        size: 18, color: AppColors.textMuted),
+                    onTap: () =>
+                        Navigator.of(context, rootNavigator: true).push(
                       appPageRoute(
                         LegalPage(
                           title: texts['privacy_policy']!,
-                          sections: currentLang == 'id' ? kPrivacyPolicyId : kPrivacyPolicyEn,
+                          sections: currentLang == 'id'
+                              ? kPrivacyPolicyId
+                              : kPrivacyPolicyEn,
                         ),
                       ),
                     ),
@@ -987,8 +1023,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    title: Text(texts['open_source_licenses']!, style: AppTextStyles.body()),
-                    trailing: Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
+                    title: Text(texts['open_source_licenses']!,
+                        style: AppTextStyles.body()),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        size: 18, color: AppColors.textMuted),
                     onTap: () => showLicensePage(
                       context: context,
                       applicationName: kAppName,
@@ -1002,31 +1040,39 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   // sebelumnya cuma bisa lewat email manual ke CS.
                   Text(
                     texts['danger_zone']!.toUpperCase(),
-                    style: AppTextStyles.caption(color: AppColors.danger).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
+                    style: AppTextStyles.caption(color: AppColors.danger)
+                        .copyWith(
+                            fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: Icon(Icons.download_rounded, size: 20, color: AppColors.primary),
-                    title: Text(texts['download_data']!, style: AppTextStyles.body()),
+                    leading: Icon(Icons.download_rounded,
+                        size: 20, color: AppColors.primary),
+                    title: Text(texts['download_data']!,
+                        style: AppTextStyles.body()),
                     subtitle: Text(
                       texts['download_data_desc']!,
-                      style: AppTextStyles.caption(color: AppColors.textSecondary),
+                      style:
+                          AppTextStyles.caption(color: AppColors.textSecondary),
                     ),
                     onTap: () => _handleDownloadData(texts),
                   ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     dense: true,
-                    leading: Icon(Icons.delete_forever_rounded, size: 20, color: AppColors.danger),
+                    leading: Icon(Icons.delete_forever_rounded,
+                        size: 20, color: AppColors.danger),
                     title: Text(
                       texts['delete_account']!,
-                      style: AppTextStyles.body().copyWith(color: AppColors.danger, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.body().copyWith(
+                          color: AppColors.danger, fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
                       texts['delete_account_desc']!,
-                      style: AppTextStyles.caption(color: AppColors.textSecondary),
+                      style:
+                          AppTextStyles.caption(color: AppColors.textSecondary),
                     ),
                     onTap: () => _showDeleteAccountModal(texts),
                   ),
@@ -1044,7 +1090,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   /// sebelum beneran ganti, jadi bukan langsung aktif.
   void _showChangeEmailModal(Map<String, String> texts) {
     final emailController = TextEditingController();
-    final currentEmail = Supabase.instance.client.auth.currentUser?.email ?? '-';
+    final currentEmail =
+        Supabase.instance.client.auth.currentUser?.email ?? '-';
 
     showModalBottomSheet(
       context: context,
@@ -1084,34 +1131,35 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             return AppBottomSheet(
               title: texts['change_email']!,
               child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${texts['current_email_label']}: $currentEmail",
-                        style: AppTextStyles.caption(color: AppColors.textSecondary),
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${texts['current_email_label']}: $currentEmail",
+                    style:
+                        AppTextStyles.caption(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: texts['new_email_label'],
+                      filled: true,
+                      fillColor: AppColors.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: BorderSide.none,
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      TextField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: texts['new_email_label'],
-                          filled: true,
-                          fillColor: AppColors.background,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AppButton(
-                        label: texts['btn_update']!,
-                        isLoading: isSaving,
-                        onPressed: submit,
-                      ),
-                    ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AppButton(
+                    label: texts['btn_update']!,
+                    isLoading: isSaving,
+                    onPressed: submit,
+                  ),
+                ],
               ),
             );
           },
@@ -1274,8 +1322,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         String confirmText = '';
         return StatefulBuilder(
           builder: (context, setState) {
-            final bool canDelete =
-                confirmText.trim().toUpperCase() == texts['delete_confirm_word'];
+            final bool canDelete = confirmText.trim().toUpperCase() ==
+                texts['delete_confirm_word'];
 
             Future<void> confirmDelete() async {
               setState(() => isDeleting = true);
@@ -1313,7 +1361,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 context.go('/');
                 ScaffoldMessenger.of(
                   this.context,
-                ).showSnackBar(SnackBar(content: Text(texts['account_deleted']!)));
+                ).showSnackBar(
+                    SnackBar(content: Text(texts['account_deleted']!)));
               } catch (e) {
                 setState(() => isDeleting = false);
                 if (!mounted) return;
@@ -1402,134 +1451,165 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 120),
-          child: ResponsiveCenter(
-            maxWidth: 640,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeaderProfile(
-                  context,
-                  texts,
-                  parentName,
-                  childName,
-                  childId,
-                  childData['avatar_url'] as String?,
-                  childData['age'] as int?,
-                ),
-                _buildProfileCompleteness(
-                  context,
-                  texts,
-                  ref.watch(profileCompletenessProvider),
-                  childId,
-                ),
-                _buildSubscriptionSection(context, texts, parentName),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
-                        child: Text(texts['certificate_title']!, style: AppTextStyles.h1().copyWith(fontSize: 22)),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-
-                      // ===============================================
-                      // CAROUSEL SERTIFIKAT (UI BARU: BISA DI-SWIPE)
-                      // ===============================================
-                      allCertsAsync.when(
-                        loading: () => const Padding(
-                          padding: EdgeInsets.all(AppSpacing.lg),
-                          child: AppLoading(),
-                        ),
-                        error: (e, s) => const SizedBox(),
-                        data: (certs) {
-                          if (certs.isEmpty) return const SizedBox();
-
-                          return SizedBox(
-                            // +10 buat ruang bayangan; ikut skala teks biar
-                            // tetap muat pas "Ukuran Teks" dibesarin.
-                            height: context.scaledHeight(190),
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: certs.length,
-                              // Tambahkan padding awal dan akhir agar estetik
-                              padding: EdgeInsets.symmetric(horizontal: context.pageHPadding),
-                              itemBuilder: (context, index) {
-                                final cert = certs[index];
-
-                                return Consumer(
-                                  builder: (context, ref, child) {
-                                    final String roleId = cert['role_id'] ?? '';
-                                    final certProgressAsync = ref.watch(
-                                      certificateProgressProvider(childId),
-                                    );
-
-                                    final int unlockedBadges =
-                                        certProgressAsync.value?[roleId] ?? 0;
-
-                                    return Padding(
-                                      // Spasi antar sertifikat
-                                      padding: const EdgeInsets.only(right: AppSpacing.md),
-                                      child: GestureDetector(
-                                        onTap: () => _navigateToFullscreen(
-                                          CertificateDetailPage(certData: cert),
-                                        ),
-                                        child: _buildEstetikAchievementCard(
-                                          context,
-                                          texts,
-                                          cert,
-                                          unlockedBadges,
-                                          lang, // MELEMPAR BAHASA AKTIF
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: AppSpacing.md + 4),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () =>
-                              _navigateToFullscreen(AllCertificatesPage()),
-                          child: Container(
-                            padding: const EdgeInsets.only(bottom: 2),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: AppColors.primary, width: 2),
-                              ),
-                            ),
-                            child: Text(
-                              texts['view_all_cert']!,
-                              style: AppTextStyles.bodyBold().copyWith(fontSize: 13),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _buildQuickStats(context, texts, totalMissions, totalXp, childLevel),
-
-                _buildMenuList(context, texts, childData, lang),
-
-                _buildLogoutButton(context, texts),
-                const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
-              ],
+      // Lapisan dekorasi tetap -- pola yang sama dipakai di Home,
+      // Progress, & Onboarding.
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: RepaintBoundary(
+              child: Stack(
+                children: [
+                  ColorBlob(
+                      top: -20, left: -50, size: 150, color: AppColors.accent),
+                  ColorBlob(
+                      top: 300, right: -60, size: 130, color: AppColors.info),
+                  Sparkle(
+                      top: 120, right: 40, size: 15, color: AppColors.accent),
+                  Sparkle(top: 460, left: 40, size: 14, color: AppColors.info),
+                ],
+              ),
             ),
           ),
-        ),
+          SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 120),
+              child: ResponsiveCenter(
+                maxWidth: 640,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeaderProfile(
+                      context,
+                      texts,
+                      parentName,
+                      childName,
+                      childId,
+                      childData['avatar_url'] as String?,
+                      childData['age'] as int?,
+                    ),
+                    _buildProfileCompleteness(
+                      context,
+                      texts,
+                      ref.watch(profileCompletenessProvider),
+                      childId,
+                    ),
+                    _buildSubscriptionSection(context, texts, parentName),
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: context.pageHPadding),
+                            child: Text(texts['certificate_title']!,
+                                style:
+                                    AppTextStyles.h1().copyWith(fontSize: 22)),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // ===============================================
+                          // CAROUSEL SERTIFIKAT (UI BARU: BISA DI-SWIPE)
+                          // ===============================================
+                          allCertsAsync.when(
+                            loading: () => const Padding(
+                              padding: EdgeInsets.all(AppSpacing.lg),
+                              child: AppLoading(),
+                            ),
+                            error: (e, s) => const SizedBox(),
+                            data: (certs) {
+                              if (certs.isEmpty) return const SizedBox();
+
+                              return SizedBox(
+                                // +10 buat ruang bayangan; ikut skala teks biar
+                                // tetap muat pas "Ukuran Teks" dibesarin.
+                                height: context.scaledHeight(190),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const BouncingScrollPhysics(),
+                                  itemCount: certs.length,
+                                  // Tambahkan padding awal dan akhir agar estetik
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: context.pageHPadding),
+                                  itemBuilder: (context, index) {
+                                    final cert = certs[index];
+
+                                    return Consumer(
+                                      builder: (context, ref, child) {
+                                        final String roleId =
+                                            cert['role_id'] ?? '';
+                                        final certProgressAsync = ref.watch(
+                                          certificateProgressProvider(childId),
+                                        );
+
+                                        final int unlockedBadges =
+                                            certProgressAsync.value?[roleId] ??
+                                                0;
+
+                                        return Padding(
+                                          // Spasi antar sertifikat
+                                          padding: const EdgeInsets.only(
+                                              right: AppSpacing.md),
+                                          child: GestureDetector(
+                                            onTap: () => _navigateToFullscreen(
+                                              CertificateDetailPage(
+                                                  certData: cert),
+                                            ),
+                                            child: _buildEstetikAchievementCard(
+                                              context,
+                                              texts,
+                                              cert,
+                                              unlockedBadges,
+                                              lang, // MELEMPAR BAHASA AKTIF
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+
+                          const SizedBox(height: AppSpacing.md + 4),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  _navigateToFullscreen(AllCertificatesPage()),
+                              child: Container(
+                                padding: const EdgeInsets.only(bottom: 2),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                        color: AppColors.primary, width: 2),
+                                  ),
+                                ),
+                                child: Text(
+                                  texts['view_all_cert']!,
+                                  style: AppTextStyles.bodyBold()
+                                      .copyWith(fontSize: 13),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildQuickStats(
+                        context, texts, totalMissions, totalXp, childLevel),
+                    _buildMenuList(context, texts, childData, lang),
+                    _buildLogoutButton(context, texts),
+                    const SizedBox(height: AppSpacing.xl + AppSpacing.sm),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1686,12 +1766,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         currentChildAge: childAge,
       ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.xs + 2),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm + 4, vertical: AppSpacing.xs + 2),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.sm + 10),
           border: Border.all(color: AppColors.border),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))
+          ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1749,7 +1833,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2),
               ),
-              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
+              child: const Icon(Icons.camera_alt_rounded,
+                  color: Colors.white, size: 14),
             ),
           ),
         ),
@@ -1787,7 +1872,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Center(child: CircularProgressIndicator()),
                     ),
                     error: (e, s) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       child: Text(
                         "${texts['err_load_children']}$e",
                         style: AppTextStyles.body(color: AppColors.danger),
@@ -1878,7 +1964,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 1.5),
                         ),
-                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 13),
+                        child: const Icon(Icons.camera_alt_rounded,
+                            color: Colors.white, size: 13),
                       ),
                     ),
                   ),
@@ -1892,7 +1979,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Text(name, style: AppTextStyles.bodyBold()),
                   Text(
                     "Lvl $level",
-                    style: AppTextStyles.caption(color: AppColors.textSecondary),
+                    style:
+                        AppTextStyles.caption(color: AppColors.textSecondary),
                   ),
                 ],
               ),
@@ -1906,7 +1994,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
                 child: Text(
                   texts['current_child_badge']!,
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             if (onDelete != null)
@@ -1996,11 +2087,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       );
       if (picked == null) return;
 
-      final url = await StorageUploadService.uploadProfilePhoto(File(picked.path));
+      final url =
+          await StorageUploadService.uploadProfilePhoto(File(picked.path));
       await Supabase.instance.client
           .from('children')
-          .update({'avatar_url': url})
-          .eq('id', childId);
+          .update({'avatar_url': url}).eq('id', childId);
       // Nggak perlu invalidate manual — childDataProvider stream-nya
       // realtime, otomatis kebaca begitu kolomnya ke-update.
 
@@ -2048,10 +2139,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF4b4b4b), Color(0xFF6e6e6e), Color(0xFFa3a3a3)],
+                colors: [
+                  Color(0xFF4b4b4b),
+                  Color(0xFF6e6e6e),
+                  Color(0xFFa3a3a3)
+                ],
               ),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))],
+              boxShadow: const [
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
+              ],
             ),
             child: Stack(
               children: [
@@ -2092,15 +2190,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         decoration: BoxDecoration(
                           color: AppColors.accentTint,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2)),
                         ),
                         alignment: Alignment.center,
-                        child: const Text("👩🏻", style: TextStyle(fontSize: 20)),
+                        child:
+                            const Text("👩🏻", style: TextStyle(fontSize: 20)),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         "${texts['parent_prefix']} $parentName",
-                        style: AppTextStyles.h3(color: Colors.white).copyWith(fontSize: 18),
+                        style: AppTextStyles.h3(color: Colors.white)
+                            .copyWith(fontSize: 18),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2109,10 +2210,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         children: [
                           Text(
                             texts['free_user']!,
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
+                            style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 12),
                           ),
                           const SizedBox(width: AppSpacing.xs),
-                          Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.7), size: 10),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              size: 10),
                         ],
                       ),
                     ],
@@ -2149,9 +2254,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.verified, color: AppColors.primary, size: 16),
+                          Icon(Icons.verified,
+                              color: AppColors.primary, size: 16),
                           const SizedBox(width: AppSpacing.sm),
-                          Text(texts['monthly_plan']!, style: AppTextStyles.bodyBold()),
+                          Text(texts['monthly_plan']!,
+                              style: AppTextStyles.bodyBold()),
                         ],
                       ),
                       Text(
@@ -2180,11 +2287,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             disabledBackgroundColor: Colors.white,
                             foregroundColor: AppColors.primary,
                             disabledForegroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.sm + 6),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.xl)),
                             elevation: 2,
                           ),
-                          child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(texts['plan_detail']!,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm + 4),
@@ -2196,11 +2308,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             disabledBackgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             disabledForegroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.sm + 6),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.xl)),
                             elevation: 4,
                           ),
-                          child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(texts['upgrade_plan']!,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -2230,9 +2347,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final previewBadges = (cert['badges'] as List).take(3).toList();
     final totalBadges = (cert['badges'] as List).length;
 
-    int displayUnlocked = dbUnlockedBadges > totalBadges
-        ? totalBadges
-        : dbUnlockedBadges;
+    int displayUnlocked =
+        dbUnlockedBadges > totalBadges ? totalBadges : dbUnlockedBadges;
 
     // Status Teks (Dinamis dari Dictionary)
     final String statusText = displayUnlocked >= totalBadges
@@ -2240,12 +2356,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         : "$displayUnlocked/$totalBadges ${texts['done_suffix']}";
 
     // Judul & Kategori Dinamis
-    final String roleLabel = lang == 'id'
-        ? cert['roleLabelId']
-        : cert['roleLabelEn'];
-    final String cardTitle = lang == 'id'
-        ? cert['cardTitleId']
-        : cert['cardTitleEn'];
+    final String roleLabel =
+        lang == 'id' ? cert['roleLabelId'] : cert['roleLabelEn'];
+    final String cardTitle =
+        lang == 'id' ? cert['cardTitleId'] : cert['cardTitleEn'];
 
     // Tinggi ikut setelan "Ukuran Teks" -- isinya teks semua, kalau
     // kotaknya dipatok 180 mati sementara teksnya membesar, ujungnya
@@ -2262,10 +2376,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: cert['gradient'] ?? [AppColors.primary, AppColors.primaryLight],
+            colors:
+                cert['gradient'] ?? [AppColors.primary, AppColors.primaryLight],
           ),
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))
+          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -2296,7 +2414,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   color: AppColors.accentTint,
                   borderRadius: BorderRadius.circular(AppSpacing.sm + 4),
                   border: Border.all(color: Colors.white, width: 2),
-                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))],
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2))
+                  ],
                 ),
                 alignment: Alignment.center,
                 child: const Text("👦🏻", style: TextStyle(fontSize: 24)),
@@ -2317,7 +2440,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
-                      shadows: const [Shadow(color: Colors.black45, blurRadius: 2)],
+                      shadows: const [
+                        Shadow(color: Colors.black45, blurRadius: 2)
+                      ],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -2385,8 +2510,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           ),
                           alignment: Alignment.center,
                           child: isUnlocked
-                              ? Text(badge['emoji'] ?? '🏅', style: const TextStyle(fontSize: 16))
-                              : const Icon(Icons.lock, size: 16, color: Colors.white38),
+                              ? Text(badge['emoji'] ?? '🏅',
+                                  style: const TextStyle(fontSize: 16))
+                              : const Icon(Icons.lock,
+                                  size: 16, color: Colors.white38),
                         );
                       }),
                       if (totalBadges > previewBadges.length)
@@ -2397,7 +2524,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+                              shadows: [
+                                Shadow(color: Colors.black45, blurRadius: 4)
+                              ],
                             ),
                           ),
                         ),
@@ -2420,15 +2549,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     int level,
   ) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: context.pageHPadding, vertical: AppSpacing.sm + 4),
+      padding: EdgeInsets.symmetric(
+          horizontal: context.pageHPadding, vertical: AppSpacing.sm + 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(texts['quick_stats']!, style: AppTextStyles.h1().copyWith(fontSize: 22)),
+          Text(texts['quick_stats']!,
+              style: AppTextStyles.h1().copyWith(fontSize: 22)),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              _buildStatCard(totalMissions.toString(), texts['total_missions']!),
+              _buildStatCard(
+                  totalMissions.toString(), texts['total_missions']!),
               const SizedBox(width: AppSpacing.md),
               _buildStatCard(totalXp.toString(), texts['total_exp']!),
               const SizedBox(width: AppSpacing.md),
@@ -2451,7 +2583,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             children: [
               Text(
                 value,
-                style: AppTextStyles.h1(color: AppColors.accent).copyWith(fontSize: 28),
+                style: AppTextStyles.h1(color: AppColors.accent)
+                    .copyWith(fontSize: 28),
               ),
               Text(
                 label,
@@ -2560,7 +2693,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),
         ),
-        title: Text(title, style: AppTextStyles.bodyBold().copyWith(fontSize: 15)),
+        title:
+            Text(title, style: AppTextStyles.bodyBold().copyWith(fontSize: 15)),
         trailing: Icon(
           Icons.arrow_forward_ios_rounded,
           color: AppColors.primary.withValues(alpha: 0.5),
@@ -2578,10 +2712,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         onPressed: () => _confirmLogout(texts),
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl)),
           elevation: 4,
         ),
-        child: Text(texts['logout']!, style: AppTextStyles.button().copyWith(fontSize: 18)),
+        child: Text(texts['logout']!,
+            style: AppTextStyles.button().copyWith(fontSize: 18)),
       ),
     );
   }
