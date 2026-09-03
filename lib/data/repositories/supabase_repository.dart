@@ -29,7 +29,10 @@ class SupabaseRepository {
           .from('children')
           .insert({
             'parent_id': currentUser.id,
-            'name': name,
+            // Dipangkas lagi di sini, bukan cuma di layar pemanggilnya --
+            // ini satu-satunya pintu masuk baris `children`, jadi lebih
+            // aman kalau aturannya dipegang di sini juga.
+            'name': name.trim(),
             'age': age,
             'avatar_url': avatarUrl, // 🔥 FOTO DISIMPAN KE KOLOM INI
           })

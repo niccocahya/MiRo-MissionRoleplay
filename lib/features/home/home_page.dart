@@ -209,6 +209,7 @@ final childAchievementsProvider =
 const Map<String, Map<String, String>> _t = {
   'en': {
     'greeting': "Hello,",
+    'child_fallback': "Champ",
     'subtitle': "Let's start today's adventure!",
     'little_explorer': "Little Explorer",
     'motivation': "You're doing great!",
@@ -235,6 +236,7 @@ const Map<String, Map<String, String>> _t = {
   },
   'id': {
     'greeting': "Halo, Bapak/Ibu",
+    'child_fallback': "Anak Hebat",
     'subtitle': "Mari mulai petualangan hari ini!",
     'little_explorer': "Penjelajah Kecil",
     'motivation': "Kamu melakukan yang terbaik!",
@@ -343,7 +345,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       data: (data) {
         final String childId = data?['id'] ?? '';
         _repairProgressOnce(childId);
-        final String childName = data?['name'] ?? "Anak Hebat";
+        // Fallback-nya sekarang ikut bahasa, dan ikut jalan buat nama
+        // yang KOSONG -- bukan cuma null. `?? "Anak Hebat"` yang dulu
+        // nggak nangkep string kosong, dan orang tua yang milih English
+        // tetap disapa pakai teks Indonesia.
+        final String rawChildName = (data?['name'] as String? ?? '').trim();
+        final String childName =
+            rawChildName.isEmpty ? texts['child_fallback']! : rawChildName;
 
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
         final int totalXp = realtimeXpAsync.value ?? data?['total_xp'] ?? 0;

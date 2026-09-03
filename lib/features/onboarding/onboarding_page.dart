@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../shared/widgets/step_progress_bar.dart';
 import '../../shared/widgets/back_button.dart';
 import '../../shared/widgets/coming_soon_badge.dart';
+import '../../core/constants/input_limits.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/router/app_page_transition.dart';
@@ -915,6 +916,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   icon: Icons.person_outline,
                   placeholder: texts['name_hint']!,
                   controller: _nameController,
+                  maxLength: kMaxParentNameLength,
                 ),
                 const SizedBox(height: 16),
                 _CustomTextField(
@@ -1161,7 +1163,14 @@ class _CustomTextField extends StatefulWidget {
     required this.placeholder,
     required this.controller,
     this.isPassword = false,
+    this.maxLength,
   });
+
+  /// Batas panjang opsional. Cuma dipasang di kolom NAMA -- email dan
+  /// password sengaja dibiarin bebas: panjangnya divalidasi server
+  /// Supabase, dan motong password diam-diam bakal bikin orang nggak
+  /// bisa login pakai password yang sebenarnya benar.
+  final int? maxLength;
 
   @override
   State<_CustomTextField> createState() => _CustomTextFieldState();
@@ -1194,6 +1203,14 @@ class _CustomTextFieldState extends State<_CustomTextField> {
         TextField(
           controller: widget.controller,
           obscureText: widget.isPassword ? _obscureText : false,
+          maxLength: widget.maxLength,
+          buildCounter: (
+            _, {
+            required int currentLength,
+            required bool isFocused,
+            int? maxLength,
+          }) =>
+              null,
           style: TextStyle(color: _kOnboardingNavy),
           decoration: InputDecoration(
             hintText: widget.placeholder,

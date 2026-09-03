@@ -44,6 +44,7 @@ const Map<String, Map<String, String>> _t = {
     'chip_recommend': "Recommend a mission for today",
     'chip_xp': "How do XP & levels work?",
     'chip_progress': "Tell me about my child's progress",
+    'child_fallback': "Champ",
     // {g} = sapaan waktu, {n} = nama anak.
     'greet_mission': "{g}! Stuck anywhere in this mission? Just ask Mink! 🐧",
     'greet_home': "{g}! Need a mission suggestion, or want to talk about how {n} is doing today? Ask Mink! 🐧✨",
@@ -71,6 +72,7 @@ const Map<String, Map<String, String>> _t = {
     'chip_xp': "Gimana cara kerja XP & level?",
     'chip_progress': "Ceritain progres anakku",
     'greet_mission': "{g} Bunda! Ada yang bingung pas ngerjain misi ini? Tanya Mink aja! 🐧",
+    'child_fallback': "Anak Hebat",
     'greet_home': "{g} Bunda! Butuh rekomendasi misi atau mau bahas perkembangan {n} hari ini? Tanya Mink ya! 🐧✨",
   },
 };
@@ -527,7 +529,12 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
         .read(chatbotProvider.notifier)
         .sendMessage(
           text,
-          childName: childFullData['name'] ?? 'Anak Hebat',
+          childName: () {
+            final n = (childFullData['name'] as String? ?? '').trim();
+            return n.isEmpty
+                ? _texts(ref.read(languageProvider))['child_fallback']!
+                : n;
+          }(),
           missionContext: activeContext,
           childFullData: childFullData,
           recentAchievements: recentAchievements,
@@ -560,7 +567,10 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     final screenHeight = context.screenHeight;
     final chatState = ref.watch(chatbotProvider);
     final childData = ref.watch(childDataProvider).value ?? {};
-    final String childName = childData['name'] ?? 'Anak Hebat';
+    final String rawName = (childData['name'] as String? ?? '').trim();
+    final String childName = rawName.isEmpty
+        ? _texts(ref.watch(languageProvider))['child_fallback']!
+        : rawName;
 
     // Skor 5 skill (buat konteks yang dikasih ke Mink) ada di tabel
     // `child_stats`, BUKAN di `children` — `childData` doang nggak

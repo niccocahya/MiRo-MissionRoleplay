@@ -12,6 +12,7 @@ import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_provider.dart';
 import '../../core/services/storage_upload_service.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/constants/input_limits.dart';
 import '../../core/theme/app_spacing.dart';
 
 // 🔥 IMPORT SAKLAR UTAMA DARI FILE CHATBOT (Biar gak beda alam)
@@ -291,7 +292,13 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
       final String childId = await ref
           .read(supabaseRepositoryProvider)
           .submitOnboardingData(
-            name: childName,
+            // Dipangkas SEBELUM disimpan. Validasi di atas emang udah
+            // pakai trim(), tapi yang dikirim ke database dulu nilai
+            // mentahnya -- jadi nama berspasi di ujung tetap lolos dan
+            // kebawa ke mana-mana: sapaan di Home ("Halo, Jasmine !"),
+            // sertifikat, sampai laporan PDF. Di database sekarang masih
+            // ada satu baris peninggalan ini.
+            name: childName.trim(),
             age: childAge!,
             interests: childEnjoys,
             learningStyles: childLearns,
@@ -514,6 +521,13 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
               ),
             ),
             onChanged: (val) => childName = val,
+            // Dulu nggak ada batas panjang sama sekali di seluruh app --
+            // nama sepanjang apa pun keterima, lalu kebawa ke sapaan
+            // Home, kartu sertifikat, dan laporan PDF yang lebarnya
+            // tetap. buildCounter dimatiin biar teks "0/30" bawaan
+            // Flutter nggak nongol dan ngerusak tata letaknya.
+            maxLength: kMaxChildNameLength,
+            buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
             decoration: InputDecoration(
               hintText: texts['step1_hint']!,
               filled: true,

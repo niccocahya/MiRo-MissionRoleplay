@@ -21,6 +21,7 @@ import '../../core/providers/child_questionnaire_provider.dart';
 import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/profile_completeness_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
+import '../../core/constants/input_limits.dart';
 import '../../core/providers/parent_provider.dart';
 import '../../core/providers/recent_accounts_provider.dart';
 import '../../core/providers/text_size_provider.dart';
@@ -76,6 +77,18 @@ final unlockedAchievementsCountProvider = StreamProvider.family<int, String>((
 // ==========================================
 // DICTIONARY (KAMUS BAHASA PROFIL)
 // ==========================================
+/// Matiin penghitung "0/30" bawaan Flutter yang otomatis nongol begitu
+/// `maxLength` dipasang -- kalau dibiarin, dia nambah baris di bawah tiap
+/// kolom isian dan ngerusak jarak antar-elemen di modal yang tingginya
+/// udah pas.
+Widget? _noCounter(
+  BuildContext context, {
+  required int currentLength,
+  required bool isFocused,
+  int? maxLength,
+}) =>
+    null;
+
 const Map<String, Map<String, String>> _t = {
   'en': {
     'parent_prefix': "Parent",
@@ -485,6 +498,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: parentController,
+                      // Sama alasannya kayak di layar identify: sebelum
+                      // ini nggak ada batas panjang di mana pun, padahal
+                      // nama kebawa ke sapaan Home & laporan PDF yang
+                      // lebarnya tetap.
+                      maxLength: kMaxParentNameLength,
+                      buildCounter: _noCounter,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -500,6 +519,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
                       controller: childController,
+                      maxLength: kMaxChildNameLength,
+                      buildCounter: _noCounter,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -520,6 +541,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     TextField(
                       controller: ageController,
                       keyboardType: TextInputType.number,
+                      maxLength: kMaxChildAgeLength,
+                      buildCounter: _noCounter,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
