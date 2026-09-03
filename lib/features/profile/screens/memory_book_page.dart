@@ -13,12 +13,14 @@ import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/app_choice_chip.dart';
 import '../../../shared/widgets/app_screen_header.dart';
+import '../../../shared/widgets/fun_background_decorations.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
     'close_photo': "Close photo",
     'title': "Memory Book",
-    'empty': "No photos yet -- complete a mission to start collecting memories.",
+    'empty':
+        "No photos yet -- complete a mission to start collecting memories.",
     'err': "Failed to load photos: ",
     'all_roles': "All",
   },
@@ -49,8 +51,9 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
 
   void _openViewer(MemoryPhoto photo, String lang, Map<String, String> texts) {
     final role = roleVisualById(photo.roleId) ?? kUnknownRoleVisual;
-    final String dateLabel =
-        photo.takenAt != null ? DateFormat('dd MMM yyyy').format(photo.takenAt!) : '';
+    final String dateLabel = photo.takenAt != null
+        ? DateFormat('dd MMM yyyy').format(photo.takenAt!)
+        : '';
 
     showDialog(
       context: context,
@@ -73,7 +76,8 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
                       errorWidget: (c, e, s) => Container(
                         color: AppColors.border,
                         height: 200,
-                        child: Icon(Icons.broken_image, color: AppColors.textMuted),
+                        child: Icon(Icons.broken_image,
+                            color: AppColors.textMuted),
                       ),
                     ),
                   ),
@@ -93,7 +97,8 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
                           if (dateLabel.isNotEmpty)
                             Text(
                               "${role.name(lang)} • $dateLabel",
-                              style: AppTextStyles.caption(color: AppColors.textSecondary),
+                              style: AppTextStyles.caption(
+                                  color: AppColors.textSecondary),
                             ),
                         ],
                       ),
@@ -126,98 +131,127 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppScreenHeader(title: texts['title']!),
-            Expanded(
-              child: photosAsync.when(
-                loading: () => const AppLoading(),
-                error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
-                data: (allPhotos) {
-                  if (allPhotos.isEmpty) {
-                    return AppEmptyState(
-                      message: texts['empty']!,
-                      icon: Icons.photo_library_outlined,
-                    );
-                  }
+      // Sentuhan tipis doang -- ini galeri FOTO, jadi dekorasinya sengaja
+      // minimal biar nggak berebut perhatian sama foto anaknya sendiri.
+      body: Stack(
+        children: [
+          const Positioned(
+            top: 60,
+            right: 20,
+            child: Sparkle(size: 18, color: AppColors.gold),
+          ),
+          const Positioned(
+            bottom: 160,
+            left: 16,
+            child: Sparkle(size: 14, color: AppColors.accent),
+          ),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppScreenHeader(title: texts['title']!),
+                Expanded(
+                  child: photosAsync.when(
+                    loading: () => const AppLoading(),
+                    error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
+                    data: (allPhotos) {
+                      if (allPhotos.isEmpty) {
+                        return AppEmptyState(
+                          message: texts['empty']!,
+                          icon: Icons.photo_library_outlined,
+                        );
+                      }
 
-                  // Urutan chip-nya ngikutin kRoleVisuals (Koki/Dokter/
-                  // Pelukis/dst), bukan urutan kemunculan role di allPhotos
-                  // (yang disortir "terbaru duluan" di provider) -- kalau
-                  // pakai itu langsung, urutan chip-nya acak/nggak konsisten
-                  // tiap kali data foto berubah.
-                  final presentRoleIds = allPhotos.map((p) => p.roleId).toSet();
-                  final roleIds = [
-                    ...kRoleVisuals.map((r) => r.id).where(presentRoleIds.contains),
-                    ...presentRoleIds.where(
-                      (id) => !kRoleVisuals.any((r) => r.id == id),
-                    ),
-                  ];
-                  final photos = _selectedRoleId == null
-                      ? allPhotos
-                      : allPhotos.where((p) => p.roleId == _selectedRoleId).toList();
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (roleIds.length > 1)
-                        SizedBox(
-                          height: 40,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            padding: EdgeInsets.symmetric(horizontal: hPad),
-                            children: [
-                              _roleChip(null, texts['all_roles']!, AppColors.primary),
-                              const SizedBox(width: AppSpacing.sm),
-                              ...roleIds.map((id) {
-                                final role = roleVisualById(id) ?? kUnknownRoleVisual;
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                                  child: _roleChip(id, role.name(lang), role.resolvedBadgeColor),
-                                );
-                              }),
-                            ],
-                          ),
+                      // Urutan chip-nya ngikutin kRoleVisuals (Koki/Dokter/
+                      // Pelukis/dst), bukan urutan kemunculan role di allPhotos
+                      // (yang disortir "terbaru duluan" di provider) -- kalau
+                      // pakai itu langsung, urutan chip-nya acak/nggak konsisten
+                      // tiap kali data foto berubah.
+                      final presentRoleIds =
+                          allPhotos.map((p) => p.roleId).toSet();
+                      final roleIds = [
+                        ...kRoleVisuals
+                            .map((r) => r.id)
+                            .where(presentRoleIds.contains),
+                        ...presentRoleIds.where(
+                          (id) => !kRoleVisuals.any((r) => r.id == id),
                         ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Expanded(
-                        child: GridView.builder(
-                          padding: EdgeInsets.fromLTRB(hPad, 0, hPad, 40),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 6,
-                            mainAxisSpacing: 6,
-                          ),
-                          itemCount: photos.length,
-                          itemBuilder: (context, index) {
-                            final photo = photos[index];
-                            return GestureDetector(
-                              onTap: () => _openViewer(photo, lang, texts),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(AppRadius.sm),
-                                child: CachedNetworkImage(
-                                  imageUrl: photo.imageUrl,
-                                  fit: BoxFit.cover,
-                                  placeholder: (c, u) => Container(color: AppColors.border),
-                                  errorWidget: (c, e, s) => Container(
-                                    color: AppColors.border,
-                                    child: Icon(Icons.broken_image, color: AppColors.textMuted),
-                                  ),
-                                ),
+                      ];
+                      final photos = _selectedRoleId == null
+                          ? allPhotos
+                          : allPhotos
+                              .where((p) => p.roleId == _selectedRoleId)
+                              .toList();
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (roleIds.length > 1)
+                            SizedBox(
+                              height: 40,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsets.symmetric(horizontal: hPad),
+                                children: [
+                                  _roleChip(null, texts['all_roles']!,
+                                      AppColors.primary),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  ...roleIds.map((id) {
+                                    final role = roleVisualById(id) ??
+                                        kUnknownRoleVisual;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                          right: AppSpacing.sm),
+                                      child: _roleChip(id, role.name(lang),
+                                          role.resolvedBadgeColor),
+                                    );
+                                  }),
+                                ],
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                            ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Expanded(
+                            child: GridView.builder(
+                              padding: EdgeInsets.fromLTRB(hPad, 0, hPad, 40),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 6,
+                                mainAxisSpacing: 6,
+                              ),
+                              itemCount: photos.length,
+                              itemBuilder: (context, index) {
+                                final photo = photos[index];
+                                return GestureDetector(
+                                  onTap: () => _openViewer(photo, lang, texts),
+                                  child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.sm),
+                                    child: CachedNetworkImage(
+                                      imageUrl: photo.imageUrl,
+                                      fit: BoxFit.cover,
+                                      placeholder: (c, u) =>
+                                          Container(color: AppColors.border),
+                                      errorWidget: (c, e, s) => Container(
+                                        color: AppColors.border,
+                                        child: Icon(Icons.broken_image,
+                                            color: AppColors.textMuted),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/app_screen_header.dart';
+import '../../../shared/widgets/fun_background_decorations.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
@@ -28,8 +29,24 @@ const Map<String, Map<String, String>> _t = {
   },
 };
 
-const List<String> _kDayLabelsId = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
-const List<String> _kDayLabelsEn = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const List<String> _kDayLabelsId = [
+  "Sen",
+  "Sel",
+  "Rab",
+  "Kam",
+  "Jum",
+  "Sab",
+  "Min"
+];
+const List<String> _kDayLabelsEn = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun"
+];
 
 /// Kalender ala "contribution graph" GitHub buat streak -- dulu streak
 /// cuma ditampilin sebagai 1 angka polos ("7 hari beruntun"), nggak ada
@@ -49,51 +66,77 @@ class StreakCalendarPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppScreenHeader(title: texts['title']!),
-            Expanded(
-              child: activeDatesAsync.when(
-                loading: () => const AppLoading(),
-                error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
-                data: (activeDates) => SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        texts['subtitle']!,
-                        style: AppTextStyles.body(color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      _CalendarGrid(activeDates: activeDates, lang: lang),
-                      const SizedBox(height: AppSpacing.lg),
-                      Row(
+      // Kalender konsistensi -- layar yang ngerayain kebiasaan main tiap
+      // hari, jadi pas juga dikasih dekorasi yang sama kayak layar
+      // pencapaian lain (Semua Lencana, dst).
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: RepaintBoundary(
+              child: Stack(
+                children: [
+                  ColorBlob(
+                      top: -20, right: -40, size: 130, color: AppColors.accent),
+                  Sparkle(top: 90, left: 30, size: 15, color: AppColors.gold),
+                  Sparkle(
+                      bottom: 140,
+                      right: 30,
+                      size: 14,
+                      color: AppColors.accent),
+                ],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppScreenHeader(title: texts['title']!),
+                Expanded(
+                  child: activeDatesAsync.when(
+                    loading: () => const AppLoading(),
+                    error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
+                    data: (activeDates) => SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _legendDot(AppColors.accent),
-                          const SizedBox(width: AppSpacing.xs),
                           Text(
-                            texts['legend_active']!,
-                            style: AppTextStyles.caption(color: AppColors.textSecondary),
+                            texts['subtitle']!,
+                            style: AppTextStyles.body(
+                                color: AppColors.textSecondary),
                           ),
-                          const SizedBox(width: AppSpacing.lg),
-                          _legendDot(AppColors.border),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            texts['legend_inactive']!,
-                            style: AppTextStyles.caption(color: AppColors.textSecondary),
+                          const SizedBox(height: AppSpacing.lg),
+                          _CalendarGrid(activeDates: activeDates, lang: lang),
+                          const SizedBox(height: AppSpacing.lg),
+                          Row(
+                            children: [
+                              _legendDot(AppColors.accent),
+                              const SizedBox(width: AppSpacing.xs),
+                              Text(
+                                texts['legend_active']!,
+                                style: AppTextStyles.caption(
+                                    color: AppColors.textSecondary),
+                              ),
+                              const SizedBox(width: AppSpacing.lg),
+                              _legendDot(AppColors.border),
+                              const SizedBox(width: AppSpacing.xs),
+                              Text(
+                                texts['legend_inactive']!,
+                                style: AppTextStyles.caption(
+                                    color: AppColors.textSecondary),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -102,7 +145,8 @@ class StreakCalendarPage extends ConsumerWidget {
     return Container(
       width: 12,
       height: 12,
-      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
     );
   }
 }
@@ -122,12 +166,14 @@ class _CalendarGrid extends StatelessWidget {
     // Mundur ke hari Senin minggu ini, terus mundur lagi 11 minggu penuh --
     // total 12 minggu (84 hari), disusun kolom = minggu, baris = hari.
     final int weekdayOffset = todayNormalized.weekday - 1; // Senin = 0
-    final startOfThisWeek = todayNormalized.subtract(Duration(days: weekdayOffset));
+    final startOfThisWeek =
+        todayNormalized.subtract(Duration(days: weekdayOffset));
     final gridStart = startOfThisWeek.subtract(const Duration(days: 7 * 11));
 
     final List<List<DateTime>> weeks = List.generate(12, (weekIndex) {
       final weekStart = gridStart.add(Duration(days: 7 * weekIndex));
-      return List.generate(7, (dayIndex) => weekStart.add(Duration(days: dayIndex)));
+      return List.generate(
+          7, (dayIndex) => weekStart.add(Duration(days: dayIndex)));
     });
 
     return SingleChildScrollView(
@@ -144,8 +190,9 @@ class _CalendarGrid extends StatelessWidget {
                         height: 16,
                         child: Text(
                           d,
-                          style: AppTextStyles.caption(color: AppColors.textMuted)
-                              .copyWith(fontSize: 10),
+                          style:
+                              AppTextStyles.caption(color: AppColors.textMuted)
+                                  .copyWith(fontSize: 10),
                         ),
                       ),
                     ))
@@ -169,7 +216,9 @@ class _CalendarGrid extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isFuture
                               ? Colors.transparent
-                              : (isActive ? AppColors.accent : AppColors.border),
+                              : (isActive
+                                  ? AppColors.accent
+                                  : AppColors.border),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
