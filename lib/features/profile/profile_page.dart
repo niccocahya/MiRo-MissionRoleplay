@@ -2156,74 +2156,92 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+          // Dirombak total -- sebelumnya judul+deskripsi paket ngambang
+          // tanpa wadah, dan KEDUA tombol di bawahnya masing-masing
+          // dibungkus ComingSoonBadge SENDIRI-SENDIRI. Karena tombolnya
+          // cuma separuh lebar (Expanded berdampingan), dua badge yang
+          // sama-sama nempel di pojok kanan-atas tombolnya ketemu di
+          // tengah baris dan numpuk PERSIS di atas tulisan tombol -- itu
+          // yang kelihatan di laporan bug (dua pil "Segera Hadir" saling
+          // tindih, tulisan tombol ketutupan).
+          //
+          // Sekarang: satu AppCard (wadah yang sama dipakai kartu-kartu
+          // lain di app ini) buat seluruh blok paket, dibungkus SATU
+          // ComingSoonBadge di luarnya -- satu pil, satu kain pudar,
+          // nutupin semuanya sekaligus. Bukan cuma ngebenerin numpuknya,
+          // tapi juga lebih jujur: yang belum jadi itu FITUR paketnya,
+          // bukan salah satu tombol doang.
+          ComingSoonBadge(
+            radius: AppRadius.lg,
+            child: AppCard(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.verified, color: AppColors.primary, size: 16),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(texts['monthly_plan']!, style: AppTextStyles.bodyBold()),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.verified, color: AppColors.primary, size: 16),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(texts['monthly_plan']!, style: AppTextStyles.bodyBold()),
+                        ],
+                      ),
+                      Text(
+                        texts['plan_desc']!,
+                        textAlign: TextAlign.right,
+                        style: AppTextStyles.caption(
+                          color: AppColors.primary.withValues(alpha: 0.6),
+                        ).copyWith(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  // `disabledForegroundColor` WAJIB di-set bareng
+                  // `disabledBackgroundColor`: styleFrom cuma nerapin
+                  // `foregroundColor` ke state AKTIF. Pas onPressed null,
+                  // warna teksnya jatuh ke bawaan Material (abu ~38%
+                  // transparan) -- di atas tombol navy hasilnya teksnya
+                  // ilang total (kotak abu polos), persis laporan bug lama.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            disabledForegroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            elevation: 2,
+                          ),
+                          child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm + 4),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            disabledBackgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            disabledForegroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                            elevation: 4,
+                          ),
+                          child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              Text(
-                texts['plan_desc']!,
-                textAlign: TextAlign.right,
-                style: AppTextStyles.caption(
-                  color: AppColors.primary.withValues(alpha: 0.6),
-                ).copyWith(fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // Belum ada sistem paket/pembayaran beneran, jadi 2 tombol ini
-          // ditandain jelas belum bisa dipencet — sebelumnya keliatan aktif
-          // tapi diem aja pas ditekan.
-          //
-          // `disabledForegroundColor` WAJIB di-set bareng
-          // `disabledBackgroundColor`: styleFrom cuma nerapin
-          // `foregroundColor` ke state AKTIF. Pas onPressed null, warna
-          // teksnya jatuh ke bawaan Material (abu ~38% transparan) -- di
-          // atas tombol navy hasilnya teksnya ilang total (kelihatan cuma
-          // kotak abu polos), persis yang kejadian di laporan bug.
-          Row(
-            children: [
-              Expanded(
-                child: ComingSoonBadge(
-                  child: ElevatedButton(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.white,
-                      foregroundColor: AppColors.primary,
-                      disabledForegroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                      elevation: 2,
-                    ),
-                    child: Text(texts['plan_detail']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm + 4),
-              Expanded(
-                child: ComingSoonBadge(
-                  child: ElevatedButton(
-                    onPressed: null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      disabledForegroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                      elevation: 4,
-                    ),
-                    child: Text(texts['upgrade_plan']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
