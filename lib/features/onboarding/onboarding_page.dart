@@ -38,6 +38,8 @@ const Color _kOnboardingSurface = Colors.white;
 // ==========================================
 const Map<String, Map<String, String>> _t = {
   'en': {
+    'show_password': "Show password",
+    'hide_password': "Hide password",
     'splash_desc': 'Exciting adventures\nwithout screen time',
     'splash_tap': 'Tap anywhere to continue',
     'lang_title': 'Choose\nlanguage',
@@ -73,6 +75,8 @@ const Map<String, Map<String, String>> _t = {
     'recent_accounts': "Recent accounts on this device",
   },
   'id': {
+    'show_password': "Tampilkan kata sandi",
+    'hide_password': "Sembunyikan kata sandi",
     'splash_desc': 'Petualangan seru\ntanpa layar gawai',
     'splash_tap': 'Ketuk di mana saja untuk lanjut',
     'lang_title': 'Pilih\nbahasa',
@@ -1150,7 +1154,7 @@ class _Dot extends StatelessWidget {
   }
 }
 
-class _CustomTextField extends StatefulWidget {
+class _CustomTextField extends ConsumerStatefulWidget {
   final String label;
   final IconData icon;
   final String placeholder;
@@ -1173,10 +1177,10 @@ class _CustomTextField extends StatefulWidget {
   final int? maxLength;
 
   @override
-  State<_CustomTextField> createState() => _CustomTextFieldState();
+  ConsumerState<_CustomTextField> createState() => _CustomTextFieldState();
 }
 
-class _CustomTextFieldState extends State<_CustomTextField> {
+class _CustomTextFieldState extends ConsumerState<_CustomTextField> {
   bool _obscureText = true;
   @override
   Widget build(BuildContext context) {
@@ -1245,6 +1249,8 @@ class _CustomTextFieldState extends State<_CustomTextField> {
             ),
             suffixIcon: widget.isPassword
                 ? IconButton(
+                    tooltip: (_t[ref.watch(languageProvider)] ?? _t['en']!)[
+                        _obscureText ? 'show_password' : 'hide_password'],
                     icon: Icon(
                       _obscureText
                           ? Icons.visibility_off_outlined

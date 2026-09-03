@@ -22,6 +22,7 @@ import '../../../core/theme/app_spacing.dart';
 // ==========================================
 const Map<String, Map<String, String>> _t = {
   'en': {
+    'close_photo': "Close photo",
     'img_failed': "Failed to load image",
     'photo_saved': "Photo successfully saved",
     'photo_failed': "Failed to upload photo: ",
@@ -42,6 +43,7 @@ const Map<String, Map<String, String>> _t = {
     'leave_confirm': "Leave",
   },
   'id': {
+    'close_photo': "Tutup foto",
     'img_failed': "Gambar gagal dimuat",
     'photo_saved': "Foto berhasil tersimpan",
     'photo_failed': "Gagal mengunggah foto: ",
@@ -236,6 +238,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
 
   void _showImageDialog(String rawPath) {
     if (rawPath.isEmpty) return;
+    final texts = _t[ref.read(languageProvider)] ?? _t['en']!;
 
     showDialog(
       context: context,
@@ -261,6 +264,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
               top: -16,
               right: -16,
               child: IconButton(
+                tooltip: texts['close_photo']!,
                 icon: const Icon(Icons.cancel, color: Colors.white, size: 36),
                 onPressed: () => Navigator.pop(context),
               ),

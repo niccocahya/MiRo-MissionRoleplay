@@ -16,12 +16,14 @@ import '../../../shared/widgets/app_screen_header.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
+    'close_photo': "Close photo",
     'title': "Memory Book",
     'empty': "No photos yet -- complete a mission to start collecting memories.",
     'err': "Failed to load photos: ",
     'all_roles': "All",
   },
   'id': {
+    'close_photo': "Tutup foto",
     'title': "Buku Kenangan",
     'empty': "Belum ada foto -- selesaikan misi buat mulai ngumpulin kenangan.",
     'err': "Gagal memuat foto: ",
@@ -103,6 +105,7 @@ class _MemoryBookPageState extends ConsumerState<MemoryBookPage> {
               top: -16,
               right: -16,
               child: IconButton(
+                tooltip: texts['close_photo']!,
                 icon: const Icon(Icons.cancel, color: Colors.white, size: 36),
                 onPressed: () => Navigator.pop(context),
               ),

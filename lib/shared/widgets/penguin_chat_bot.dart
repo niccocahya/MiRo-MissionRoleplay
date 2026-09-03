@@ -46,6 +46,7 @@ const Map<String, Map<String, String>> _t = {
     'chip_progress': "Tell me about my child's progress",
     'child_fallback': "Champ",
     // {g} = sapaan waktu, {n} = nama anak.
+    'close_chat': "Close chat",
     'greet_mission': "{g}! Stuck anywhere in this mission? Just ask Mink! 🐧",
     'greet_home': "{g}! Need a mission suggestion, or want to talk about how {n} is doing today? Ask Mink! 🐧✨",
   },
@@ -74,6 +75,7 @@ const Map<String, Map<String, String>> _t = {
     'greet_mission': "{g} Bunda! Ada yang bingung pas ngerjain misi ini? Tanya Mink aja! 🐧",
     'child_fallback': "Anak Hebat",
     'greet_home': "{g} Bunda! Butuh rekomendasi misi atau mau bahas perkembangan {n} hari ini? Tanya Mink ya! 🐧✨",
+    'close_chat': "Tutup chat",
   },
 };
 
@@ -765,6 +767,7 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
                     ),
                   ),
                 IconButton(
+                  tooltip: t['close_chat']!,
                   onPressed: () => ref.read(chatWindowOpenProvider.notifier).close(),
                   icon: Icon(
                     Icons.close_rounded,

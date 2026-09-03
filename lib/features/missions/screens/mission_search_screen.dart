@@ -21,6 +21,7 @@ import '../../../shared/widgets/app_screen_header.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
+    'clear_search': "Clear search",
     'title': "Search Missions",
     'hint': "Search mission name...",
     'all_roles': "All",
@@ -34,6 +35,7 @@ const Map<String, Map<String, String>> _t = {
     'view_in_map': "View in map →",
   },
   'id': {
+    'clear_search': "Hapus pencarian",
     'title': "Cari Misi",
     'hint': "Cari nama misi...",
     'all_roles': "Semua",
@@ -106,6 +108,7 @@ class _MissionSearchScreenState extends ConsumerState<MissionSearchScreen> {
                   suffixIcon: _query.isEmpty
                       ? null
                       : IconButton(
+                          tooltip: texts['clear_search']!,
                           icon: const Icon(Icons.close_rounded),
                           onPressed: () => setState(() {
                             _searchController.clear();
