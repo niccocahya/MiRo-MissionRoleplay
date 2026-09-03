@@ -17,6 +17,17 @@ final totalMissionsCompletedProvider = StreamProvider.family<int, String>((
       .stream(primaryKey: ['id'])
       .eq('child_id', childId)
       .map((event) {
-        return event.where((row) => row['status'] == 'completed').length;
+        // Dihitung per MISI UNIK, bukan per baris log. Dulu tiap baris
+        // 'completed' dihitung satu -- padahal satu misi bisa punya lebih
+        // dari satu baris 'completed' peninggalan celah lama (sebelum
+        // penjaga anti-dobel di _syncToDatabase ada). Efeknya angka "misi
+        // selesai" di Profil nggak cocok sama jumlah level/lencana yang
+        // dikasih app, karena dua-duanya itu dihitung per misi unik.
+        // Di database sekarang masih ada 6 baris peninggalan itu.
+        return event
+            .where((row) => row['status'] == 'completed')
+            .map((row) => row['mission_id'])
+            .toSet()
+            .length;
       });
 });

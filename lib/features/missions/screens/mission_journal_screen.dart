@@ -135,6 +135,30 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
   bool _syncFailed = false;
   String? _pendingAchievementId;
 
+  // Penanda per-langkah buat "Coba Lagi" yang BISA MELANJUTKAN.
+  //
+  // _syncToDatabase nulis ke 5 tempat berbeda dan sama sekali nggak
+  // atomik. Kalau putus di tengah -- misal log misi kesimpen tapi update
+  // XP-nya gagal -- dulu tombol "Coba Lagi" malah bikin RUGI: percobaan
+  // kedua ketemu log 'completed' punyanya sendiri di penjaga anti-dobel,
+  // nyimpulin "ini replay", lalu return tanpa ngasih XP/skill/level/
+  // lencana APA PUN -- sambil ngapus banner errornya, jadi keliatan
+  // sukses. Hadiah misinya hilang permanen tanpa ada yang tau.
+  //
+  // Ini bukan teori: di database, Fajar kurang 20 poin kreativitas + 10
+  // motorik dibanding total earned_skills dari misi-misi yang dia
+  // selesaikan, dan dia juga anak yang dulu kehilangan 9 dari 12
+  // lencana -- sisa dari kejadian yang persis seperti ini.
+  //
+  // Dengan penanda ini tiap langkah cuma dijalankan sekali; percobaan
+  // ulang nerusin dari yang belum kelar, bukan mulai dari nol.
+  bool _stepLogWritten = false;
+  bool _stepPhotosSaved = false;
+  bool _stepXpApplied = false;
+  bool _stepLevelApplied = false;
+  bool _stepStatsApplied = false;
+  bool _stepAchievementApplied = false;
+
   // Rating bintang (1-5) buat misi ini -- null berarti belum dikasih
   // rating. Dulu nggak ada cara buat anak/orang tua ngasih tau seberapa
   // seru satu misi dibanding misi lain.
@@ -354,7 +378,12 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
     SupabaseClient supabase,
     String missionLogId,
   ) async {
-    if (widget.capturedPhotos.isEmpty) return;
+    // Dijaga penanda karena fungsi ini dipanggil ulang tiap "Coba Lagi".
+    // Insert-nya satu batch (semua baris atau nggak sama sekali), jadi
+    // percobaan ulang setelah GAGAL aman -- yang bahaya percobaan ulang
+    // setelah BERHASIL: fotonya bakal masuk dua kali dan kelihatan dobel
+    // di Memory Book.
+    if (_stepPhotosSaved || widget.capturedPhotos.isEmpty) return;
     try {
       final rows = [
         for (int i = 0; i < widget.capturedPhotos.length; i++)
@@ -365,6 +394,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           },
       ];
       await supabase.from('journals').insert(rows);
+      _stepPhotosSaved = true;
     } catch (e) {
       debugPrint("Gagal simpan foto jurnal: $e");
     }
@@ -388,7 +418,6 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       if (childDb == null) return false;
 
       final String childId = childDb['id'];
-      final int currentTotalXp = childDb['total_xp'] ?? 0;
       final String nowLocal = DateTime.now().toIso8601String();
 
       // Cegah XP/skill/level kecatat dobel kalau misi ini kebetulan udah
@@ -397,13 +426,21 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       // mulai ulang misi yang sama (Intro screen nggak pernah kecopot
       // dari stack navigasi begitu Play/Win/Journal ke-push, jadi masih
       // bisa "Mulai misi" lagi dari sana).
-      final alreadyCompleted = await supabase
-          .from('mission_logs')
-          .select('id')
-          .eq('child_id', childId)
-          .eq('mission_id', widget.mission.id)
-          .eq('status', 'completed')
-          .limit(1);
+      //
+      // Penjaga ini SENGAJA dilewati kalau log-nya barusan kita tulis
+      // sendiri (_stepLogWritten). Tanpa itu, percobaan ulang setelah
+      // gagal separuh jalan bakal ketemu log punyanya sendiri, salah
+      // nyimpulin "ini replay", dan ngebuang sisa hadiah yang belum
+      // sempat dikasih.
+      final alreadyCompleted = _stepLogWritten
+          ? const <Map<String, dynamic>>[]
+          : await supabase
+              .from('mission_logs')
+              .select('id')
+              .eq('child_id', childId)
+              .eq('mission_id', widget.mission.id)
+              .eq('status', 'completed')
+              .limit(1);
 
       if (alreadyCompleted.isNotEmpty) {
         // Ini "Ulangi Misi" (replay) atau alur-balik-lalu-mulai-lagi yang
@@ -442,21 +479,24 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       }
 
       // 1. Simpan Log Misi
-      final logResponse = await supabase
-          .from('mission_logs')
-          .insert({
-            'child_id': childId,
-            'role_id': widget.mission.roleId,
-            'mission_id': widget.mission.id,
-            'status': 'completed',
-            'earned_xp': widget.mission.xpReward,
-            'earned_skills': widget.mission.skillsReward,
-            'completed_at': nowLocal,
-          })
-          .select('id')
-          .single();
+      if (!_stepLogWritten) {
+        final logResponse = await supabase
+            .from('mission_logs')
+            .insert({
+              'child_id': childId,
+              'role_id': widget.mission.roleId,
+              'mission_id': widget.mission.id,
+              'status': 'completed',
+              'earned_xp': widget.mission.xpReward,
+              'earned_skills': widget.mission.skillsReward,
+              'completed_at': nowLocal,
+            })
+            .select('id')
+            .single();
 
-      _generatedMissionLogId = logResponse['id'];
+        _generatedMissionLogId = logResponse['id'];
+        _stepLogWritten = true;
+      }
       // Dulu foto yang diambil pas misi berlangsung cuma ada di memori
       // layar ini (buat kolase win screen) -- nggak PERNAH ditulis ke
       // tabel `journals`. Efeknya, buka lagi jurnal misi yang udah
@@ -468,36 +508,56 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       await _saveJournalPhotos(supabase, _generatedMissionLogId!);
 
       // 2. Update Total XP Anak
-      await supabase
-          .from('children')
-          .update({'total_xp': currentTotalXp + widget.mission.xpReward})
-          .eq('id', childId);
+      //
+      // total_xp dibaca ULANG dari database di sini, bukan pakai nilai
+      // dari childDb yang diambil di awal fungsi. Pada percobaan ulang,
+      // nilai awal itu bisa udah basi (anak sempat main di perangkat
+      // lain), dan nulis "nilai_basi + xp" bakal ngehapus XP yang
+      // didapat di sela-sela itu.
+      if (!_stepXpApplied) {
+        final freshChild = await supabase
+            .from('children')
+            .select('total_xp')
+            .eq('id', childId)
+            .single();
+        await supabase
+            .from('children')
+            .update({
+              'total_xp': (freshChild['total_xp'] as int? ?? 0) +
+                  widget.mission.xpReward,
+            })
+            .eq('id', childId);
+        _stepXpApplied = true;
+      }
 
       // 3. Update Progress Level
-      final progressRes = await supabase
-          .from('child_role_progress')
-          .select('unlocked_level')
-          .eq('child_id', childId)
-          .eq('role_id', widget.mission.roleId)
-          .maybeSingle();
-
-      if (progressRes == null) {
-        await supabase.from('child_role_progress').insert({
-          'child_id': childId,
-          'role_id': widget.mission.roleId,
-          'unlocked_level': 2,
-        });
-      } else {
-        int currentUnlocked = progressRes['unlocked_level'] ?? 1;
-        await supabase
+      if (!_stepLevelApplied) {
+        final progressRes = await supabase
             .from('child_role_progress')
-            .update({'unlocked_level': currentUnlocked + 1})
+            .select('unlocked_level')
             .eq('child_id', childId)
-            .eq('role_id', widget.mission.roleId);
+            .eq('role_id', widget.mission.roleId)
+            .maybeSingle();
+
+        if (progressRes == null) {
+          await supabase.from('child_role_progress').insert({
+            'child_id': childId,
+            'role_id': widget.mission.roleId,
+            'unlocked_level': 2,
+          });
+        } else {
+          int currentUnlocked = progressRes['unlocked_level'] ?? 1;
+          await supabase
+              .from('child_role_progress')
+              .update({'unlocked_level': currentUnlocked + 1})
+              .eq('child_id', childId)
+              .eq('role_id', widget.mission.roleId);
+        }
+        _stepLevelApplied = true;
       }
 
       // 4. Update Child Stats
-      if (widget.mission.skillsReward.isNotEmpty) {
+      if (!_stepStatsApplied && widget.mission.skillsReward.isNotEmpty) {
         final statsRes = await supabase
             .from('child_stats')
             .select()
@@ -526,20 +586,28 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           });
           await supabase.from('child_stats').insert(inserts);
         }
+        _stepStatsApplied = true;
       }
 
       // 5. Eksekusi Achievement
-      if (earnedAchievementId != null && earnedAchievementId.isNotEmpty) {
+      if (!_stepAchievementApplied &&
+          earnedAchievementId != null &&
+          earnedAchievementId.isNotEmpty) {
         try {
           await supabase.from('child_achievements').insert({
             'child_id': childId,
             'achievement_id': earnedAchievementId,
-            'unlocked_at': nowLocal, 
+            'unlocked_at': nowLocal,
           });
           debugPrint("✅ LENCANA BERHASIL TERCATAT!");
+          _stepAchievementApplied = true;
         } on PostgrestException catch (e) {
-          if (e.code != '23505') {
+          // 23505 = sudah ada barisnya; itu tetap terhitung beres.
+          if (e.code == '23505') {
+            _stepAchievementApplied = true;
+          } else {
             debugPrint("❌ Gagal Simpan Lencana: ${e.message}");
+            rethrow;
           }
         }
       }

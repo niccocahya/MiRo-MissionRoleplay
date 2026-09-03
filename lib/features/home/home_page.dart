@@ -13,7 +13,7 @@ import '../../core/providers/mission_stats_provider.dart';
 import '../../core/providers/notification_prefs_provider.dart';
 import '../../core/providers/parent_provider.dart';
 import '../../core/providers/streak_provider.dart';
-import '../../core/services/achievement_repair_service.dart';
+import '../../core/services/progress_repair_service.dart';
 import '../../core/router/app_page_transition.dart';
 import '../../core/utils/date_utils.dart';
 import '../../core/utils/level_utils.dart';
@@ -262,9 +262,9 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  // Anak-anak yang lencananya udah dicek di sesi ini, biar penambalan
+  // Anak-anak yang progresnya udah dicek di sesi ini, biar penambalan
   // nggak jalan berulang tiap Home rebuild.
-  final Set<String> _badgesRepairChecked = {};
+  final Set<String> _progressRepairChecked = {};
 
   @override
   void initState() {
@@ -275,15 +275,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
-  /// Sekali per anak per sesi: cek apakah ada lencana yang seharusnya udah
-  /// didapat tapi nggak tercatat (mis. gara-gara koneksi putus tepat pas
-  /// misinya diselesaikan), terus tambal. Lihat AchievementRepairService --
-  /// tanpa ini lencana yang kelewat hilang permanen, karena cuma pernah
-  /// diberikan sekali di detik misi selesai.
-  void _repairBadgesOnce(String childId) {
-    if (childId.isEmpty || _badgesRepairChecked.contains(childId)) return;
-    _badgesRepairChecked.add(childId);
-    AchievementRepairService.repairMissing(childId);
+  /// Sekali per anak per sesi: hitung ulang XP, level, poin skill, dan
+  /// lencana dari log misi, lalu tambal yang kurang. Lihat
+  /// ProgressRepairService -- penyimpanan hadiah misi nggak atomik, jadi
+  /// koneksi yang putus di tengah bisa bikin sebagian hadiah hilang
+  /// permanen kalau nggak ada yang ngecek ulang begini.
+  void _repairProgressOnce(String childId) {
+    if (childId.isEmpty || _progressRepairChecked.contains(childId)) return;
+    _progressRepairChecked.add(childId);
+    ProgressRepairService.repairMissing(childId);
   }
 
   // calculateLevelInfo() dipindah ke core/utils/level_utils.dart — dulu
@@ -333,7 +333,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       data: (data) {
         final String childId = data?['id'] ?? '';
-        _repairBadgesOnce(childId);
+        _repairProgressOnce(childId);
         final String childName = data?['name'] ?? "Anak Hebat";
 
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
