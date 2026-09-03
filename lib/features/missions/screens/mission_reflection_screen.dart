@@ -17,6 +17,7 @@ const Map<String, Map<String, String>> _t = {
   'en': {
     'err_select': "Please select parent and child feelings first",
     'err_save': "Failed to save reflection: ",
+    'err_unlinked': "This mission's progress hasn't been saved yet, so the reflection can't be attached to it. Go back and tap Try Again first.",
     'title': "How was the mission?",
     'parent_feeling': "PARENT FEELING",
     'child_feeling': "CHILD FEELING",
@@ -27,6 +28,7 @@ const Map<String, Map<String, String>> _t = {
   'id': {
     'err_select': "Pilih perasaan ayah bunda dan anak dulu ya",
     'err_save': "Gagal menyimpan refleksi: ",
+    'err_unlinked': "Progres misinya belum kesimpen, jadi refleksinya nggak bisa ditempelin ke misi ini. Balik dulu terus pencet Coba Lagi ya.",
     'title': "Bagaimana misinya?",
     'parent_feeling': "PERASAAN ORANG TUA",
     'child_feeling': "PERASAAN ANAK",
@@ -83,13 +85,26 @@ class _MissionReflectionScreenState
 
     setState(() => _isSaving = true);
 
+    // Lapis kedua (yang pertama: tombol masuk ke layar ini dikunci sampai
+    // id-nya siap, lihat mission_journal_screen.dart). Tanpa mission_log_id,
+    // baris refleksinya nggak nyambung ke misi mana pun -- kesimpen tapi
+    // nggak akan pernah bisa ditampilin lagi. Lebih baik jujur gagal
+    // daripada diem-diem bikin data yatim.
+    if (widget.missionLogId == null) {
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(texts['err_unlinked']!)));
+      return;
+    }
+
     try {
       final supabase = Supabase.instance.client;
 
       // MENGIRIM DATA KE TABEL 'reflections' SESUAI SKEMA SQL-MU
       await supabase.from('reflections').insert({
         // Tembak ID Log Misi agar berelasi dengan riwayat misi
-        if (widget.missionLogId != null) 'mission_log_id': widget.missionLogId,
+        'mission_log_id': widget.missionLogId,
         'parent_feeling': parentFeeling,
         'child_feeling': childFeeling,
         'notes': _notesController.text.trim(),

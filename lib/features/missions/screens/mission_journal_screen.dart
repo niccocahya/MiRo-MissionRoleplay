@@ -984,7 +984,17 @@ Future<void> _downloadCollage() async {
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: ElevatedButton(
-                  onPressed: () {
+                  // Tombol ini ada DI LUAR penjaga `_isLoading` di atas, jadi
+                  // dulu bisa dipencet pas sinkronisasi misi masih jalan --
+                  // `_generatedMissionLogId` masih null, dan refleksi yang
+                  // diisi setelahnya kesimpen TANPA penghubung ke misinya:
+                  // nggak akan pernah bisa ditampilin lagi. Di database ini
+                  // ada 19 baris refleksi yatim kayak gitu (semua dari masa
+                  // sebelum id-nya dialirkan dengan benar). Sekarang tombolnya
+                  // nunggu sampai id-nya siap.
+                  onPressed: (!widget.isViewOnly && _generatedMissionLogId == null)
+                      ? null
+                      : () {
                     if (widget.isViewOnly) {
                       Navigator.pop(context);
                     } else {
