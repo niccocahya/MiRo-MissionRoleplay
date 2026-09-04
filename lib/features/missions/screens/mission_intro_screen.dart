@@ -13,8 +13,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/responsive.dart';
 import '../../../core/services/favorite_missions_service.dart';
-import '../../../core/constants/role_visuals.dart';
-import '../../../shared/widgets/fun_background_decorations.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP)
@@ -47,22 +45,10 @@ class MissionIntroScreen extends ConsumerWidget {
     final texts = _t[lang] ?? _t['en']!;
     final isFavorite = ref.watch(favoriteMissionsProvider).contains(mission.id);
 
-    final roleVisual = roleVisualById(mission.roleId) ?? kUnknownRoleVisual;
-
     return Scaffold(
       backgroundColor: bgColor,
       body: Stack(
         children: [
-          // Sentuhan warna ringan doang di sini -- ilustrasi penguin
-          // role-nya sendiri udah jadi elemen visual utama, jadi
-          // dekorasinya sengaja dikit biar nggak menuh-menuhin gambarnya.
-          Sparkle(
-              top: 100,
-              right: 24,
-              size: 16,
-              color: roleVisual.resolvedBadgeColor),
-          Sparkle(top: 180, left: 16, size: 12, color: AppColors.gold),
-
           // 1. BACKGROUND & GAMBAR
           Positioned(
             bottom: 0,
@@ -96,16 +82,11 @@ class MissionIntroScreen extends ConsumerWidget {
                             color: Colors.white,
                             shape: BoxShape.circle,
                             boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 8,
-                                  offset: Offset(0, 2)),
+                              BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2)),
                             ],
                           ),
                           child: Icon(
-                            isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
+                            isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                             color: AppColors.accent,
                             size: 18,
                           ),
@@ -130,8 +111,7 @@ class MissionIntroScreen extends ConsumerWidget {
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.accent.withValues(alpha: 0.15),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.sm + 10),
+                            borderRadius: BorderRadius.circular(AppRadius.sm + 10),
                           ),
                           child: Text(
                             (roleName ?? mission.roleId).toUpperCase(),
@@ -223,8 +203,7 @@ class MissionIntroScreen extends ConsumerWidget {
                         // di level data lewat pengecekan mission_logs yang
                         // udah `completed` — ini cuma benerin alur baliknya
                         // biar nggak nyasar/aneh.)
-                        Navigator.of(context, rootNavigator: true)
-                            .pushReplacement(
+                        Navigator.of(context, rootNavigator: true).pushReplacement(
                           appPageRoute(MissionPlayScreen(mission: mission)),
                         );
                       },
@@ -239,10 +218,7 @@ class MissionIntroScreen extends ConsumerWidget {
                       child: Ink(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFFF58B7A),
-                              AppColors.accentDark
-                            ],
+                            colors: [const Color(0xFFF58B7A), AppColors.accentDark],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -457,4 +433,5 @@ class MissionIntroScreen extends ConsumerWidget {
       ),
     );
   }
+
 }

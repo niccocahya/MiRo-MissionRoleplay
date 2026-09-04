@@ -23,7 +23,6 @@ import '../../core/router/app_page_transition.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_choice_chip.dart';
 import '../../shared/widgets/app_state_views.dart';
-import '../../shared/widgets/fun_background_decorations.dart';
 // IMPORT BARU UNTUK MEMBUKA JURNAL
 import '../missions/data/mission_model.dart';
 import '../missions/screens/mission_journal_screen.dart';
@@ -138,9 +137,11 @@ final missionHistoryProvider = StreamProvider.family<List<dynamic>, String>((
         }).toList();
 
         list.sort((a, b) {
-          final dateA = parseDateSafely(a['completed_at'] ?? '') ??
+          final dateA =
+              parseDateSafely(a['completed_at'] ?? '') ??
               DateTime.fromMillisecondsSinceEpoch(0);
-          final dateB = parseDateSafely(b['completed_at'] ?? '') ??
+          final dateB =
+              parseDateSafely(b['completed_at'] ?? '') ??
               DateTime.fromMillisecondsSinceEpoch(0);
           return dateB.compareTo(dateA);
         });
@@ -154,37 +155,39 @@ final missionHistoryProvider = StreamProvider.family<List<dynamic>, String>((
 // ==========================================
 final childAchievementsProvider =
     StreamProvider.family<List<Map<String, dynamic>>, String>((ref, childId) {
-  if (childId.isEmpty) return Stream.value([]);
+      if (childId.isEmpty) return Stream.value([]);
 
-  final supabase = Supabase.instance.client;
+      final supabase = Supabase.instance.client;
 
-  return supabase
-      .from('child_achievements')
-      .stream(primaryKey: ['id'])
-      .eq('child_id', childId)
-      .asyncMap((achievements) async {
-        if (achievements.isEmpty) return <Map<String, dynamic>>[];
-        try {
-          final masterRes = await supabase.from('achievements_master').select();
-          final masterMap = {for (var item in masterRes) item['id']: item};
+      return supabase
+          .from('child_achievements')
+          .stream(primaryKey: ['id'])
+          .eq('child_id', childId)
+          .asyncMap((achievements) async {
+            if (achievements.isEmpty) return <Map<String, dynamic>>[];
+            try {
+              final masterRes = await supabase
+                  .from('achievements_master')
+                  .select();
+              final masterMap = {for (var item in masterRes) item['id']: item};
 
-          return achievements.map((item) {
-            final master = masterMap[item['achievement_id']] ?? {};
-            return {
-              'achievement_id': item['achievement_id'],
-              'unlocked_at': item['unlocked_at'],
-              'title_id': master['title_id'] ?? 'Pencapaian',
-              'title_en': master['title_en'] ?? 'Achievement',
-              'icon_url': master['icon_url'] ?? '🏅',
-              'role_id': master['role_id'] ?? '',
-            };
-          }).toList();
-        } catch (e) {
-          debugPrint("Gagal memuat master achievements: $e");
-          return [];
-        }
-      });
-});
+              return achievements.map((item) {
+                final master = masterMap[item['achievement_id']] ?? {};
+                return {
+                  'achievement_id': item['achievement_id'],
+                  'unlocked_at': item['unlocked_at'],
+                  'title_id': master['title_id'] ?? 'Pencapaian',
+                  'title_en': master['title_en'] ?? 'Achievement',
+                  'icon_url': master['icon_url'] ?? '🏅',
+                  'role_id': master['role_id'] ?? '',
+                };
+              }).toList();
+            } catch (e) {
+              debugPrint("Gagal memuat master achievements: $e");
+              return [];
+            }
+          });
+    });
 
 // ==========================================
 // DICTIONARY (KAMUS BAHASA LENGKAP)
@@ -217,8 +220,7 @@ const Map<String, Map<String, String>> _t = {
     'default_child_name': "Child",
     'export_pdf': "Export as PDF",
     'skill_trend_title': "Growth Trend",
-    'skill_trend_empty':
-        "Complete at least 2 missions to see this skill's trend.",
+    'skill_trend_empty': "Complete at least 2 missions to see this skill's trend.",
     'skill_trend_unit': "pts",
     // Role Names
     'role_chef': "Chef",
@@ -364,8 +366,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
       };
       final roleFilterLabel = _selectedRoleFilter == 'semua'
           ? texts['filter_all']!
-          : (roleVisualById(_selectedRoleFilter)?.name(lang) ??
-              _selectedRoleFilter);
+          : (roleVisualById(_selectedRoleFilter)?.name(lang) ?? _selectedRoleFilter);
 
       await exportProgressReportPdf(
         lang: lang,
@@ -414,8 +415,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           .from('journals')
           .select('image_url')
           .eq('mission_log_id', logItem['id']);
-      List<String> photos =
-          (journalRes as List).map((e) => e['image_url'].toString()).toList();
+      List<String> photos = (journalRes as List)
+          .map((e) => e['image_url'].toString())
+          .toList();
 
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
@@ -495,80 +497,52 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
 
         return Scaffold(
           backgroundColor: AppColors.background,
-          // Lapisan dekorasi tetap (nggak ikut scroll) -- pola yang sama
-          // dipakai di Home & Onboarding, biar Progress nggak kerasa
-          // "layar laporan" doang yang polos di antara layar lain yang
-          // udah lebih hidup.
-          body: Stack(
-            children: [
-              const Positioned.fill(
-                child: RepaintBoundary(
-                  child: Stack(
-                    children: [
-                      ColorBlob(
-                          top: -10,
-                          right: -50,
-                          size: 140,
-                          color: AppColors.info),
-                      ColorBlob(
-                          top: 340,
-                          left: -60,
-                          size: 130,
-                          color: AppColors.gold),
-                      Sparkle(
-                          top: 110, left: 30, size: 15, color: AppColors.info),
-                      Sparkle(
-                          top: 500, right: 40, size: 14, color: AppColors.gold),
-                    ],
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(texts, childName),
+                  _buildStreakAndLevelSection(currentStreak, totalXp, texts, childId),
+                  _buildRadarChart(texts, radarData, rawScores, maxIndex),
+                  _buildSkillTrendSection(texts, trendAsync, maxIndex),
+
+                  monthlyDaysAsync.when(
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(AppSpacing.lg),
+                      child: AppLoading(),
+                    ),
+                    error: (e, s) => const SizedBox(),
+                    data: (activeDays) =>
+                        _buildMonthlyCalendar(texts, activeDays, lang),
                   ),
-                ),
-              ),
-              SafeArea(
-                bottom: false,
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 120),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildHeader(texts, childName),
-                      _buildStreakAndLevelSection(
-                          currentStreak, totalXp, texts, childId),
-                      _buildRadarChart(texts, radarData, rawScores, maxIndex),
-                      _buildSkillTrendSection(texts, trendAsync, maxIndex),
-                      monthlyDaysAsync.when(
-                        loading: () => const Padding(
-                          padding: EdgeInsets.all(AppSpacing.lg),
-                          child: AppLoading(),
-                        ),
-                        error: (e, s) => const SizedBox(),
-                        data: (activeDays) =>
-                            _buildMonthlyCalendar(texts, activeDays, lang),
-                      ),
-                      _buildMissionHistorySection(
-                        context,
-                        texts,
-                        lang,
-                        historyAsync,
-                        childName: childName,
-                        level: calculateLevel(totalXp),
-                        totalXp: totalXp,
-                        currentStreak: currentStreak,
-                        skillScores: {
-                          'cognitive': cog,
-                          'empathy': emp,
-                          'creativity': cre,
-                          'literacy': lit,
-                          'motoric': mot,
-                        },
-                        achievementsAsync: achievementsAsync,
-                      ),
-                      _buildAchievementsSection(texts, achievementsAsync, lang),
-                    ],
+
+                  _buildMissionHistorySection(
+                    context,
+                    texts,
+                    lang,
+                    historyAsync,
+                    childName: childName,
+                    level: calculateLevel(totalXp),
+                    totalXp: totalXp,
+                    currentStreak: currentStreak,
+                    skillScores: {
+                      'cognitive': cog,
+                      'empathy': emp,
+                      'creativity': cre,
+                      'literacy': lit,
+                      'motoric': mot,
+                    },
+                    achievementsAsync: achievementsAsync,
                   ),
-                ),
+
+                  _buildAchievementsSection(texts, achievementsAsync, lang),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -882,13 +856,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               final spots = points
                   .asMap()
                   .entries
-                  .map((e) =>
-                      FlSpot(e.key.toDouble(), e.value.cumulative[skill] ?? 0))
+                  .map((e) => FlSpot(e.key.toDouble(), e.value.cumulative[skill] ?? 0))
                   .toList();
-              final double maxY =
-                  spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
-              final double interval =
-                  (points.length / 4).clamp(1, 999).roundToDouble();
+              final double maxY = spots
+                  .map((s) => s.y)
+                  .reduce((a, b) => a > b ? a : b);
+              final double interval = (points.length / 4).clamp(1, 999).roundToDouble();
 
               return AppCard(
                 child: SizedBox(
@@ -897,23 +870,19 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     LineChartData(
                       minY: 0,
                       maxY: maxY <= 0 ? 10 : maxY * 1.2,
-                      gridData:
-                          const FlGridData(show: true, drawVerticalLine: false),
+                      gridData: const FlGridData(show: true, drawVerticalLine: false),
                       borderData: FlBorderData(show: false),
                       titlesData: FlTitlesData(
                         show: true,
-                        topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             reservedSize: 32,
                             getTitlesWidget: (value, meta) => Text(
                               value.toInt().toString(),
-                              style: TextStyle(
-                                  fontSize: 10, color: AppColors.textMuted),
+                              style: TextStyle(fontSize: 10, color: AppColors.textMuted),
                             ),
                           ),
                         ),
@@ -924,15 +893,12 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                             interval: interval,
                             getTitlesWidget: (value, meta) {
                               final idx = value.round();
-                              if (idx < 0 || idx >= points.length) {
-                                return const SizedBox();
-                              }
+                              if (idx < 0 || idx >= points.length) return const SizedBox();
                               return Padding(
                                 padding: const EdgeInsets.only(top: 6),
                                 child: Text(
                                   DateFormat('d/M').format(points[idx].date),
-                                  style: TextStyle(
-                                      fontSize: 9, color: AppColors.textMuted),
+                                  style: TextStyle(fontSize: 9, color: AppColors.textMuted),
                                 ),
                               );
                             },
@@ -941,14 +907,10 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                       ),
                       lineTouchData: LineTouchData(
                         touchTooltipData: LineTouchTooltipData(
-                          getTooltipItems: (touchedSpots) =>
-                              touchedSpots.map((s) {
+                          getTooltipItems: (touchedSpots) => touchedSpots.map((s) {
                             return LineTooltipItem(
                               '${s.y.toInt()} ${texts['skill_trend_unit']}',
-                              const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11),
+                              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
                             );
                           }).toList(),
                         ),
@@ -1099,7 +1061,9 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       decoration: BoxDecoration(
-                        color: isActive ? AppColors.accent : AppColors.border,
+                        color: isActive
+                            ? AppColors.accent
+                            : AppColors.border,
                         shape: BoxShape.circle,
                         boxShadow: isActive
                             ? [
@@ -1178,28 +1142,28 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 onPressed: _isExportingPdf
                     ? null
                     : () => _exportReport(
-                          texts,
-                          lang,
-                          historyAsync,
-                          childName: childName,
-                          level: level,
-                          totalXp: totalXp,
-                          currentStreak: currentStreak,
-                          skillScores: skillScores,
-                          achievementsAsync: achievementsAsync,
-                        ),
+                        texts,
+                        lang,
+                        historyAsync,
+                        childName: childName,
+                        level: level,
+                        totalXp: totalXp,
+                        currentStreak: currentStreak,
+                        skillScores: skillScores,
+                        achievementsAsync: achievementsAsync,
+                      ),
                 icon: _isExportingPdf
                     ? const SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Icon(Icons.picture_as_pdf_rounded,
-                        color: AppColors.accent),
+                    : Icon(Icons.picture_as_pdf_rounded, color: AppColors.accent),
               ),
             ],
           ),
           const SizedBox(height: 4),
+
           Row(
             children: [
               Expanded(
@@ -1231,6 +1195,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             ],
           ),
           const SizedBox(height: 24),
+
           historyAsync.when(
             loading: () => const AppLoading(),
             error: (e, s) => AppErrorView(message: "${texts['err_load']}$e"),
@@ -1312,8 +1277,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         ? (achievement['title_id'] ?? 'Pencapaian')
         : (achievement['title_en'] ?? 'Achievement');
 
-    final role = roleVisualById(achievement['role_id']?.toString()) ??
-        kUnknownRoleVisual;
+    final role = roleVisualById(achievement['role_id']?.toString()) ?? kUnknownRoleVisual;
 
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.md - 2),
@@ -1324,8 +1288,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
           children: [
             Container(
               padding: const EdgeInsets.all(AppSpacing.sm + 2),
-              decoration: BoxDecoration(
-                  color: role.resolvedTint, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: role.resolvedTint, shape: BoxShape.circle),
               child: Text(icon, style: const TextStyle(fontSize: 22)),
             ),
             const SizedBox(width: AppSpacing.sm + 2),
@@ -1403,13 +1366,14 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         ? DateFormat('dd MMM yyyy, HH:mm').format(dateTime)
         : dateStr;
 
-    final role =
-        roleVisualById(item['role_id']?.toString()) ?? kUnknownRoleVisual;
+    final role = roleVisualById(item['role_id']?.toString()) ?? kUnknownRoleVisual;
     final String roleName = role.name(lang);
 
-    String skillsGained = skills.keys.map((k) {
-      return texts[k.toLowerCase()] ?? k;
-    }).join(', ');
+    String skillsGained = skills.keys
+        .map((k) {
+          return texts[k.toLowerCase()] ?? k;
+        })
+        .join(', ');
 
     return AppCard(
       child: Row(
@@ -1432,20 +1396,17 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(roleName,
-                    style: AppTextStyles.bodyBold().copyWith(fontSize: 16)),
+                Text(roleName, style: AppTextStyles.bodyBold().copyWith(fontSize: 16)),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   formattedDate,
-                  style: AppTextStyles.caption(
-                      color: AppColors.primary.withValues(alpha: 0.5)),
+                  style: AppTextStyles.caption(color: AppColors.primary.withValues(alpha: 0.5)),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 if (skillsGained.isNotEmpty)
                   Text(
                     "+ $skillsGained",
-                    style: AppTextStyles.caption(color: AppColors.success)
-                        .copyWith(
+                    style: AppTextStyles.caption(color: AppColors.success).copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -1453,16 +1414,14 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm + 4, vertical: AppSpacing.sm),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm + 4, vertical: AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.gold.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Text(
               "+$xp XP",
-              style: AppTextStyles.caption(color: AppColors.gold)
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: AppTextStyles.caption(color: AppColors.gold).copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -1524,7 +1483,9 @@ class _ChartLabel extends StatelessWidget {
           Text(
             "$score Pts",
             style: TextStyle(
-              color: isActive ? AppColors.accent : AppColors.primary,
+              color: isActive
+                  ? AppColors.accent
+                  : AppColors.primary,
               fontSize: 12,
               fontWeight: FontWeight.w900,
             ),
@@ -1581,8 +1542,9 @@ class RadarChartPainter extends CustomPainter {
       canvas.drawLine(center, Offset(x, y), paintAxisLine);
     }
 
-    final safeValues =
-        dataValues.length == 5 ? dataValues : [0.05, 0.05, 0.05, 0.05, 0.05];
+    final safeValues = dataValues.length == 5
+        ? dataValues
+        : [0.05, 0.05, 0.05, 0.05, 0.05];
 
     final Path dataPath = Path();
     final List<Offset> dataPoints = [];
