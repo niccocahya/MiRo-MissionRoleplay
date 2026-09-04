@@ -12,7 +12,6 @@ import '../../../core/theme/responsive.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_state_views.dart';
 import '../../../shared/widgets/app_screen_header.dart';
-import '../../../shared/widgets/fun_background_decorations.dart';
 
 const Map<String, Map<String, String>> _t = {
   'en': {
@@ -47,117 +46,81 @@ class AllBadgesPage extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      // Layar koleksi lencana -- ini justru salah satu tempat PALING pas
-      // buat sentuhan seru (anak lagi liat hasil pencapaiannya), jadi
-      // dikasih gelembung emas + kelap-kelip, bukan cuma abu polos.
-      body: Stack(
-        children: [
-          const Positioned.fill(
-            child: RepaintBoundary(
-              child: Stack(
-                children: [
-                  ColorBlob(
-                      top: -20, right: -50, size: 140, color: AppColors.gold),
-                  ColorBlob(
-                      bottom: 100,
-                      left: -60,
-                      size: 130,
-                      color: AppColors.accent),
-                  Sparkle(top: 100, left: 30, size: 16, color: AppColors.gold),
-                  Sparkle(
-                      top: 320, right: 40, size: 14, color: AppColors.accent),
-                ],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppScreenHeader(title: texts['title']!),
-                Expanded(
-                  child: badgesAsync.when(
-                    loading: () => const AppLoading(),
-                    error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
-                    data: (badges) {
-                      if (badges.isEmpty) {
-                        return AppEmptyState(message: texts['empty']!);
-                      }
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppScreenHeader(title: texts['title']!),
+            Expanded(
+              child: badgesAsync.when(
+                loading: () => const AppLoading(),
+                error: (e, s) => AppErrorView(message: "${texts['err']}$e"),
+                data: (badges) {
+                  if (badges.isEmpty) {
+                    return AppEmptyState(message: texts['empty']!);
+                  }
 
-                      // Dikelompokin per role biar konsisten sama Peta Misi /
-                      // Semua Sertifikat, bukan 1 grid rata tanpa konteks.
-                      final Map<String, List<BadgeEntry>> byRole = {};
-                      for (final b in badges) {
-                        byRole.putIfAbsent(b.roleId, () => []).add(b);
-                      }
+                  // Dikelompokin per role biar konsisten sama Peta Misi /
+                  // Semua Sertifikat, bukan 1 grid rata tanpa konteks.
+                  final Map<String, List<BadgeEntry>> byRole = {};
+                  for (final b in badges) {
+                    byRole.putIfAbsent(b.roleId, () => []).add(b);
+                  }
 
-                      // Urutan SECTION-nya sendiri (Koki/Dokter/Pelukis/dst)
-                      // ngikutin kRoleVisuals -- bukan urutan insersi Map, yang
-                      // kebentuk dari urutan badges (badges disortir "kebuka
-                      // duluan" di provider), jadi tanpa ini urutan section-nya
-                      // acak/nggak konsisten tiap kali data berubah, beda dari
-                      // urutan role yang stabil di layar lain (mission search,
-                      // dst).
-                      final orderedRoleIds = [
-                        ...kRoleVisuals
-                            .map((r) => r.id)
-                            .where(byRole.containsKey),
-                        ...byRole.keys.where(
-                          (id) => !kRoleVisuals.any((r) => r.id == id),
-                        ),
-                      ];
+                  // Urutan SECTION-nya sendiri (Koki/Dokter/Pelukis/dst)
+                  // ngikutin kRoleVisuals -- bukan urutan insersi Map, yang
+                  // kebentuk dari urutan badges (badges disortir "kebuka
+                  // duluan" di provider), jadi tanpa ini urutan section-nya
+                  // acak/nggak konsisten tiap kali data berubah, beda dari
+                  // urutan role yang stabil di layar lain (mission search,
+                  // dst).
+                  final orderedRoleIds = [
+                    ...kRoleVisuals.map((r) => r.id).where(byRole.containsKey),
+                    ...byRole.keys.where(
+                      (id) => !kRoleVisuals.any((r) => r.id == id),
+                    ),
+                  ];
 
-                      return ListView(
-                        padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
-                        children: orderedRoleIds.map((roleId) {
-                          final role =
-                              roleVisualById(roleId) ?? kUnknownRoleVisual;
-                          final entryValue = byRole[roleId]!;
-                          final unlockedCount =
-                              entryValue.where((b) => b.isUnlocked).length;
+                  return ListView(
+                    padding: EdgeInsets.fromLTRB(hPad, 8, hPad, 40),
+                    children: orderedRoleIds.map((roleId) {
+                      final role = roleVisualById(roleId) ?? kUnknownRoleVisual;
+                      final entryValue = byRole[roleId]!;
+                      final unlockedCount =
+                          entryValue.where((b) => b.isUnlocked).length;
 
-                          return Padding(
-                            padding:
-                                const EdgeInsets.only(bottom: AppSpacing.lg),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Text(role.name(lang),
-                                        style: AppTextStyles.h3()),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Text(
-                                      "$unlockedCount/${entryValue.length}",
-                                      style: AppTextStyles.caption(
-                                          color: AppColors.textMuted),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                ...entryValue.map(
-                                  (b) => Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: AppSpacing.sm),
-                                    child: _BadgeTile(
-                                        badge: b,
-                                        role: role,
-                                        lang: lang,
-                                        texts: texts),
-                                  ),
+                                Text(role.name(lang), style: AppTextStyles.h3()),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  "$unlockedCount/${entryValue.length}",
+                                  style: AppTextStyles.caption(color: AppColors.textMuted),
                                 ),
                               ],
                             ),
-                          );
-                        }).toList(),
+                            const SizedBox(height: AppSpacing.sm),
+                            ...entryValue.map(
+                              (b) => Padding(
+                                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                                child: _BadgeTile(badge: b, role: role, lang: lang, texts: texts),
+                              ),
+                            ),
+                          ],
+                        ),
                       );
-                    },
-                  ),
-                ),
-              ],
+                    }).toList(),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -218,9 +181,7 @@ class _BadgeTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: AppTextStyles.caption(
-                      color: unlocked
-                          ? AppColors.textSecondary
-                          : AppColors.textMuted,
+                      color: unlocked ? AppColors.textSecondary : AppColors.textMuted,
                     ),
                   ),
                 ],

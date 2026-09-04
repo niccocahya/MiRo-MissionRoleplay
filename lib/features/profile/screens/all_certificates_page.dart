@@ -66,76 +66,60 @@ class AllCertificatesPage extends ConsumerWidget {
       // "ngakalin" status bar pakai padding atas 40px hardcoded, yang
       // ketinggian/kependekan tergantung HP-nya (notch beda-beda) dan
       // kelebihan di web. Sekarang ikut SafeArea kayak layar detail lain.
-      // Gradasi tipis (emas ke background) ditambah di sini SEBAGAI SATU
-      // lapis pembungkus doang -- bukan restrukturisasi jadi Stack -- biar
-      // konten daftar sertifikat di bawahnya nggak perlu digeser ulang.
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFF8E9), AppColors.background],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              AppScreenHeader(title: texts['title']!),
+      body: SafeArea(
+        child: Column(
+          children: [
+            AppScreenHeader(title: texts['title']!),
 
-              // LIST SEMUA SERTIFIKAT DINAMIS
-              Expanded(
-                child: allCertsAsync.when(
+          // LIST SEMUA SERTIFIKAT DINAMIS
+          Expanded(
+            child: allCertsAsync.when(
+              loading: () => const AppLoading(),
+              error: (e, s) => AppErrorView(message: "${texts['err_cert']}$e"),
+              data: (allCerts) {
+                if (allCerts.isEmpty) {
+                  return AppEmptyState(message: texts['empty_cert']!);
+                }
+
+                return certProgressAsync.when(
                   loading: () => const AppLoading(),
-                  error: (e, s) =>
-                      AppErrorView(message: "${texts['err_cert']}$e"),
-                  data: (allCerts) {
-                    if (allCerts.isEmpty) {
-                      return AppEmptyState(message: texts['empty_cert']!);
-                    }
+                  error: (e, s) => AppErrorView(message: "${texts['err_prog']}$e"),
+                  data: (roleCounts) {
+                    return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: allCerts.length,
+                      itemBuilder: (context, index) {
+                        final cert = allCerts[index];
+                        final String roleId = cert['role_id'] ?? '';
+                        final int dbUnlockedBadges = roleCounts[roleId] ?? 0;
 
-                    return certProgressAsync.when(
-                      loading: () => const AppLoading(),
-                      error: (e, s) =>
-                          AppErrorView(message: "${texts['err_prog']}$e"),
-                      data: (roleCounts) {
-                        return ListView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: allCerts.length,
-                          itemBuilder: (context, index) {
-                            final cert = allCerts[index];
-                            final String roleId = cert['role_id'] ?? '';
-                            final int dbUnlockedBadges =
-                                roleCounts[roleId] ?? 0;
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context, rootNavigator: true)
-                                      .push(
-                                    appPageRoute(
-                                      CertificateDetailPage(certData: cert),
-                                    ),
-                                  );
-                                },
-                                child: _buildAchievementCard(
-                                  context,
-                                  cert,
-                                  dbUnlockedBadges,
-                                  texts,
-                                  lang, // Kirim bahasa aktif ke dalam fungsi
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context, rootNavigator: true).push(
+                                appPageRoute(
+                                  CertificateDetailPage(certData: cert),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                            child: _buildAchievementCard(
+                              context,
+                              cert,
+                              dbUnlockedBadges,
+                              texts,
+                              lang, // Kirim bahasa aktif ke dalam fungsi
+                            ),
+                          ),
                         );
                       },
                     );
                   },
-                ),
+                );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -153,8 +137,9 @@ class AllCertificatesPage extends ConsumerWidget {
     final cardWidth = context.screenWidth * 0.88;
 
     final totalBadges = (cert['badges'] as List).length;
-    final unlockedCount =
-        dbUnlockedCount > totalBadges ? totalBadges : dbUnlockedCount;
+    final unlockedCount = dbUnlockedCount > totalBadges
+        ? totalBadges
+        : dbUnlockedCount;
 
     // Gunakan Teks Dinamis
     final String statusText = unlockedCount >= totalBadges
@@ -164,10 +149,12 @@ class AllCertificatesPage extends ConsumerWidget {
     final previewBadges = (cert['badges'] as List).take(3).toList();
 
     // Tentukan Teks Label berdasarkan bahasa
-    final String roleLabel =
-        lang == 'id' ? cert['roleLabelId'] : cert['roleLabelEn'];
-    final String cardTitle =
-        lang == 'id' ? cert['cardTitleId'] : cert['cardTitleEn'];
+    final String roleLabel = lang == 'id'
+        ? cert['roleLabelId']
+        : cert['roleLabelEn'];
+    final String cardTitle = lang == 'id'
+        ? cert['cardTitleId']
+        : cert['cardTitleEn'];
 
     // Langsung tembak Center dan Container kartunya aja!
     // Tingginya ikut setelan "Ukuran Teks" (lihat context.scaledHeight):
@@ -183,7 +170,8 @@ class AllCertificatesPage extends ConsumerWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors:
-                cert['gradient'] ?? [AppColors.primary, AppColors.primaryLight],
+                cert['gradient'] ??
+                [AppColors.primary, AppColors.primaryLight],
           ),
           borderRadius: BorderRadius.circular(AppRadius.lg),
           boxShadow: const [

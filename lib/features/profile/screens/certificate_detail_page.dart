@@ -19,8 +19,7 @@ import '../../../shared/widgets/back_button.dart'; // Wajib narik custom back bu
 // ==========================================
 // PROVIDER DINAMIS: MENGHITUNG BADGE KHUSUS ROLE INI
 // ==========================================
-final roleUnlockedCountProvider =
-    FutureProvider.autoDispose.family<int, String>((
+final roleUnlockedCountProvider = FutureProvider.autoDispose.family<int, String>((
   ref,
   params,
 ) async {
@@ -133,17 +132,13 @@ class CertificateDetailPage extends ConsumerWidget {
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(texts['save_success']!),
-            backgroundColor: AppColors.success),
+        SnackBar(content: Text(texts['save_success']!), backgroundColor: AppColors.success),
       );
     } catch (e) {
       debugPrint("Gagal menyimpan sertifikat: $e");
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(texts['save_fail']!),
-            backgroundColor: AppColors.danger),
+        SnackBar(content: Text(texts['save_fail']!), backgroundColor: AppColors.danger),
       );
     }
   }
@@ -190,8 +185,9 @@ class CertificateDetailPage extends ConsumerWidget {
     final int totalBadges = badges.length;
 
     // Cegah angka melebihi batas maksimal lencana yang ada di desain
-    final int unlockedCount =
-        dbUnlockedCount > totalBadges ? totalBadges : dbUnlockedCount;
+    final int unlockedCount = dbUnlockedCount > totalBadges
+        ? totalBadges
+        : dbUnlockedCount;
     final bool isComplete = unlockedCount >= totalBadges;
 
     // Gunakan Teks Dinamis untuk "Selesai"
@@ -213,488 +209,469 @@ class CertificateDetailPage extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       // NAVBAR OTOMATIS HILANG DI SINI (Scaffold Fullscreen)
-      // Gradasi tipis (emas ke background) SEBAGAI SATU lapis pembungkus
-      // -- sertifikatnya sendiri (di bawah) tetap fokus utama, ini cuma
-      // ngangkat warna dasar layar dari abu polos.
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFF8E9), AppColors.background],
-          ),
-        ),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              // HEADER DENGAN BACK BUTTON BARU
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 40, 24, 16),
-                child: Row(
-                  children: [
-                    CustomBackButton(
-                      onPressed: () =>
-                          Navigator.of(context).pop(), // Kembali ke List Semua
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          children: [
+            // HEADER DENGAN BACK BUTTON BARU
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 40, 24, 16),
+              child: Row(
+                children: [
+                  CustomBackButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop(), // Kembali ke List Semua
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    texts['title']!,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      texts['title']!,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      roleLabel,
-                      style: TextStyle(
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                      ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    roleLabel,
+                    style: TextStyle(
+                      color: AppColors.primary.withValues(alpha: 0.5),
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
                     ),
-                    const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 24),
 
-                    // ===============================================
-                    // BANNER SERTIFIKAT UTAMA
-                    // ===============================================
-                    // Dibungkus RepaintBoundary biar bannernya bisa
-                    // di-screenshot buat tombol Unduh/Bagikan di bawah
-                    // (dulu 2 tombol itu keliatan aktif tapi onPressed-nya
-                    // kosongan, nggak ngapa-ngapain sama sekali).
-                    RepaintBoundary(
-                      key: _certificateKey,
-                      child: Container(
-                        width: double.infinity,
-                        height: 240,
-                        decoration: BoxDecoration(
-                          // MENGGUNAKAN GRADIENT BAWAAN ROLE DARI DB
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: certData['gradient'] ??
-                                [AppColors.primary, AppColors.primaryLight],
-                          ),
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 15,
-                              offset: Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Stack(
-                          children: [
-                            // 1. PINGUIN BACKGROUND DI KANAN
-                            Positioned(
-                              bottom: -30,
-                              right: -20,
-                              child: Opacity(
-                                opacity:
-                                    0.25, // Transparan agar tidak nabrak text
-                                child: Image.asset(
-                                  certData['characterImg'],
-                                  width: 180,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (c, e, s) => const SizedBox(),
-                                ),
-                              ),
-                            ),
-
-                            // 2. FOTO ANAK & NAMA DI TENGAH-KANAN
-                            Align(
-                              alignment: const Alignment(
-                                0.75,
-                                0.0,
-                              ), // Center-Right Alignment
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 65,
-                                    height: 65,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.accentTint,
-                                      borderRadius: BorderRadius.circular(
-                                        16,
-                                      ), // Frame Kotak Rounded
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 2,
-                                      ), // Frame Putih
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 4,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      "👦🏻",
-                                      style: TextStyle(fontSize: 32),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    childName,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black45,
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // 3. ROLE & JUDUL DI KIRI ATAS
-                            Positioned(
-                              top: 24,
-                              left: 24,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    roleLabel,
-                                    style: TextStyle(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.7),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  SizedBox(
-                                    width:
-                                        180, // Dibatasi agar tidak numpuk sama foto
-                                    child: Text(
-                                      cardTitle,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        height: 1.2,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black45,
-                                            blurRadius: 4,
-                                          ),
-                                        ],
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // 4. BADGES & TEKS PROGRESS DI KIRI BAWAH
-                            Positioned(
-                              bottom: 24,
-                              left: 24,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    statusText,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      shadows: [
-                                        Shadow(
-                                          color: Colors.black45,
-                                          blurRadius: 2,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children:
-                                        previewBadges.asMap().entries.map((
-                                      entry,
-                                    ) {
-                                      int index = entry.key;
-                                      var badge = entry.value;
-                                      bool isUnlocked = index < unlockedCount;
-
-                                      return Container(
-                                        margin: const EdgeInsets.only(right: 8),
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isUnlocked
-                                                ? Colors.white.withValues(
-                                                    alpha: 0.8,
-                                                  )
-                                                : Colors.white.withValues(
-                                                    alpha: 0.2,
-                                                  ),
-                                            width: 1.5,
-                                          ),
-                                          color: isUnlocked
-                                              ? Colors.white
-                                                  .withValues(alpha: 0.2)
-                                              : Colors.white.withValues(
-                                                  alpha: 0.05,
-                                                ),
-                                          boxShadow: isUnlocked
-                                              ? const [
-                                                  BoxShadow(
-                                                    color: Colors.black12,
-                                                    blurRadius: 4,
-                                                    offset: Offset(0, 2),
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: isUnlocked
-                                            ? Text(
-                                                badge['emoji'] ?? '🏅',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              )
-                                            : const Icon(
-                                                Icons.lock,
-                                                size: 16,
-                                                color: Colors.white38,
-                                              ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                  // ===============================================
+                  // BANNER SERTIFIKAT UTAMA
+                  // ===============================================
+                  // Dibungkus RepaintBoundary biar bannernya bisa
+                  // di-screenshot buat tombol Unduh/Bagikan di bawah
+                  // (dulu 2 tombol itu keliatan aktif tapi onPressed-nya
+                  // kosongan, nggak ngapa-ngapain sama sekali).
+                  RepaintBoundary(
+                    key: _certificateKey,
+                    child: Container(
+                    width: double.infinity,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      // MENGGUNAKAN GRADIENT BAWAAN ROLE DARI DB
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors:
+                            certData['gradient'] ??
+                            [AppColors.primary, AppColors.primaryLight],
                       ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // ===============================================
-                    // TOMBOL UNDUH & BAGIKAN
-                    // ===============================================
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildActionButton(
-                            texts['download']!,
-                            AppColors.accent,
-                            isComplete,
-                            isComplete
-                                ? () => _downloadCertificate(context, texts)
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildActionButton(
-                            texts['share']!,
-                            AppColors.primary,
-                            isComplete,
-                            isComplete
-                                ? () => _shareCertificate(context, texts)
-                                : null,
-                          ),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 15,
+                          offset: Offset(0, 8),
                         ),
                       ],
                     ),
-                    if (!isComplete)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12),
-                        child: Text(
-                          texts['locked_warning']!,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.red.shade400,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
+                      children: [
+                        // 1. PINGUIN BACKGROUND DI KANAN
+                        Positioned(
+                          bottom: -30,
+                          right: -20,
+                          child: Opacity(
+                            opacity: 0.25, // Transparan agar tidak nabrak text
+                            child: Image.asset(
+                              certData['characterImg'],
+                              width: 180,
+                              fit: BoxFit.contain,
+                              errorBuilder: (c, e, s) => const SizedBox(),
+                            ),
                           ),
                         ),
-                      ),
 
-                    const SizedBox(height: 40),
-
-                    // ===============================================
-                    // GRID LENCANA EKSPLORASI (DETAIL) DENGAN STYLING BARU
-                    // ===============================================
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(32),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 20,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // 2. FOTO ANAK & NAMA DI TENGAH-KANAN
+                        Align(
+                          alignment: const Alignment(
+                            0.75,
+                            0.0,
+                          ), // Center-Right Alignment
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                texts['support_missions']!,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
+                              Container(
+                                width: 65,
+                                height: 65,
+                                decoration: BoxDecoration(
+                                  color: AppColors.accentTint,
+                                  borderRadius: BorderRadius.circular(
+                                    16,
+                                  ), // Frame Kotak Rounded
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ), // Frame Putih
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  "👦🏻",
+                                  style: TextStyle(fontSize: 32),
                                 ),
                               ),
+                              const SizedBox(height: 8),
                               Text(
-                                "$unlockedCount/$totalBadges",
+                                childName,
                                 style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black45,
+                                      blurRadius: 2,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                          const Divider(height: 32),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 0.7,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 24,
-                            ),
-                            itemCount: badges.length,
-                            itemBuilder: (context, index) {
-                              final b = badges[index];
+                        ),
 
-                              // LOGIC DINAMIS: Cek apakah index ini masuk hitungan unlocked
-                              final bool isLocked = index >= unlockedCount;
-
-                              // LOGIC DINAMIS: Nama badge menyesuaikan bahasa
-                              final String badgeName =
-                                  lang == 'id' ? b['nameId'] : b['nameEn'];
-
-                              return Column(
-                                children: [
-                                  Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Container(
-                                        width: 60,
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          // STYLING BARU: Warna dasar lencana sedikit transparan untuk kesan premium
-                                          color: isLocked
-                                              ? AppColors.border
-                                              : b['color'].withValues(
-                                                  alpha: 0.15,
-                                                ),
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: isLocked
-                                                ? AppColors.textMuted
-                                                : b['color'].withValues(
-                                                    alpha: 0.8,
-                                                  ),
-                                            width: 2,
-                                          ),
-                                          // Efek glowing jika sudah terbuka
-                                          boxShadow: isLocked
-                                              ? null
-                                              : [
-                                                  BoxShadow(
-                                                    color:
-                                                        b['color'].withValues(
-                                                      alpha: 0.3,
-                                                    ),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 4),
-                                                  ),
-                                                ],
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: isLocked
-                                            ? Icon(
-                                                Icons.lock,
-                                                size: 24,
-                                                color: AppColors.textMuted,
-                                              )
-                                            : Text(
-                                                b['emoji'] ?? '🏅',
-                                                style: const TextStyle(
-                                                  fontSize: 28,
-                                                ),
-                                              ),
+                        // 3. ROLE & JUDUL DI KIRI ATAS
+                        Positioned(
+                          top: 24,
+                          left: 24,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                roleLabel,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.7),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              SizedBox(
+                                width:
+                                    180, // Dibatasi agar tidak numpuk sama foto
+                                child: Text(
+                                  cardTitle,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.2,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black45,
+                                        blurRadius: 4,
                                       ),
-                                      if (isLocked)
-                                        Positioned(
-                                          bottom: 0,
-                                          right: 0,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.lock,
-                                              size: 10,
-                                              color: AppColors.textMuted,
-                                            ),
-                                          ),
-                                        ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    badgeName, // SEKARANG NAMA LENCANA MENGIKUTI BAHASA!
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+
+                        // 4. BADGES & TEKS PROGRESS DI KIRI BAWAH
+                        Positioned(
+                          bottom: 24,
+                          left: 24,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                statusText,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black45,
+                                      blurRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: previewBadges.asMap().entries.map((
+                                  entry,
+                                ) {
+                                  int index = entry.key;
+                                  var badge = entry.value;
+                                  bool isUnlocked = index < unlockedCount;
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: 8),
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isUnlocked
+                                            ? Colors.white.withValues(
+                                                alpha: 0.8,
+                                              )
+                                            : Colors.white.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                        width: 1.5,
+                                      ),
+                                      color: isUnlocked
+                                          ? Colors.white.withValues(alpha: 0.2)
+                                          : Colors.white.withValues(
+                                              alpha: 0.05,
+                                            ),
+                                      boxShadow: isUnlocked
+                                          ? const [
+                                              BoxShadow(
+                                                color: Colors.black12,
+                                                blurRadius: 4,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: isUnlocked
+                                        ? Text(
+                                            badge['emoji'] ?? '🏅',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.lock,
+                                            size: 16,
+                                            color: Colors.white38,
+                                          ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // ===============================================
+                  // TOMBOL UNDUH & BAGIKAN
+                  // ===============================================
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionButton(
+                          texts['download']!,
+                          AppColors.accent,
+                          isComplete,
+                          isComplete ? () => _downloadCertificate(context, texts) : null,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildActionButton(
+                          texts['share']!,
+                          AppColors.primary,
+                          isComplete,
+                          isComplete ? () => _shareCertificate(context, texts) : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isComplete)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        texts['locked_warning']!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.red.shade400,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+
+                  const SizedBox(height: 40),
+
+                  // ===============================================
+                  // GRID LENCANA EKSPLORASI (DETAIL) DENGAN STYLING BARU
+                  // ===============================================
+                  Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 20,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              texts['support_missions']!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            Text(
+                              "$unlockedCount/$totalBadges",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 32),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                childAspectRatio: 0.7,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 24,
+                              ),
+                          itemCount: badges.length,
+                          itemBuilder: (context, index) {
+                            final b = badges[index];
+
+                            // LOGIC DINAMIS: Cek apakah index ini masuk hitungan unlocked
+                            final bool isLocked = index >= unlockedCount;
+
+                            // LOGIC DINAMIS: Nama badge menyesuaikan bahasa
+                            final String badgeName = lang == 'id'
+                                ? b['nameId']
+                                : b['nameEn'];
+
+                            return Column(
+                              children: [
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      width: 60,
+                                      height: 60,
+                                      decoration: BoxDecoration(
+                                        // STYLING BARU: Warna dasar lencana sedikit transparan untuk kesan premium
+                                        color: isLocked
+                                            ? AppColors.border
+                                            : b['color'].withValues(
+                                                alpha: 0.15,
+                                              ),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isLocked
+                                              ? AppColors.textMuted
+                                              : b['color'].withValues(
+                                                  alpha: 0.8,
+                                                ),
+                                          width: 2,
+                                        ),
+                                        // Efek glowing jika sudah terbuka
+                                        boxShadow: isLocked
+                                            ? null
+                                            : [
+                                                BoxShadow(
+                                                  color: b['color'].withValues(
+                                                    alpha: 0.3,
+                                                  ),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
+                                                ),
+                                              ],
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: isLocked
+                                          ? Icon(
+                                              Icons.lock,
+                                              size: 24,
+                                              color: AppColors.textMuted,
+                                            )
+                                          : Text(
+                                              b['emoji'] ?? '🏅',
+                                              style: const TextStyle(
+                                                fontSize: 28,
+                                              ),
+                                            ),
+                                    ),
+                                    if (isLocked)
+                                      Positioned(
+                                        bottom: 0,
+                                        right: 0,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.lock,
+                                            size: 10,
+                                            color: AppColors.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  badgeName, // SEKARANG NAMA LENCANA MENGIKUTI BAHASA!
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -713,8 +690,7 @@ class CertificateDetailPage extends ConsumerWidget {
         disabledBackgroundColor: AppColors.border,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.xl)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
         elevation: enabled ? 4 : 0,
       ),
       child: Text(
