@@ -16,7 +16,6 @@ import '../../../core/services/favorite_missions_service.dart';
 import '../../../core/constants/role_visuals.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/app_bottom_sheet.dart';
-import '../../../shared/widgets/fun_background_decorations.dart';
 
 // ==========================================
 // 1. DICTIONARY (KAMUS LENGKAP HALAMAN PATH)
@@ -339,8 +338,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.explore_rounded,
-                    color: Colors.white, size: 22),
+                const Icon(Icons.explore_rounded, color: Colors.white, size: 22),
                 const SizedBox(width: 10),
                 Text(
                   displayName,
@@ -386,8 +384,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Material(
-                color:
-                    isSelected ? AppColors.primaryTint : AppColors.background,
+                color: isSelected ? AppColors.primaryTint : AppColors.background,
                 borderRadius: BorderRadius.circular(18),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(18),
@@ -413,16 +410,14 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     child: Row(
                       children: [
                         Container(
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: visual.resolvedBadgeColor
-                                .withValues(alpha: 0.15),
+                            color: visual.resolvedBadgeColor.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           alignment: Alignment.center,
@@ -444,8 +439,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                           ),
                         ),
                         if (isSelected)
-                          Icon(Icons.check_circle_rounded,
-                              color: AppColors.accent, size: 22),
+                          Icon(Icons.check_circle_rounded, color: AppColors.accent, size: 22),
                       ],
                     ),
                   ),
@@ -511,16 +505,16 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                     nodeSize / 2;
 
                 final bool hasNext = index < missions.length - 1;
-                final double nextAlignX =
-                    hasNext ? math.sin((index + 1) * 1.5) * 0.5 : alignX;
+                final double nextAlignX = hasNext
+                    ? math.sin((index + 1) * 1.5) * 0.5
+                    : alignX;
                 // Jejak menuju node BERIKUTNYA diwarnai berdasarkan status
                 // node TUJUANNYA -- berwarna/hidup kalau node berikutnya
                 // udah kebuka (ngasih rasa "jalan yang udah/lagi dilalui"),
                 // abu-abu pudar kalau masih terkunci (Duolingo persis
                 // gini: rutenya tetep keliatan penuh, cuma bagian yang
                 // belum boleh dijalanin diredupkan).
-                final bool nextIsLocked =
-                    hasNext && index + 1 > _unlockedLevel - 1;
+                final bool nextIsLocked = hasNext && index + 1 > _unlockedLevel - 1;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 60),
@@ -594,8 +588,7 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
             child: Container(
               width: dotSize,
               height: dotSize,
-              decoration:
-                  BoxDecoration(color: dotColor, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
             ),
           );
         }),
@@ -650,8 +643,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               color: isCurrent
                   ? AppColors.accentDark.withValues(alpha: 0.5)
                   : isCompleted
-                      ? AppColors.success.withValues(alpha: 0.4)
-                      : AppColors.border.withValues(alpha: 0.5),
+                  ? AppColors.success.withValues(alpha: 0.4)
+                  : AppColors.border.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
           ),
@@ -666,14 +659,14 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                       colors: [const Color(0xFFF58B7A), AppColors.accentDark],
                     )
                   : isCompleted
-                      ? const RadialGradient(
-                          center: Alignment(-0.3, -0.3),
-                          colors: [Color(0xFF81C784), Color(0xFF388E3C)],
-                        )
-                      : RadialGradient(
-                          center: Alignment(-0.3, -0.3),
-                          colors: [AppColors.border, AppColors.textMuted],
-                        ),
+                  ? const RadialGradient(
+                      center: Alignment(-0.3, -0.3),
+                      colors: [Color(0xFF81C784), Color(0xFF388E3C)],
+                    )
+                  : RadialGradient(
+                      center: Alignment(-0.3, -0.3),
+                      colors: [AppColors.border, AppColors.textMuted],
+                    ),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 4),
               boxShadow: isCurrent || isCompleted
@@ -696,16 +689,16 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
                       size: 44,
                     )
                   : isCompleted
-                      ? const Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 40,
-                        )
-                      : Icon(
-                          Icons.lock_rounded,
-                          color: Colors.white.withValues(alpha: 0.7),
-                          size: 28,
-                        ),
+                  ? const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    )
+                  : Icon(
+                      Icons.lock_rounded,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      size: 28,
+                    ),
             ),
           ),
           // Label misi
@@ -745,10 +738,8 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
               left: -6,
               child: Container(
                 padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                    color: AppColors.surface, shape: BoxShape.circle),
-                child: Icon(Icons.favorite_rounded,
-                    color: AppColors.accent, size: 14),
+                decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle),
+                child: Icon(Icons.favorite_rounded, color: AppColors.accent, size: 14),
               ),
             ),
         ],
@@ -760,25 +751,113 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
   /// `_buildCloudDecorator` yang masing-masing gambar SATU icon awan
   /// pipih di opacity 6% (nyaris nggak keliatan) -- itu sumber keluhan
   /// "polos banget, awan gajelas, hambar". Sekarang: awan yang beneran
-  /// punya bentuk, gelembung warna, & kelap-kelip bintang -- 3 widget
-  /// dekoratif ini sekarang di shared/widgets/fun_background_decorations
-  /// .dart biar layar LAIN juga bisa pakai bahasa visual yang sama.
+  /// punya bentuk (dilapis dari beberapa lingkaran, bukan 1 icon), plus
+  /// gelembung warna & kelap-kelip bintang yang nggak ada sebelumnya sama
+  /// sekali -- semuanya ngambil warna role aktif biar nyambung ke gradasi
+  /// background barusan.
   List<Widget> _buildPathDecorations(RoleVisual visual) {
     return [
-      ColorBlob(
-          top: 160, right: -40, size: 140, color: visual.resolvedBadgeColor),
-      ColorBlob(
-          bottom: 260, left: -55, size: 170, color: visual.resolvedBadgeColor),
-      const ColorBlob(top: 480, left: 30, size: 80, color: AppColors.gold),
-      const PuffyCloud(top: 40, left: -20, scale: 1.0),
-      const PuffyCloud(top: 260, right: -30, scale: 1.3),
-      const PuffyCloud(bottom: 140, left: 10, scale: 0.75),
-      const PuffyCloud(top: 560, right: 10, scale: 0.9),
-      const Sparkle(top: 120, left: 60, size: 16),
-      const Sparkle(top: 340, right: 70, size: 12),
-      const Sparkle(bottom: 200, left: 100, size: 14),
-      const Sparkle(top: 620, right: 50, size: 18),
+      _buildColorBlob(top: 160, right: -40, size: 140, color: visual.resolvedBadgeColor),
+      _buildColorBlob(bottom: 260, left: -55, size: 170, color: visual.resolvedBadgeColor),
+      _buildColorBlob(top: 480, left: 30, size: 80, color: AppColors.gold),
+
+      _buildPuffyCloud(top: 40, left: -20, scale: 1.0),
+      _buildPuffyCloud(top: 260, right: -30, scale: 1.3),
+      _buildPuffyCloud(bottom: 140, left: 10, scale: 0.75),
+      _buildPuffyCloud(top: 560, right: 10, scale: 0.9),
+
+      _buildSparkle(top: 120, left: 60, size: 16),
+      _buildSparkle(top: 340, right: 70, size: 12),
+      _buildSparkle(bottom: 200, left: 100, size: 14),
+      _buildSparkle(top: 620, right: 50, size: 18),
     ];
+  }
+
+  /// Awan "dilapis tangan" dari 3 lingkaran putih semi-transparan yang
+  /// saling tumpang tindih -- bentuknya jadi beneran kebaca sebagai awan
+  /// (gumpalan nggak rata), bukan lingkaran/icon tunggal yang keliatan
+  /// digital banget.
+  Widget _buildPuffyCloud({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+    double scale = 1.0,
+  }) {
+    Widget puff(double size) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.55),
+            shape: BoxShape.circle,
+          ),
+        );
+
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: SizedBox(
+        width: 100 * scale,
+        height: 60 * scale,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(left: 10 * scale, top: 10 * scale, child: puff(50 * scale)),
+            Positioned(left: 0, top: 20 * scale, child: puff(38 * scale)),
+            Positioned(left: 42 * scale, top: 16 * scale, child: puff(42 * scale)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Gelembung warna lembut -- elemen baru yang nggak ada sebelumnya,
+  /// ngasih "tekstur" ke background tanpa perlu gambar/asset tambahan.
+  Widget _buildColorBlob({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+    required double size,
+    required Color color,
+  }) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.18),
+          shape: BoxShape.circle,
+        ),
+      ),
+    );
+  }
+
+  /// Kelap-kelip kecil -- nuansa "petualangan seru" ala game, elemen baru.
+  Widget _buildSparkle({
+    double? top,
+    double? left,
+    double? right,
+    double? bottom,
+    required double size,
+  }) {
+    return Positioned(
+      top: top,
+      left: left,
+      right: right,
+      bottom: bottom,
+      child: Icon(
+        Icons.auto_awesome_rounded,
+        color: Colors.white.withValues(alpha: 0.75),
+        size: size,
+      ),
+    );
   }
 
   Widget _buildStarPin() {

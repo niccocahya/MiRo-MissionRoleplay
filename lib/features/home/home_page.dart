@@ -28,7 +28,6 @@ import '../../core/theme/responsive.dart';
 import '../profile/screens/all_badges_page.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_state_views.dart';
-import '../../shared/widgets/fun_background_decorations.dart';
 import '../../shared/widgets/penguin_chat_bot.dart';
 import '../../shared/widgets/section_header.dart';
 
@@ -70,37 +69,37 @@ final childRealtimeXpProvider = StreamProvider.family<int, String>((
 // ==========================================
 final weeklyMissionCountStreamProvider =
     StreamProvider.family<List<Map<String, dynamic>>, String>((ref, childId) {
-  if (childId.isEmpty) return Stream.value([]);
+      if (childId.isEmpty) return Stream.value([]);
 
-  final supabase = Supabase.instance.client;
+      final supabase = Supabase.instance.client;
 
-  // WAKTU LOKAL, bukan UTC. Dulu batas minggunya dihitung di UTC --
-  // buat WIB (UTC+7) itu artinya "minggu" versi grafik ini mulai jam
-  // 07:00 pagi Senin, bukan tengah malam. Misi yang dikerjain
-  // 00:00-06:59 WIB masuk ke kotak hari SEBELUMNYA, dan misi Minggu
-  // malam bisa kehitung minggu berikutnya. parseDateSafely sekarang
-  // balikin waktu lokal, jadi batasnya harus lokal juga biar nyambung.
-  final now = DateTime.now();
+      // WAKTU LOKAL, bukan UTC. Dulu batas minggunya dihitung di UTC --
+      // buat WIB (UTC+7) itu artinya "minggu" versi grafik ini mulai jam
+      // 07:00 pagi Senin, bukan tengah malam. Misi yang dikerjain
+      // 00:00-06:59 WIB masuk ke kotak hari SEBELUMNYA, dan misi Minggu
+      // malam bisa kehitung minggu berikutnya. parseDateSafely sekarang
+      // balikin waktu lokal, jadi batasnya harus lokal juga biar nyambung.
+      final now = DateTime.now();
 
-  final int daysSinceSunday = now.weekday == 7 ? 0 : now.weekday;
+      final int daysSinceSunday = now.weekday == 7 ? 0 : now.weekday;
 
-  final startOfWeek = DateTime(
-    now.year,
-    now.month,
-    now.day,
-  ).subtract(Duration(days: daysSinceSunday));
+      final startOfWeek = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: daysSinceSunday));
 
-  final endOfWeek = startOfWeek.add(const Duration(days: 7));
+      final endOfWeek = startOfWeek.add(const Duration(days: 7));
 
-  return supabase
-      .from('mission_logs')
-      .stream(primaryKey: ['id'])
-      // Sama kayak childRealtimeXpProvider di atas: dulu ini narik
-      // SELURUH tabel mission_logs terus disaring di Dart. Makin banyak
-      // misi yang diselesaikan, makin berat -- dan tiap perubahan satu
-      // baris ngirim ulang semuanya.
-      .eq('child_id', childId)
-      .map((event) {
+      return supabase
+          .from('mission_logs')
+          .stream(primaryKey: ['id'])
+          // Sama kayak childRealtimeXpProvider di atas: dulu ini narik
+          // SELURUH tabel mission_logs terus disaring di Dart. Makin banyak
+          // misi yang diselesaikan, makin berat -- dan tiap perubahan satu
+          // baris ngirim ulang semuanya.
+          .eq('child_id', childId)
+          .map((event) {
         // Satu misi cuma boleh dihitung SEKALI, di penyelesaian
         // pertamanya. Di database masih ada baris 'completed' dobel
         // peninggalan celah lama (sebelum penjaga anti-dobel ada), dan
@@ -137,65 +136,69 @@ final weeklyMissionCountStreamProvider =
             .map((wd) => {'weekday': wd, 'count': missionsPerDay[wd] ?? 0})
             .toList();
       });
-});
+    });
 
 // ==========================================
 // PROVIDER REAL-TIME 3: PENCAPAIAN ANAK LENGKAP DENGAN JOIN
 // ==========================================
 final childAchievementsProvider =
     StreamProvider.family<List<Map<String, dynamic>>, String>((ref, childId) {
-  if (childId.isEmpty) return Stream.value([]);
+      if (childId.isEmpty) return Stream.value([]);
 
-  final supabase = Supabase.instance.client;
+      final supabase = Supabase.instance.client;
 
-  return supabase
-      .from('child_achievements')
-      .stream(
-        primaryKey: ['child_id', 'achievement_id'],
-      ) // Primary Key Komposit
-      .eq('child_id', childId)
-      .asyncMap((achievements) async {
-        if (achievements.isEmpty) return <Map<String, dynamic>>[];
+      return supabase
+          .from('child_achievements')
+          .stream(
+            primaryKey: ['child_id', 'achievement_id'],
+          ) // Primary Key Komposit
+          .eq('child_id', childId)
+          .asyncMap((achievements) async {
+            if (achievements.isEmpty) return <Map<String, dynamic>>[];
 
-        try {
-          final achievementIds =
-              achievements.map((a) => a['achievement_id']).toSet().toList();
+            try {
+              final achievementIds = achievements
+                  .map((a) => a['achievement_id'])
+                  .toSet()
+                  .toList();
 
-          final masterRes = await supabase
-              .from('achievements_master')
-              .select('id, title_id, title_en, icon_url, role_id')
-              .inFilter('id', achievementIds);
+              final masterRes = await supabase
+                  .from('achievements_master')
+                  .select('id, title_id, title_en, icon_url, role_id')
+                  .inFilter('id', achievementIds);
 
-          final masterMap = {for (var item in masterRes) item['id']: item};
+              final masterMap = {for (var item in masterRes) item['id']: item};
 
-          final List<Map<String, dynamic>> mappedList = achievements.map((
-            item,
-          ) {
-            final master = masterMap[item['achievement_id']] ?? {};
-            return {
-              'achievement_id': item['achievement_id'],
-              'unlocked_at': item['unlocked_at'],
-              'title_id': master['title_id'] ?? 'Pencapaian',
-              'title_en': master['title_en'] ?? 'Achievement',
-              'icon_url': master['icon_url'] ?? '🏅',
-              'role_id': master['role_id'] ?? '',
-            };
-          }).toList();
+              final List<Map<String, dynamic>> mappedList = achievements.map((
+                item,
+              ) {
+                final master = masterMap[item['achievement_id']] ?? {};
+                return {
+                  'achievement_id': item['achievement_id'],
+                  'unlocked_at': item['unlocked_at'],
+                  'title_id': master['title_id'] ?? 'Pencapaian',
+                  'title_en': master['title_en'] ?? 'Achievement',
+                  'icon_url': master['icon_url'] ?? '🏅',
+                  'role_id': master['role_id'] ?? '',
+                };
+              }).toList();
 
-          mappedList.sort((a, b) {
-            final dateA = parseDateSafely(a['unlocked_at'] ?? '') ??
-                DateTime.fromMillisecondsSinceEpoch(0);
-            final dateB = parseDateSafely(b['unlocked_at'] ?? '') ??
-                DateTime.fromMillisecondsSinceEpoch(0);
-            return dateB.compareTo(dateA); // Descending
+              mappedList.sort((a, b) {
+                final dateA =
+                    parseDateSafely(a['unlocked_at'] ?? '') ??
+                    DateTime.fromMillisecondsSinceEpoch(0);
+                final dateB =
+                    parseDateSafely(b['unlocked_at'] ?? '') ??
+                    DateTime.fromMillisecondsSinceEpoch(0);
+                return dateB.compareTo(dateA); // Descending
+              });
+
+              return mappedList;
+            } catch (e) {
+              return [];
+            }
           });
-
-          return mappedList;
-        } catch (e) {
-          return [];
-        }
-      });
-});
+    });
 
 // ==========================================
 // DICTIONARY (KAMUS BAHASA HOME PAGE)
@@ -373,110 +376,78 @@ class _HomePageState extends ConsumerState<HomePage> {
         // kasus itu kartu fallback ke deskripsi role generik + tombol ke
         // peta role, bukan maksa nunjukin misi yang udah kelar sebagai
         // "misi hari ini".
-        final MissionModel? currentMission = (recommendedMissions == null ||
-                recommendedMissions.isEmpty ||
-                recommendedUnlockedLevel > recommendedMissions.length)
-            ? null
-            : recommendedMissions[recommendedUnlockedLevel - 1];
+        final MissionModel? currentMission =
+            (recommendedMissions == null ||
+                    recommendedMissions.isEmpty ||
+                    recommendedUnlockedLevel > recommendedMissions.length)
+                ? null
+                : recommendedMissions[recommendedUnlockedLevel - 1];
 
         return Scaffold(
           backgroundColor: AppColors.background,
-          // Dulu Home cuma background polos (AppColors.background rata)
-          // di belakang konten -- kebaca netral, tapi bukan "seru". Lapisan
-          // dekorasi FIXED (nggak ikut scroll) ditaruh di belakang konten
-          // yang scroll, elemen yang sama dipakai di Onboarding & peta
-          // misi biar bahasa visualnya konsisten dari layar pertama app
-          // dibuka sampai layar yang paling sering dibuka tiap hari.
-          body: Stack(
-            children: [
-              const Positioned.fill(
-                child: RepaintBoundary(
-                  child: Stack(
-                    children: [
-                      ColorBlob(
-                          top: -20,
-                          right: -50,
-                          size: 150,
-                          color: AppColors.accent),
-                      ColorBlob(
-                          top: 260,
-                          left: -60,
-                          size: 130,
-                          color: AppColors.gold),
-                      Sparkle(
-                          top: 130,
-                          right: 40,
-                          size: 16,
-                          color: AppColors.accent),
-                      Sparkle(
-                          top: 420, left: 30, size: 14, color: AppColors.gold),
-                    ],
-                  ),
-                ),
-              ),
-              SafeArea(
-                bottom: false,
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: ResponsiveCenter(
-                    maxWidth: 640,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildHeader(context, texts, parentName),
-                        _buildUserCard(
-                          context,
-                          texts,
-                          childName,
-                          childLevel,
-                          childCurrentXp,
-                          childMaxXp,
-                        ),
-                        _buildStreakReminder(
-                          context,
-                          texts,
-                          streakAsync.value,
-                          streakAtRiskAsync.value ?? false,
-                        ),
-                        _buildQuickActions(context, texts),
-                        _buildTodayMissionCard(
-                          context,
-                          texts,
-                          lang,
-                          recommendedRoleId,
-                          currentMission,
-                        ),
-                        _buildChooseRole(context, texts, lang),
-                        progressAsync.when(
-                          loading: () => const Padding(
-                            padding: EdgeInsets.all(AppSpacing.xl),
-                            child: AppLoading(),
-                          ),
-                          error: (e, s) => Padding(
-                            padding: const EdgeInsets.all(AppSpacing.lg),
-                            child: Text("${texts['err_loading']}$e"),
-                          ),
-                          data: (progressData) => _buildStackedBoxProgress(
-                              context, texts, progressData, lang),
-                        ),
-                        achievementsAsync.when(
-                          loading: () => const SizedBox(),
-                          error: (e, s) => const SizedBox(),
-                          data: (achievementsData) => _buildRecentAchievements(
-                            context,
-                            texts,
-                            achievementsData,
-                            lang,
-                            childId,
-                          ),
-                        ),
-                        const SizedBox(height: 120),
-                      ],
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ResponsiveCenter(
+                maxWidth: 640,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(context, texts, parentName),
+                    _buildUserCard(
+                      context,
+                      texts,
+                      childName,
+                      childLevel,
+                      childCurrentXp,
+                      childMaxXp,
                     ),
-                  ),
+                    _buildStreakReminder(
+                      context,
+                      texts,
+                      streakAsync.value,
+                      streakAtRiskAsync.value ?? false,
+                    ),
+                    _buildQuickActions(context, texts),
+                    _buildTodayMissionCard(
+                      context,
+                      texts,
+                      lang,
+                      recommendedRoleId,
+                      currentMission,
+                    ),
+                    _buildChooseRole(context, texts, lang),
+
+                    progressAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(AppSpacing.xl),
+                        child: AppLoading(),
+                      ),
+                      error: (e, s) => Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Text("${texts['err_loading']}$e"),
+                      ),
+                      data: (progressData) =>
+                          _buildStackedBoxProgress(context, texts, progressData, lang),
+                    ),
+
+                    achievementsAsync.when(
+                      loading: () => const SizedBox(),
+                      error: (e, s) => const SizedBox(),
+                      data: (achievementsData) => _buildRecentAchievements(
+                        context,
+                        texts,
+                        achievementsData,
+                        lang,
+                        childId,
+                      ),
+                    ),
+                    const SizedBox(height: 120),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       },
@@ -528,10 +499,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border),
                 boxShadow: const [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 4,
-                      offset: Offset(0, 2)),
+                  BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                 ],
               ),
               child: Icon(
@@ -560,10 +528,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         shape: BoxShape.circle,
                         border: Border.all(color: AppColors.border),
                         boxShadow: const [
-                          BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 4,
-                              offset: Offset(0, 2)),
+                          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                         ],
                       ),
                       child: Icon(
@@ -577,8 +542,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         top: -2,
                         right: -2,
                         child: Container(
-                          constraints:
-                              const BoxConstraints(minWidth: 18, minHeight: 18),
+                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
                             color: AppColors.accent,
@@ -707,8 +671,8 @@ class _HomePageState extends ConsumerState<HomePage> {
     final String title = atRisk
         ? '$streak ${texts['streak_risk_title']!}'
         : (active
-            ? '$streak ${texts['streak_active_title']!}'
-            : texts['streak_start_title']!);
+              ? '$streak ${texts['streak_active_title']!}'
+              : texts['streak_start_title']!);
     final String desc = atRisk
         ? texts['streak_risk_desc']!
         : (active ? texts['streak_active_desc']! : texts['streak_start_desc']!);
@@ -743,8 +707,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   Text(
                     desc,
-                    style:
-                        AppTextStyles.caption(color: AppColors.textSecondary),
+                    style: AppTextStyles.caption(color: AppColors.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -806,12 +769,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.white, width: 2),
+                                border: Border.all(color: Colors.white, width: 2),
                               ),
                               alignment: Alignment.center,
-                              child: const Text("👦🏻",
-                                  style: TextStyle(fontSize: 24)),
+                              child: const Text("👦🏻", style: TextStyle(fontSize: 24)),
                             ),
                             const SizedBox(width: AppSpacing.sm + 4),
                             Column(
@@ -855,15 +816,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                       children: [
                         Text(
                           "⭐ Level $level",
-                          style: AppTextStyles.caption(color: Colors.white)
-                              .copyWith(
+                          style: AppTextStyles.caption(color: Colors.white).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           "$xp/$maxXp XP",
-                          style: AppTextStyles.caption(color: Colors.white)
-                              .copyWith(
+                          style: AppTextStyles.caption(color: Colors.white).copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -950,8 +909,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.4,
-                  child:
-                      Image.asset('assets/images/snow.png', fit: BoxFit.cover),
+                  child: Image.asset('assets/images/snow.png', fit: BoxFit.cover),
                 ),
               ),
               Positioned(
@@ -978,8 +936,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         texts['today_rec']!,
                         style: AppTextStyles.caption(
                           color: AppColors.primary.withValues(alpha: 0.8),
-                        ).copyWith(
-                            fontWeight: FontWeight.bold, letterSpacing: 1),
+                        ).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
@@ -991,8 +948,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         missionDesc,
-                        style: AppTextStyles.body(
-                            color: AppColors.primary.withValues(alpha: 0.7)),
+                        style: AppTextStyles.body(color: AppColors.primary.withValues(alpha: 0.7)),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1031,17 +987,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [
-                                AppColors.gold,
-                                AppColors.gold.withValues(alpha: 0.85)
-                              ],
+                              colors: [AppColors.gold, AppColors.gold.withValues(alpha: 0.85)],
                             ),
                             borderRadius: BorderRadius.circular(AppRadius.xl),
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            constraints: const BoxConstraints(
-                                minWidth: 100, minHeight: 40),
+                            constraints: const BoxConstraints(minWidth: 100, minHeight: 40),
                             child: Text(
                               texts['btn_start_mission']!,
                               style: AppTextStyles.button(),
@@ -1117,8 +1069,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               errorBuilder: (_, __, ___) => Container(
                                 color: role.resolvedTint,
                                 child: const Center(
-                                  child: Icon(Icons.stars_rounded,
-                                      color: Colors.black12, size: 60),
+                                  child: Icon(Icons.stars_rounded, color: Colors.black12, size: 60),
                                 ),
                               ),
                             ),
@@ -1147,8 +1098,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                             right: AppSpacing.md,
                             child: Text(
                               title,
-                              style:
-                                  AppTextStyles.bodyBold(color: Colors.white),
+                              style: AppTextStyles.bodyBold(color: Colors.white),
                             ),
                           ),
                         ],
@@ -1165,24 +1115,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   String _getDayName(int weekday, String lang) {
-    const idNames = {
-      1: 'Sen',
-      2: 'Sel',
-      3: 'Rab',
-      4: 'Kam',
-      5: 'Jum',
-      6: 'Sab',
-      7: 'Min'
-    };
-    const enNames = {
-      1: 'Mon',
-      2: 'Tue',
-      3: 'Wed',
-      4: 'Thu',
-      5: 'Fri',
-      6: 'Sat',
-      7: 'Sun'
-    };
+    const idNames = {1: 'Sen', 2: 'Sel', 3: 'Rab', 4: 'Kam', 5: 'Jum', 6: 'Sab', 7: 'Min'};
+    const enNames = {1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 7: 'Sun'};
     return (lang == 'id' ? idNames[weekday] : enNames[weekday]) ?? '-';
   }
 
@@ -1267,22 +1201,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                                   curve: Curves.easeOutBack,
                                   width: 26,
                                   height: 26,
-                                  margin:
-                                      const EdgeInsets.only(top: AppSpacing.xs),
+                                  margin: const EdgeInsets.only(top: AppSpacing.xs),
                                   decoration: BoxDecoration(
                                     color: AppColors.accent,
                                     borderRadius: BorderRadius.circular(6),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.accent
-                                            .withValues(alpha: 0.3),
+                                        color: AppColors.accent.withValues(alpha: 0.3),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(Icons.star_rounded,
-                                      color: Colors.white, size: 16),
+                                  child: const Icon(Icons.star_rounded, color: Colors.white, size: 16),
                                 );
                               }),
                           ],
@@ -1292,8 +1223,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       Text(
                         dayName,
                         style: AppTextStyles.caption(
-                          color: AppColors.primary
-                              .withValues(alpha: count > 0 ? 0.9 : 0.4),
+                          color: AppColors.primary.withValues(alpha: count > 0 ? 0.9 : 0.4),
                         ).copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -1344,8 +1274,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: achievementsData.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(width: AppSpacing.sm + 4),
+                separatorBuilder: (context, index) => const SizedBox(width: AppSpacing.sm + 4),
                 itemBuilder: (context, index) {
                   final item = achievementsData[index];
 
@@ -1441,8 +1370,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 right: 0,
                 child: Opacity(
                   opacity: 0.9,
-                  child:
-                      Image.asset('assets/images/snow.png', fit: BoxFit.cover),
+                  child: Image.asset('assets/images/snow.png', fit: BoxFit.cover),
                 ),
               ),
               Positioned(
@@ -1469,8 +1397,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       color: Colors.white.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child:
-                        Icon(Icons.close, color: AppColors.primary, size: 20),
+                    child: Icon(Icons.close, color: AppColors.primary, size: 20),
                   ),
                 ),
               ),
@@ -1506,18 +1433,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(AppRadius.xl),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 4)
-                            ],
+                            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(skill.name(lang),
-                                  style: AppTextStyles.bodyBold()),
+                              Text(skill.name(lang), style: AppTextStyles.bodyBold()),
                               const SizedBox(width: AppSpacing.sm),
-                              Text(skill.icon,
-                                  style: const TextStyle(fontSize: 16)),
+                              Text(skill.icon, style: const TextStyle(fontSize: 16)),
                             ],
                           ),
                         );
