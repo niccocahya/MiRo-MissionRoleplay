@@ -356,6 +356,14 @@ class _MissionPathScreenState extends ConsumerState<MissionPathScreen> {
   ) {
     showModalBottomSheet(
       context: context,
+      // Navbar bawah (CustomBottomNavBar) ditaruh di ScaffoldWithNavBar
+      // sebagai Positioned di dalam Stack yang SAMA sama konten halaman --
+      // tanpa ini, sheet-nya kegambar lewat Navigator yang lebih lokal
+      // (nested di bawah ScaffoldWithNavBar), jadi navbar-nya ikut
+      // "menang" di atas ujung bawah sheet-nya (baris peran terakhir
+      // ketutupan). `rootNavigator: true` maksa sheet ini kegambar lewat
+      // Navigator paling luar app, di atas SEGALANYA termasuk navbar.
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) => AppBottomSheet(

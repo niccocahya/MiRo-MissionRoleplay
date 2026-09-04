@@ -8,9 +8,9 @@ import '../../core/providers/child_provider.dart';
 import '../../core/providers/language_provider.dart';
 import '../../core/providers/child_stats_provider.dart';
 import '../../core/utils/level_utils.dart';
-import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/responsive.dart';
 
 /// Seluruh teks Mink, dua bahasa.
@@ -438,6 +438,11 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
+  // Dialog konfirmasi "hapus histori" digambar SENDIRI di sini (bukan
+  // lewat showDialog) -- lihat catatan panjang di _confirmClearHistory
+  // buat alasannya.
+  bool _showClearConfirm = false;
+
   @override
   void dispose() {
     // Dulu nggak ada dispose() sama sekali di sini -- nggak kerasa
@@ -462,38 +467,29 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
     });
   }
 
-  Future<void> _confirmClearHistory(BuildContext context) async {
-    final t = _texts(ref.read(languageProvider));
-    // BUKAN `context` lokal punya widget ini -- PenguinChatButton dirender
-    // di luar tree Navigator utama (lihat catatan di app_router.dart soal
-    // rootNavigatorKey), jadi context lokalnya nggak punya Navigator
-    // ancestor sama sekali. showDialog lewat context itu bakal ngelempar
-    // "No Navigator found in context".
-    final navContext = rootNavigatorKey.currentContext;
-    if (navContext == null) return;
-    final confirmed = await showDialog<bool>(
-      context: navContext,
-      builder: (ctx) => AlertDialog(
-        title: Text(t['clear_title']!),
-        content: Text(t['clear_body']!),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(t['clear_cancel']!),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              t['clear_confirm']!,
-              style: TextStyle(color: AppColors.danger),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed ?? false) {
-      await ref.read(chatbotProvider.notifier).clearHistory();
-    }
+  // Dulu ini nge-showDialog lewat rootNavigatorKey.currentContext -- itu
+  // benerin CRASH-nya (PenguinChatButton nggak punya Navigator ancestor
+  // sendiri), tapi ninggalin bug VISUAL baru: dialognya emang kebuka
+  // tanpa error, tapi kegambar ke Overlay APLIKASI UTAMA punya
+  // rootNavigatorKey -- yang di main.dart posisinya PERTAMA (paling
+  // BAWAH) di antara 2 layer Stack-nya MyApp, sedangkan seluruh
+  // PenguinChatButton (termasuk jendela chat yang lagi kebuka) hidup di
+  // Overlay TERPISAH yang ditaruh SETELAHNYA (paling ATAS). Jadi dialog
+  // konfirmasinya kegambar, tapi ketutupan sama jendela chat sendiri --
+  // "kebuka" tapi nggak kelihatan.
+  //
+  // Sekarang dialognya nggak lewat showDialog/Navigator sama sekali --
+  // digambar sebagai state lokal widget ini sendiri (`_showClearConfirm`),
+  // jadi otomatis satu Overlay/Stack yang SAMA persis sama jendela chat,
+  // dan tinggal ditaruh sebagai children TERAKHIR di Stack utama biar
+  // pasti di atas.
+  void _confirmClearHistory(BuildContext context) {
+    setState(() => _showClearConfirm = true);
+  }
+
+  Future<void> _handleClearConfirmed() async {
+    setState(() => _showClearConfirm = false);
+    await ref.read(chatbotProvider.notifier).clearHistory();
   }
 
   Future<void> _handleSend(
@@ -686,7 +682,77 @@ class _PenguinChatButtonState extends ConsumerState<PenguinChatButton> {
               ),
             ),
           ),
+
+        // Sengaja jadi children TERAKHIR di Stack ini -- lihat catatan
+        // panjang di _confirmClearHistory. Dijamin di atas jendela chat
+        // (dan bola Mink) karena satu Stack yang sama, bukan Navigator/
+        // Overlay lain yang urutan tumpukannya nggak bisa dipastikan.
+        if (_showClearConfirm) _buildClearConfirmOverlay(),
       ],
+    );
+  }
+
+  Widget _buildClearConfirmOverlay() {
+    final t = _texts(ref.watch(languageProvider));
+    return Positioned.fill(
+      child: Material(
+        color: Colors.black.withValues(alpha: 0.5),
+        child: GestureDetector(
+          onTap: () => setState(() => _showClearConfirm = false),
+          child: Center(
+            child: GestureDetector(
+              // Nyerap tap di dalam kartu-nya sendiri biar nggak ke-anggep
+              // "tap di luar" (yang nutup dialog) sama GestureDetector scrim
+              // di atas.
+              onTap: () {},
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 40),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black38, blurRadius: 20, offset: Offset(0, 8)),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t['clear_title']!,
+                      style: AppTextStyles.h3(color: AppColors.primary),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      t['clear_body']!,
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => setState(() => _showClearConfirm = false),
+                          child: Text(t['clear_cancel']!),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        TextButton(
+                          onPressed: _handleClearConfirmed,
+                          child: Text(
+                            t['clear_confirm']!,
+                            style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
