@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../data/mission_model.dart';
 import '../../../core/providers/language_provider.dart'; // Wajib narik provider bahasa
 import '../../../core/constants/feeling_emojis.dart';
+import '../../../core/constants/role_visuals.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 
@@ -17,7 +18,8 @@ const Map<String, Map<String, String>> _t = {
   'en': {
     'err_select': "Please select parent and child feelings first",
     'err_save': "Failed to save reflection: ",
-    'err_unlinked': "This mission's progress hasn't been saved yet, so the reflection can't be attached to it. Go back and tap Try Again first.",
+    'err_unlinked':
+        "This mission's progress hasn't been saved yet, so the reflection can't be attached to it. Go back and tap Try Again first.",
     'title': "How was the mission?",
     'parent_feeling': "PARENT FEELING",
     'child_feeling': "CHILD FEELING",
@@ -28,7 +30,8 @@ const Map<String, Map<String, String>> _t = {
   'id': {
     'err_select': "Pilih perasaan ayah bunda dan anak dulu ya",
     'err_save': "Gagal menyimpan refleksi: ",
-    'err_unlinked': "Progres misinya belum kesimpen, jadi refleksinya nggak bisa ditempelin ke misi ini. Balik dulu terus pencet Coba Lagi ya.",
+    'err_unlinked':
+        "Progres misinya belum kesimpen, jadi refleksinya nggak bisa ditempelin ke misi ini. Balik dulu terus pencet Coba Lagi ya.",
     'title': "Bagaimana misinya?",
     'parent_feeling': "PERASAAN ORANG TUA",
     'child_feeling': "PERASAAN ANAK",
@@ -137,113 +140,134 @@ class _MissionReflectionScreenState
         ? widget.mission.skillsReward.keys.first.toUpperCase()
         : texts['skill_label']!;
 
+    final roleVisual =
+        roleVisualById(widget.mission.roleId) ?? kUnknownRoleVisual;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                texts['title']!,
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-
-              // KARTU RINGKASAN MISI (Glassmorphism Style)
-              _buildMissionSummaryCard(primarySkill, lang),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              // INPUT PERASAAN
-              _buildFeelingSelector(
-                texts['parent_feeling']!,
-                parentFeeling,
-                (val) => setState(() => parentFeeling = val),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-
-              _buildFeelingSelector(
-                texts['child_feeling']!,
-                childFeeling,
-                (val) => setState(() => childFeeling = val),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // INPUT CATATAN REFLEKSI
-              Expanded(
-                child: TextField(
-                  controller: _notesController,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
+      // Gradasi tipis bertema role, SEBAGAI SATU lapis pembungkus doang --
+      // ini layar "gimana perasaan kalian", momen yang hangat, jadi cocok
+      // dikasih warna dikit ketimbang abu polos, tanpa perlu ngerombak
+      // struktur form emoji di bawahnya.
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.lerp(roleVisual.resolvedBadgeColor, Colors.white, 0.85)!,
+              AppColors.background,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  texts['title']!,
                   style: TextStyle(
                     color: AppColors.primary,
-                    fontSize: 14,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: texts['hint_notes']!,
-                    hintStyle: TextStyle(
-                      color: AppColors.primary.withValues(alpha: 0.4),
-                    ),
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    contentPadding: const EdgeInsets.all(20),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      borderSide: BorderSide(color: AppColors.primary),
-                    ),
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    height: 1.1,
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.lg),
 
-              // TOMBOL SIMPAN (Dengan Loading State)
-              ElevatedButton(
-                onPressed: _isSaving ? null : _saveReflection,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  disabledBackgroundColor: AppColors.accent.withValues(alpha: 0.7),
-                  minimumSize: const Size(double.infinity, 60),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                  ),
-                  elevation: 4,
+                // KARTU RINGKASAN MISI (Glassmorphism Style)
+                _buildMissionSummaryCard(primarySkill, lang),
+
+                const SizedBox(height: AppSpacing.xl),
+
+                // INPUT PERASAAN
+                _buildFeelingSelector(
+                  texts['parent_feeling']!,
+                  parentFeeling,
+                  (val) => setState(() => parentFeeling = val),
                 ),
-                child: _isSaving
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 3,
-                        ),
-                      )
-                    : Text(
-                        texts['btn_save']!,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                const SizedBox(height: AppSpacing.lg),
+
+                _buildFeelingSelector(
+                  texts['child_feeling']!,
+                  childFeeling,
+                  (val) => setState(() => childFeeling = val),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+
+                // INPUT CATATAN REFLEKSI
+                Expanded(
+                  child: TextField(
+                    controller: _notesController,
+                    maxLines: null,
+                    expands: true,
+                    textAlignVertical: TextAlignVertical.top,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 14,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: texts['hint_notes']!,
+                      hintStyle: TextStyle(
+                        color: AppColors.primary.withValues(alpha: 0.4),
                       ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-            ],
+                      filled: true,
+                      fillColor: AppColors.surface,
+                      contentPadding: const EdgeInsets.all(20),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        borderSide: BorderSide(color: AppColors.border),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        borderSide: BorderSide(color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // TOMBOL SIMPAN (Dengan Loading State)
+                ElevatedButton(
+                  onPressed: _isSaving ? null : _saveReflection,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    disabledBackgroundColor:
+                        AppColors.accent.withValues(alpha: 0.7),
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: _isSaving
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 3,
+                          ),
+                        )
+                      : Text(
+                          texts['btn_save']!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
           ),
         ),
       ),
@@ -360,12 +384,13 @@ class _MissionReflectionScreenState
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeOutBack,
                   transformAlignment: Alignment.center,
-                  transform: Matrix4.identity()..scaleByDouble(
-                    isSelected ? 1.3 : 1.0,
-                    isSelected ? 1.3 : 1.0,
-                    1.0,
-                    1.0,
-                  ),
+                  transform: Matrix4.identity()
+                    ..scaleByDouble(
+                      isSelected ? 1.3 : 1.0,
+                      isSelected ? 1.3 : 1.0,
+                      1.0,
+                      1.0,
+                    ),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: isSelected
