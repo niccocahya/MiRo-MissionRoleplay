@@ -62,11 +62,16 @@ class CustomBottomNavBar extends StatelessWidget {
             alignment: Alignment.centerLeft,
             children: [
               AnimatedPositioned(
-                duration: const Duration(milliseconds: 320),
-                // easeOutBack dikit "mantul" pas berhenti -- item playful
-                // yang cocok sama nuansa kids-app MiRO, bukan geser datar
-                // kaku ala aplikasi kerja/kantoran.
-                curve: Curves.easeOutBack,
+                duration: const Duration(milliseconds: 260),
+                // Dulu Curves.easeOutBack -- lingkarannya sengaja LEWAT
+                // dulu dari posisi targetnya baru mantul balik. Efeknya
+                // kalau tab diketuk cepat berturut-turut (animasi baru
+                // nimpa animasi lama yang belum selesai mantul), gerakannya
+                // jadi kebalik-balik dan kelihatan kayak glitch, bukan
+                // playful. easeOut polos -- geser lalu berhenti bersih,
+                // nggak pernah lewat dari targetnya, jadi nggak ada apa
+                // pun buat "dikoreksi balik" walau diketuk berkali-kali.
+                curve: Curves.easeOut,
                 left: safeIndex * slotWidth + (slotWidth - circleSize) / 2,
                 top: (constraints.maxHeight - circleSize) / 2,
                 child: Container(

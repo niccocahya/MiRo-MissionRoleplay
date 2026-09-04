@@ -38,10 +38,11 @@ class ScaffoldWithNavBar extends StatelessWidget {
             right: 0,
             // BUKAN const — widget const dikanonikalisasi jadi 1 objek yang
             // sama persis tiap kali, jadi Flutter skip rebuild-nya walau
-            // parent (ScaffoldWithNavBar) rebuild. Itu bikin warnanya
-            // "nyangkut" ke mode lama pas dark mode di-toggle sementara
-            // masih di halaman yang sama. Sama alasannya buat semua
-            // `const XxxPage()` di bawah.
+            // parent (ScaffoldWithNavBar) rebuild. Non-const di sini yang
+            // bikin lingkaran penandanya (AnimatedPositioned di dalam
+            // CustomBottomNavBar) bisa BERGESER pas ganti tab -- tiap
+            // navigasi manggil build() lagi dengan `location` baru, dan itu
+            // cuma kejadian kalau widget-nya beneran di-rebuild tiap kali.
             child: Center(child: CustomBottomNavBar()),
           ),
         ],
