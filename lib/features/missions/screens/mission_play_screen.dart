@@ -14,7 +14,6 @@ import 'mission_win_screen.dart';
 import '../../../core/providers/language_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/storage_upload_service.dart';
-import '../../../core/constants/role_visuals.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 
@@ -39,8 +38,7 @@ const Map<String, Map<String, String>> _t = {
     'back': "Back",
     'next': "Next",
     'leave_title': "Leave this mission?",
-    'leave_desc':
-        "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
+    'leave_desc': "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
     'leave_stay': "Keep going",
     'leave_confirm': "Leave",
   },
@@ -61,8 +59,7 @@ const Map<String, Map<String, String>> _t = {
     'back': "Kembali",
     'next': "Lanjut",
     'leave_title': "Keluar dari misi ini?",
-    'leave_desc':
-        "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
+    'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
     'leave_stay': "Lanjut Main",
     'leave_confirm': "Keluar",
   },
@@ -201,8 +198,9 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
 
   void _setMissionContextForMink() {
     final lang = ref.read(languageProvider);
-    final title =
-        lang == 'id' ? widget.mission.titleId : widget.mission.titleEn;
+    final title = lang == 'id'
+        ? widget.mission.titleId
+        : widget.mission.titleEn;
     final desc = lang == 'id'
         ? widget.mission.descriptionId
         : widget.mission.descriptionEn;
@@ -345,8 +343,9 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
     final lang = ref.watch(languageProvider);
     final texts = _t[lang] ?? _t['en']!;
 
-    final List steps =
-        lang == 'id' ? widget.mission.stepsId : widget.mission.stepsEn;
+    final List steps = lang == 'id'
+        ? widget.mission.stepsId
+        : widget.mission.stepsEn;
     final bool allStepsDone = completedSteps >= steps.length;
 
     return PopScope(
@@ -368,7 +367,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
   }
 
   /// Ada yang bakal hilang kalau layar ini ditutup sekarang?
-  bool get _hasUnsavedProgress => _stepPhotos.isNotEmpty || completedSteps > 0;
+  bool get _hasUnsavedProgress =>
+      _stepPhotos.isNotEmpty || completedSteps > 0;
 
   Future<bool> _confirmLeaveMission(Map<String, String> texts) async {
     if (!_hasUnsavedProgress) return true;
@@ -402,17 +402,6 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
     List steps,
     bool allStepsDone,
   ) {
-    // Dulu gradasinya SAMA persis buat semua role (background -> biru
-    // pucat 0xFFE2EAF4) -- layar tempat anak BENERAN ngerjain misinya
-    // (bukan cuma liat-liat), jadi pas juga dikasih warna identitas
-    // role-nya sendiri, sama kayak yang udah dipakai di peta misi &
-    // layar intro. Cuma ganti WARNA gradiennya di sini, struktur
-    // Container/SafeArea di bawahnya nggak disentuh -- layar ini isinya
-    // padat (langkah, foto, TTS), jadi risiko paling kecil justru
-    // penting di sini.
-    final roleVisual =
-        roleVisualById(widget.mission.roleId) ?? kUnknownRoleVisual;
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SizedBox.expand(
@@ -421,11 +410,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                AppColors.background,
-                Color.lerp(
-                    AppColors.background, roleVisual.resolvedBadgeColor, 0.12)!,
-              ],
+              colors: [AppColors.background, const Color(0xFFE2EAF4)],
             ),
           ),
           child: SafeArea(
@@ -460,13 +445,11 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                 color: isCompleted || isActive
                                     ? AppColors.primary
                                     : AppColors.border,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.sm),
+                                borderRadius: BorderRadius.circular(AppRadius.sm),
                                 boxShadow: isActive
                                     ? [
                                         BoxShadow(
-                                          color: AppColors.primary
-                                              .withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(alpha: 0.3),
                                           blurRadius: 6,
                                           offset: const Offset(0, 2),
                                         ),
@@ -499,7 +482,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                       final bool isFinished = index < completedSteps;
                       final bool isOpen = activeStep == index;
                       final bool isTipsOpen = openTipsIndex == index;
-                      final bool isLastSubStep = instructions.isEmpty ||
+                      final bool isLastSubStep =
+                          instructions.isEmpty ||
                           _currentSubSteps[index] == instructions.length - 1;
 
                       return GestureDetector(
@@ -583,8 +567,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                       if (!isOpen)
                                         Icon(
                                           Icons.keyboard_arrow_down,
-                                          color: AppColors.primary
-                                              .withValues(alpha: 0.4),
+                                          color: AppColors.primary.withValues(alpha: 0.4),
                                         ),
                                     ],
                                   ),
@@ -611,9 +594,9 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                   height: 28,
                                                   decoration:
                                                       const BoxDecoration(
-                                                    color: Colors.white,
-                                                    shape: BoxShape.circle,
-                                                  ),
+                                                        color: Colors.white,
+                                                        shape: BoxShape.circle,
+                                                      ),
                                                   alignment: Alignment.center,
                                                   child: Text(
                                                     '${subIdx + 1}',
@@ -650,22 +633,19 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                         ),
                                                         child: Container(
                                                           padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                            horizontal: 12,
-                                                            vertical: 8,
-                                                          ),
-                                                          decoration:
-                                                              BoxDecoration(
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 12,
+                                                                vertical: 8,
+                                                              ),
+                                                          decoration: BoxDecoration(
                                                             color: Colors.white
                                                                 .withValues(
-                                                              alpha: 0.2,
-                                                            ),
+                                                                  alpha: 0.2,
+                                                                ),
                                                             borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                              20,
-                                                            ),
+                                                                BorderRadius.circular(
+                                                                  20,
+                                                                ),
                                                           ),
                                                           child: Row(
                                                             mainAxisSize:
@@ -678,23 +658,23 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                                 color: Colors
                                                                     .white
                                                                     .withValues(
-                                                                  alpha: 0.7,
-                                                                ),
+                                                                      alpha:
+                                                                          0.7,
+                                                                    ),
                                                                 size: 16,
                                                               ),
                                                               const SizedBox(
                                                                 width: 6,
                                                               ),
                                                               Text(
-                                                                texts[
-                                                                    'listen']!,
-                                                                style:
-                                                                    TextStyle(
+                                                                texts['listen']!,
+                                                                style: TextStyle(
                                                                   color: Colors
                                                                       .white
                                                                       .withValues(
-                                                                    alpha: 0.7,
-                                                                  ),
+                                                                        alpha:
+                                                                            0.7,
+                                                                      ),
                                                                   fontSize: 12,
                                                                   fontWeight:
                                                                       FontWeight
@@ -717,13 +697,13 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                   GestureDetector(
                                                     onTap: () =>
                                                         _showImageDialog(
-                                                      step['image_url'],
-                                                    ),
+                                                          step['image_url'],
+                                                        ),
                                                     child: ClipRRect(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                        12,
-                                                      ),
+                                                            12,
+                                                          ),
                                                       child: SmartSupabaseImage(
                                                         rawPath:
                                                             step['image_url'],
@@ -753,7 +733,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                             height: 8,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: _currentSubSteps[index] ==
+                                              color:
+                                                  _currentSubSteps[index] ==
                                                       dotIdx
                                                   ? Colors.white
                                                   : Colors.white.withValues(
@@ -772,8 +753,9 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                       const Divider(color: Colors.white24),
                                       GestureDetector(
                                         onTap: () => setState(
-                                          () => openTipsIndex =
-                                              isTipsOpen ? null : index,
+                                          () => openTipsIndex = isTipsOpen
+                                              ? null
+                                              : index,
                                         ),
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(
@@ -819,10 +801,9 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                       .map(
                                                         (t) => Padding(
                                                           padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                            bottom: 16,
-                                                          ),
+                                                              const EdgeInsets.only(
+                                                                bottom: 16,
+                                                              ),
                                                           child: Row(
                                                             crossAxisAlignment:
                                                                 CrossAxisAlignment
@@ -830,8 +811,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                             children: [
                                                               const Text(
                                                                 "• ",
-                                                                style:
-                                                                    TextStyle(
+                                                                style: TextStyle(
                                                                   color: Colors
                                                                       .white,
                                                                 ),
@@ -844,14 +824,12 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                                   children: [
                                                                     Text(
                                                                       t.toString(),
-                                                                      style:
-                                                                          TextStyle(
+                                                                      style: TextStyle(
                                                                         color: Colors
                                                                             .white
                                                                             .withValues(
-                                                                          alpha:
-                                                                              0.9,
-                                                                        ),
+                                                                              alpha: 0.9,
+                                                                            ),
                                                                         fontSize:
                                                                             14,
                                                                         height:
@@ -864,17 +842,15 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                                     GestureDetector(
                                                                       onTap: () =>
                                                                           _playVoice(
-                                                                        t.toString(),
-                                                                      ),
-                                                                      child:
-                                                                          Row(
+                                                                            t.toString(),
+                                                                          ),
+                                                                      child: Row(
                                                                         mainAxisSize:
                                                                             MainAxisSize.min,
                                                                         children: [
                                                                           Icon(
                                                                             Icons.volume_up_rounded,
-                                                                            color:
-                                                                                Colors.white.withValues(
+                                                                            color: Colors.white.withValues(
                                                                               alpha: 0.7,
                                                                             ),
                                                                             size:
@@ -886,8 +862,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                                           ),
                                                                           Text(
                                                                             texts['listen']!,
-                                                                            style:
-                                                                                TextStyle(
+                                                                            style: TextStyle(
                                                                               color: Colors.white.withValues(
                                                                                 alpha: 0.7,
                                                                               ),
@@ -933,34 +908,37 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                   decoration: BoxDecoration(
                                                     color:
                                                         _stepPhotos.containsKey(
-                                                      index,
-                                                    )
-                                                            ? Colors.green
-                                                            : Colors.white
-                                                                .withValues(
+                                                          index,
+                                                        )
+                                                        ? Colors.green
+                                                        : Colors.white
+                                                              .withValues(
                                                                 alpha: 0.2,
                                                               ),
                                                     shape: BoxShape.circle,
                                                   ),
-                                                  child: isUploading &&
+                                                  child:
+                                                      isUploading &&
                                                           activeStep == index
                                                       ? const SizedBox(
                                                           width: 20,
                                                           height: 20,
                                                           child:
                                                               CircularProgressIndicator(
-                                                            color: Colors.white,
-                                                            strokeWidth: 2.5,
-                                                          ),
+                                                                color: Colors
+                                                                    .white,
+                                                                strokeWidth:
+                                                                    2.5,
+                                                              ),
                                                         )
                                                       : Icon(
                                                           _stepPhotos
                                                                   .containsKey(
-                                                            index,
-                                                          )
+                                                                    index,
+                                                                  )
                                                               ? Icons.check
                                                               : Icons
-                                                                  .camera_alt_rounded,
+                                                                    .camera_alt_rounded,
                                                           color: Colors.white,
                                                           size: 20,
                                                         ),
@@ -973,9 +951,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                       : _stepPhotos.containsKey(
                                                           index,
                                                         )
-                                                          ? texts[
-                                                              'photo_saved_btn']!
-                                                          : texts['add_photo']!,
+                                                      ? texts['photo_saved_btn']!
+                                                      : texts['add_photo']!,
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 12,
@@ -987,8 +964,10 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                           )
                                         else
                                           const SizedBox(),
+
                                         ElevatedButton(
-                                          onPressed: (isCurrent &&
+                                          onPressed:
+                                              (isCurrent &&
                                                   isLastSubStep &&
                                                   !isUploading)
                                               ? () {
@@ -1005,7 +984,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                                 }
                                               : null,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: (isCurrent &&
+                                            backgroundColor:
+                                                (isCurrent &&
                                                     isLastSubStep &&
                                                     !isUploading)
                                                 ? AppColors.accent
@@ -1019,10 +999,10 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                             ),
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(
-                                                      AppRadius.xl),
+                                                  BorderRadius.circular(AppRadius.xl),
                                             ),
-                                            elevation: (isCurrent &&
+                                            elevation:
+                                                (isCurrent &&
                                                     isLastSubStep &&
                                                     !isUploading)
                                                 ? 5
@@ -1094,8 +1074,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                     appPageRoute(
                                       MissionWinScreen(
                                         mission: widget.mission,
-                                        capturedPhotos:
-                                            _stepPhotos.values.toList(),
+                                        capturedPhotos: _stepPhotos.values
+                                            .toList(),
                                       ),
                                     ),
                                   );
