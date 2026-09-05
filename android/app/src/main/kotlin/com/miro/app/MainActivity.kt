@@ -1,4 +1,4 @@
-package com.example.miro_app
+package com.miro.app
 
 import io.flutter.embedding.android.FlutterActivity
 

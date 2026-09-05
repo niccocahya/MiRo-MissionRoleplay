@@ -59,3 +59,12 @@ flutter_0*.png
 
 # Real secrets file for --dart-define-from-file (copy from env.example.json)
 env.json
+
+# Kunci penandatanganan release -- JANGAN PERNAH masuk git. Kalau file
+# .jks-nya hilang dari luar git juga (nggak ada backup lain), app ini
+# nggak akan pernah bisa di-update lagi di Play Store selamanya, jadi
+# baris di bawah ini cuma mencegah KEBOCORAN, bukan pengganti backup.
+android/key.properties
+android/keystore/
+*.jks
+*.keystore
