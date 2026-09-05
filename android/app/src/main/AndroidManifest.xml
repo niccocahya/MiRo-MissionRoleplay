@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.miro_app">
 
-    package="com.example.miro_app">\
-<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <!-- ==================== PERMISSIONS ==================== -->
-    <!-- ✅ REQUIRED: Internet -->
+    <!-- REQUIRED: Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- ✅ OPTIONAL: Camera (untuk image_picker) -->
+    <!-- Camera (untuk image_picker — foto langkah misi & ganti avatar) -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- ✅ OPTIONAL: Storage (Android 12 dan bawah) -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Galeri foto — READ_MEDIA_IMAGES buat Android 13+ (granular media
+         permission), READ/WRITE_EXTERNAL_STORAGE buat Android 12 ke bawah
+         doang (dibatasi maxSdkVersion biar nggak minta izin storage
+         lawas yang nggak dipakai lagi di Android modern). -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
-    <!-- ✅ OPTIONAL: Microphone (untuk audio features) -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- RECORD_AUDIO dulu ada di sini "buat audio features" — app ini
+         nggak punya fitur rekam suara/speech-to-text sama sekali (dicek:
+         nggak ada package speech_to_text/audio recorder, nggak ada
+         pemakaian di kode Dart manapun). Minta izin mikrofon yang nggak
+         pernah dipakai itu masalah kepercayaan nyata buat app anak-anak
+         — orang tua yang lihat app anaknya minta akses mikrofon tanpa
+         alasan jelas wajar curiga, dan bisa kena tinjauan lebih ketat di
+         Play Store Families Policy / Data Safety form. Dihapus. -->
 
     <!-- ==================== APPLICATION ==================== -->
     <application

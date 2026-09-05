@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Miro App</string>
+	<string>MiRO</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>miro_app</string>
+	<string>MiRO</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,6 +26,19 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Wajib di iOS (beda dari Android yang minta izin runtime) — app
+	     nge-crash instan begitu manggil kamera/galeri kalau string-string
+	     ini nggak ada, bukan sekadar ditolak izinnya. Belum pernah diisi
+	     sama sekali sebelum ini. Tiga-tiganya sesuai fitur yang beneran
+	     ada: kamera & galeri buat image_picker (foto langkah misi, ganti
+	     avatar anak), dan "add" buat gal (simpan sertifikat/kolase jurnal
+	     ke galeri). -->
+	<key>NSCameraUsageDescription</key>
+	<string>MiRO butuh akses kamera untuk memotret setiap langkah misi dan mengganti foto profil anak.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MiRO butuh akses galeri untuk memilih foto langkah misi dan foto profil anak.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>MiRO butuh akses ini untuk menyimpan sertifikat dan kolase jurnal misi ke galeri fotomu.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -53,6 +53,42 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.13.1
   json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.14.4
+
+# ==================== APP ICON ====================
+# Dulu app-nya kepasang icon DEFAULT Flutter (logo Flutter biru) di semua
+# ukuran mipmap -- file-nya cuma 442-1443 byte, jelas belum pernah diganti
+# sejak `flutter create`. Ini elemen visual pertama yang dilihat orang
+# SEBELUM app-nya kebuka, jadi walau semua kerja di dalam app-nya udah
+# rapi, icon default bikin app kerasa belum jadi.
+#
+# Sumbernya penguin_splash1.png (1214x1214, background transparan, aset
+# ilustrasi yang sama dipakai di layar splash onboarding) -- dipilih
+# ketimbang logo_splash1.png (logo resmi MiRO) karena logo itu cuma
+# kesimpen di 84x84, kegedean upscale-nya buat launcher icon (butuh
+# sampai 192x192) apalagi buat listing Play Store (512x512), hasilnya
+# bakal kelihatan pecah/blur. Maskot penguin-nya sendiri (si "Mink" yang
+# sama muncul di chatbot & seluruh app) kualitasnya jauh lebih tinggi
+# resolusinya dan tetep sama-sama identitas MiRO.
+#
+# Jalanin `dart run flutter_launcher_icons` abis nambah baris ini buat
+# generate ulang semua ukuran mipmap Android + AppIcon iOS.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/images/penguin_splash1.png"
+  # Background solid warna navy brand (AppColors.primary) -- gambarnya
+  # sendiri transparan, dan launcher icon nggak boleh transparan (Android
+  # nge-render transparan jadi hitam polos di beberapa launcher).
+  adaptive_icon_background: "#0A264F"
+  adaptive_icon_foreground: "assets/images/penguin_splash1.png"
+  min_sdk_android: 21
+  # iOS App Store nolak icon yang masih punya alpha channel -- gambar
+  # sumbernya transparan (buat kebutuhan adaptive icon Android), jadi
+  # versi iOS-nya perlu background solid ditambal di baliknya biar
+  # opaque penuh.
+  remove_alpha_ios: true
+  background_color_ios: "#0A264F"
 
 # ==================== FLUTTER CONFIGURATION ====================
 flutter:
