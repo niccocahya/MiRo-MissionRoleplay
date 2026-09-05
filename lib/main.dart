@@ -9,7 +9,12 @@ import 'core/providers/text_size_provider.dart';
 import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
-import 'shared/widgets/penguin_chat_bot.dart'; // Sesuaikan path ini!
+// Mink (PenguinChatButton) DISEMBUNYIKAN SEMENTARA atas permintaan --
+// import-nya dikomentari bareng pemasangannya di bawah (lihat blok
+// "PINGUIN THE MASTER OVERLAY" di builder MaterialApp.router). Fitur &
+// kodenya nggak dihapus sama sekali, tinggal buka comment 2 bagian ini
+// lagi buat nyalain balik.
+// import 'shared/widgets/penguin_chat_bot.dart';
 
 // Diisi lewat --dart-define-from-file=env.json (lihat env.example.json).
 // Jangan taruh key beneran langsung di source lagi ya.
@@ -66,27 +71,24 @@ class MyApp extends ConsumerWidget {
               // 1. Seluruh layar aplikasi ditaruh di paling dasar
               if (child != null) child,
 
-              // 2. Pinguin dibiarkan lepas menguasai Stack!
-              // BUKAN const — widget const dikanonikalisasi (objek yang
-              // sama persis tiap kali), jadi Flutter skip rebuild-nya
-              // walau MyApp rebuild pas bahasa diganti, dan Mink bakal
-              // "nyangkut" bahasa lama.
+              // 2. Pinguin (Mink) DISEMBUNYIKAN SEMENTARA atas permintaan.
+              // Kode aslinya (Overlay tersarang + PenguinChatButton)
+              // dikomentari di bawah, bukan dihapus -- tinggal buka
+              // comment blok ini + import-nya di atas buat nyalain balik.
+              // Alasan Overlay tersarang itu ada (jangan dihapus infonya
+              // pas nyalain lagi): `child` di atas isinya Navigator (yang
+              // punya Overlay bawaannya sendiri), tapi PenguinChatButton
+              // itu SAUDARA-nya `child` di Stack, bukan turunan Navigator
+              // itu -- jadi dia nggak pernah kebagian Overlay dari mana
+              // pun secara alami, dan bakal crash "No Overlay widget
+              // found" begitu ada widget yang BUTUH Overlay ancestor
+              // (Tooltip di tombol tutup chat) direndernya.
               //
-              // Dibungkus Overlay SENDIRI di sini. `child` di atas isinya
-              // Navigator (yang punya Overlay bawaannya sendiri), tapi
-              // PenguinChatButton ini SAUDARA-nya `child` di Stack, bukan
-              // turunan Navigator itu -- jadi dia nggak pernah kebagian
-              // Overlay dari mana pun. Nggak kelihatan selama chatbot cuma
-              // pakai Container/Stack/Positioned biasa, tapi begitu ada
-              // widget yang BUTUH Overlay ancestor (Tooltip di tombol
-              // tutup chat), app-nya crash "No Overlay widget found" pas
-              // jendela chat dibuka. Overlay bisa disarangkan -- yang di
-              // sini nyediain satu khusus buat subtree ini aja.
-              Overlay(
-                initialEntries: [
-                  OverlayEntry(builder: (context) => const PenguinChatButton()),
-                ],
-              ),
+              // Overlay(
+              //   initialEntries: [
+              //     OverlayEntry(builder: (context) => const PenguinChatButton()),
+              //   ],
+              // ),
             ],
           ),
         );
