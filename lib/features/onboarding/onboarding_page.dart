@@ -190,6 +190,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   /// device, tapi di sini nggak pernah dicek) — jadi orang tua yang udah
   /// login harus login ulang manual tiap kali app dibuka lagi. Sekarang
   /// dicek dulu pas halaman ini pertama kali muncul.
+  ///
+  /// Ada laporan tester ini MASIH kejadian ("tiap keluar app harus login
+  /// ulang") walau fungsi ini udah ada. Kemungkinan besar penyebabnya:
+  /// dulu proyek Supabase-nya sempat auto-pause (lihat catatan di
+  /// progress_repair_service.dart/riwayat commit soal ini) -- pas paused,
+  /// query `children` di bawah ini GAGAL (server nggak bisa dihubungi),
+  /// dan sebelumnya itu diperlakukan sama kayak "beneran nggak ada
+  /// koneksi": session-nya udah kebukti VALID (currentSession nggak
+  /// null), tapi cuma gara-gara satu query TAMBAHAN gagal, orang tuanya
+  /// dilempar balik ke form login -- padahal login-nya sendiri sukses.
+  ///
+  /// Sekarang dipisah: kalau session-nya ada, itu FAKTA orang ini udah
+  /// login, apa pun hasil query children-nya. Gagal ngecek children
+  /// (jaringan/server bermasalah) sekarang default ke /home (lebih aman
+  /// daripada nyangkut di layar login lagi) -- bukan balik ke splash.
   Future<void> _restoreSessionIfAny() async {
     final session = Supabase.instance.client.auth.currentSession;
     if (session == null) return;
@@ -202,15 +217,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           .eq('parent_id', session.user.id)
           .limit(1);
       if (!mounted) return;
-      if (children.isNotEmpty) {
-        context.go('/home');
-      } else {
-        context.go('/identify');
-      }
+      context.go(children.isNotEmpty ? '/home' : '/identify');
     } catch (e) {
-      // Gagal cek (mis. lagi offline) — bukan fatal, biarin aja lanjut ke
-      // alur onboarding/login normal daripada nyangkut di loading terus.
-      if (mounted) setState(() => _isLoading = false);
+      // Session-nya SENDIRI udah kebukti valid (baris di atas) -- yang
+      // gagal cuma query children ini. Jangan lempar orang yang udah
+      // login balik ke form login gara-gara itu; /home yang nentuin
+      // sendiri nanti kalau ternyata memang belum ada anak.
+      debugPrint("Gagal ngecek children pas restore session, tetep lanjut ke /home: $e");
+      if (mounted) context.go('/home');
     }
   }
 

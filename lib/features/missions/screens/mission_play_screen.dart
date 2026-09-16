@@ -41,6 +41,8 @@ const Map<String, Map<String, String>> _t = {
     'leave_desc': "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
     'leave_stay': "Keep going",
     'leave_confirm': "Leave",
+    'slow_voice_on': "Slow voice on",
+    'slow_voice_off': "Slow voice off",
   },
   'id': {
     'close_photo': "Tutup foto",
@@ -62,6 +64,8 @@ const Map<String, Map<String, String>> _t = {
     'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
     'leave_stay': "Lanjut Main",
     'leave_confirm': "Keluar",
+    'slow_voice_on': "Suara pelan nyala",
+    'slow_voice_off': "Suara pelan mati",
   },
 };
 
@@ -172,6 +176,24 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
   late FlutterTts flutterTts;
   final ImagePicker _picker = ImagePicker();
 
+  // Masukan dari tester: suara pembacaan instruksi kerasa kecepetan.
+  // Ternyata bukan cuma perasaan -- skala setSpeechRate di flutter_tts itu
+  // 0.0 (paling lambat) sampai 1.0 (paling cepat), dan sekitar 0.5 yang
+  // setara "kecepatan normal" ngomong manusia. Kode lama nyetel 1.0,
+  // alias selalu dibacain di kecepatan MAKSIMUM. _kNormalRate diturunin
+  // ke bawah "normal" dikit lagi (bukan 0.5) karena ini dibacain BUAT
+  // ANAK yang lagi ngikutin instruksi sambil kerja, bukan buat didengar
+  // santai kayak podcast -- lebih lambat lebih gampang diikuti.
+  //
+  // _isSlowMode: tombol "kura-kura" yang diminta tester -- toggle di
+  // header, berlaku buat SEMUA tombol Dengar di layar ini (instruksi
+  // utama & tiap tips), bukan cuma satu tombol doang, karena situasinya
+  // "instruksi ini masih kecepetan buat anak SAYA", bukan spesifik ke
+  // satu baris teks tertentu.
+  static const double _kNormalRate = 0.42;
+  static const double _kSlowRate = 0.25;
+  bool _isSlowMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -221,7 +243,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
       await flutterTts.setLanguage(lang);
     }
 
-    await flutterTts.setSpeechRate(1.0);
+    await flutterTts.setSpeechRate(_kNormalRate);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(2.0);
   }
@@ -321,6 +343,10 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
     final texts = _t[lang] ?? _t['en']!;
 
     await flutterTts.stop();
+    // Disetel ulang tiap mau ngomong, bukan cuma sekali di _setupTts --
+    // sebagian implementasi TTS Android suka "lupa" rate-nya sendiri
+    // abis stop(), jadi lebih aman dipastikan tiap kali sebelum speak().
+    await flutterTts.setSpeechRate(_isSlowMode ? _kSlowRate : _kNormalRate);
     await flutterTts.speak(text);
     if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -424,13 +450,53 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        texts['how_to_play']!,
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              texts['how_to_play']!,
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          // Tombol kura-kura -- toggle satu ini berlaku
+                          // buat SEMUA tombol "Dengar" di layar ini, bukan
+                          // per-baris, biar orang tua/anak nggak perlu
+                          // nyalain ulang tiap pindah langkah/tips.
+                          Tooltip(
+                            message: _isSlowMode
+                                ? texts['slow_voice_on']!
+                                : texts['slow_voice_off']!,
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isSlowMode = !_isSlowMode),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: _isSlowMode
+                                      ? AppColors.accent
+                                      : AppColors.primaryTint,
+                                  shape: BoxShape.circle,
+                                ),
+                                alignment: Alignment.center,
+                                // Emoji nggak ngikutin TextStyle.color (font
+                                // emoji bawa warnanya sendiri) -- jadi beda
+                                // aktif/nggaknya diwakilin lingkaran latar
+                                // di atas (accent vs primaryTint), bukan
+                                // warna si kura-kuranya sendiri.
+                                child: const Text(
+                                  "🐢",
+                                  style: TextStyle(fontSize: 22),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
                       Row(
