@@ -205,11 +205,63 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   /// login, apa pun hasil query children-nya. Gagal ngecek children
   /// (jaringan/server bermasalah) sekarang default ke /home (lebih aman
   /// daripada nyangkut di layar login lagi) -- bukan balik ke splash.
+  ///
+  /// AUDIT LANJUTAN (masih laporan "tiap keluar app harus login ulang"
+  /// walau perbaikan di atas udah ada): ternyata ada race condition LAIN
+  /// yang lebih dalam, di dalam `supabase_flutter`/`gotrue` sendiri
+  /// (ditelusuri langsung dari source package-nya).
+  ///
+  /// `Supabase.initialize()` di main.dart nge-await `setInitialSession()`
+  /// yang nyetel `currentSession` dari data yang kesimpen di device APA
+  /// ADANYA -- token-nya udah expired atau belum SAMA SEKALI nggak dicek
+  /// di situ. Validasi/refresh token yang beneran cuma jalan lewat
+  /// `recoverSession()`, tapi proses itu jalan di BACKGROUND dan SENGAJA
+  /// nggak di-await oleh `Supabase.initialize()` (dibungkus
+  /// `CancelableOperation` yang dibiarin jalan sendiri). Kalau refresh
+  /// background itu GAGAL (mis. project Supabase lagi paused kayak
+  /// kejadian sebelumnya, atau refresh token-nya udah kadaluarsa), SDK-nya
+  /// SENDIRI diam-diam manggil signOut() dan ngosongin session yang
+  /// kesimpen -- bisa aja ini kejadian PAS BARENGAN kode di bawah lagi
+  /// jalan, atau MALAH SETELAHNYA (session yang tadinya keliatan valid pas
+  /// dicek di sini, ternyata beberapa saat kemudian udah dianggap keluar
+  /// sama SDK-nya sendiri, tanpa sepengetahuan kode ini).
+  ///
+  /// Makanya sekarang nggak cuma percaya `currentSession` apa adanya --
+  /// kalau token-nya kedeteksi udah/hampir expired (`session.isExpired`),
+  /// kode ini PROAKTIF manggil & NUNGGUIN `refreshSession()` sendiri di
+  /// sini, bukan ngandelin proses background SDK yang balapan sama query
+  /// children di bawah. Hasilnya pasti salah satu dari dua: beneran dapet
+  /// session baru yang valid (lanjut kayak biasa), atau beneran gagal
+  /// (refresh token-nya emang udah nggak berlaku / server nggak
+  /// terjangkau) -- baru di titik itu jelas orangnya emang harus login
+  /// ulang, bukan gara-gara ketebak salah oleh race condition.
   Future<void> _restoreSessionIfAny() async {
-    final session = Supabase.instance.client.auth.currentSession;
+    final auth = Supabase.instance.client.auth;
+    var session = auth.currentSession;
     if (session == null) return;
 
     setState(() => _isLoading = true);
+
+    if (session.isExpired) {
+      try {
+        final res = await auth.refreshSession();
+        session = res.session;
+      } catch (e) {
+        // Refresh token-nya sendiri juga udah nggak berlaku (atau server
+        // nggak terjangkau pas refresh) -- di titik ini SDK-nya sendiri
+        // biasanya udah nyopot session yang kesimpen. Nggak ada lagi yang
+        // bisa dipercaya, biarin lanjut ke splash/login seperti biasa.
+        debugPrint("Gagal refresh session pas restore, minta login ulang: $e");
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+    }
+
+    if (session == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
     try {
       final children = await Supabase.instance.client
           .from('children')
