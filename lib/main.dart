@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/providers/text_size_provider.dart';
+import 'core/theme/app_scroll_behavior.dart';
 import 'core/theme/app_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
@@ -54,6 +55,7 @@ class MyApp extends ConsumerWidget {
       title: 'MiRO',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      scrollBehavior: const AppScrollBehavior(),
       routerConfig: router,
 
       // ========================================================

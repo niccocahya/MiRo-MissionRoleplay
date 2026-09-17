@@ -12,6 +12,7 @@ import '../../../shared/widgets/penguin_chat_bot.dart'; // Pastikan path ini ben
 import '../data/mission_model.dart';
 import 'mission_win_screen.dart';
 import '../../../core/providers/language_provider.dart';
+import '../../../core/providers/tts_speed_provider.dart';
 import '../../../core/router/app_page_transition.dart';
 import '../../../core/services/storage_upload_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -41,8 +42,7 @@ const Map<String, Map<String, String>> _t = {
     'leave_desc': "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
     'leave_stay': "Keep going",
     'leave_confirm': "Leave",
-    'slow_voice_on': "Slow voice on",
-    'slow_voice_off': "Slow voice off",
+    'voice_speed': "Voice speed",
   },
   'id': {
     'close_photo': "Tutup foto",
@@ -64,8 +64,7 @@ const Map<String, Map<String, String>> _t = {
     'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
     'leave_stay': "Lanjut Main",
     'leave_confirm': "Keluar",
-    'slow_voice_on': "Suara pelan nyala",
-    'slow_voice_off': "Suara pelan mati",
+    'voice_speed': "Kecepatan suara",
   },
 };
 
@@ -176,23 +175,14 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
   late FlutterTts flutterTts;
   final ImagePicker _picker = ImagePicker();
 
-  // Masukan dari tester: suara pembacaan instruksi kerasa kecepetan.
-  // Ternyata bukan cuma perasaan -- skala setSpeechRate di flutter_tts itu
-  // 0.0 (paling lambat) sampai 1.0 (paling cepat), dan sekitar 0.5 yang
-  // setara "kecepatan normal" ngomong manusia. Kode lama nyetel 1.0,
-  // alias selalu dibacain di kecepatan MAKSIMUM. _kNormalRate diturunin
-  // ke bawah "normal" dikit lagi (bukan 0.5) karena ini dibacain BUAT
-  // ANAK yang lagi ngikutin instruksi sambil kerja, bukan buat didengar
-  // santai kayak podcast -- lebih lambat lebih gampang diikuti.
-  //
-  // _isSlowMode: tombol "kura-kura" yang diminta tester -- toggle di
-  // header, berlaku buat SEMUA tombol Dengar di layar ini (instruksi
-  // utama & tiap tips), bukan cuma satu tombol doang, karena situasinya
-  // "instruksi ini masih kecepetan buat anak SAYA", bukan spesifik ke
-  // satu baris teks tertentu.
-  static const double _kNormalRate = 0.42;
-  static const double _kSlowRate = 0.25;
-  bool _isSlowMode = false;
+  // Masukan dari tester: suara pembacaan instruksi kerasa kecepetan --
+  // bahkan setelah diturunin sekali (percobaan pertama: 0.42), masih
+  // dirasa kecepetan. Kecepatannya sekarang diatur lewat
+  // `ttsSpeedProvider` (core/providers/tts_speed_provider.dart): 3
+  // tingkat (Pelan/Normal/Cepat), beneran KESIMPEN di device (SharedPreferences,
+  // bukan cuma state layar ini) jadi nggak balik ke default tiap misi
+  // baru dibuka, dan berlaku buat SEMUA tombol Dengar di layar ini
+  // (instruksi utama & tiap tips), bukan cuma satu tombol doang.
 
   @override
   void initState() {
@@ -243,7 +233,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
       await flutterTts.setLanguage(lang);
     }
 
-    await flutterTts.setSpeechRate(_kNormalRate);
+    await flutterTts.setSpeechRate(ref.read(ttsSpeedProvider).rate);
     await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(2.0);
   }
@@ -346,7 +336,7 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
     // Disetel ulang tiap mau ngomong, bukan cuma sekali di _setupTts --
     // sebagian implementasi TTS Android suka "lupa" rate-nya sendiri
     // abis stop(), jadi lebih aman dipastikan tiap kali sebelum speak().
-    await flutterTts.setSpeechRate(_isSlowMode ? _kSlowRate : _kNormalRate);
+    await flutterTts.setSpeechRate(ref.read(ttsSpeedProvider).rate);
     await flutterTts.speak(text);
     if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -463,22 +453,55 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                               ),
                             ),
                           ),
-                          // Tombol kura-kura -- toggle satu ini berlaku
-                          // buat SEMUA tombol "Dengar" di layar ini, bukan
+                          // Tombol kura-kura -- sekarang buka pemilih 3
+                          // tingkat (Pelan/Normal/Cepat) lewat popup,
+                          // bukan cuma toggle 2 pilihan. Berlaku buat
+                          // SEMUA tombol "Dengar" di layar ini, bukan
                           // per-baris, biar orang tua/anak nggak perlu
                           // nyalain ulang tiap pindah langkah/tips.
-                          Tooltip(
-                            message: _isSlowMode
-                                ? texts['slow_voice_on']!
-                                : texts['slow_voice_off']!,
-                            child: GestureDetector(
-                              onTap: () => setState(() => _isSlowMode = !_isSlowMode),
+                          Builder(builder: (context) {
+                            final currentSpeed = ref.watch(ttsSpeedProvider);
+                            return PopupMenuButton<TtsSpeed>(
+                              tooltip: texts['voice_speed']!,
+                              position: PopupMenuPosition.under,
+                              onSelected: (speed) => ref
+                                  .read(ttsSpeedProvider.notifier)
+                                  .setSpeed(speed),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              itemBuilder: (context) => TtsSpeed.values.map((
+                                speed,
+                              ) {
+                                final isSelected = speed == currentSpeed;
+                                return PopupMenuItem<TtsSpeed>(
+                                  value: speed,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isSelected
+                                            ? Icons.check_circle_rounded
+                                            : Icons.circle_outlined,
+                                        size: 18,
+                                        color: isSelected
+                                            ? AppColors.accent
+                                            : AppColors.textMuted,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(speed.label(lang)),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: _isSlowMode
+                                  // Lingkaran nyala kalau kecepatannya
+                                  // udah diubah dari default (Normal) --
+                                  // penanda visual "udah disesuaikan".
+                                  color: currentSpeed != TtsSpeed.normal
                                       ? AppColors.accent
                                       : AppColors.primaryTint,
                                   shape: BoxShape.circle,
@@ -494,8 +517,8 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
                                   style: TextStyle(fontSize: 22),
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          }),
                         ],
                       ),
                       const SizedBox(height: 16),

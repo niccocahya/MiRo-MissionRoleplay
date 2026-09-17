@@ -414,8 +414,24 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       // nggak error, ini beresiko ngasih XP ke anak yang SALAH. Sekarang
       // pakai `childDataProvider`, sumber kebenaran anak yang lagi aktif
       // dipilih (sama yang dipakai Home/Progress/Profile).
+      //
+      // `childDataProvider` itu StreamProvider realtime -- bisa aja
+      // sempat ngasih `null` SEMENTARA (mis. koneksi realtime lagi
+      // nyambung ulang abis app balik dari background lama, kayak pas
+      // misi tadinya dimainin cukup lama). Dulu di sini langsung nyerah
+      // diam-diam (`return false` doang) TANPA nyalain `_syncFailed` --
+      // efeknya XP/skill misi ini nggak kesimpen sama sekali, tapi layar
+      // tetep nunjukin seolah berhasil (skill increase-nya ambil dari
+      // data misi statis, bukan hasil sync ini), dan tombol "Lanjut ke
+      // Refleksi" macet permanen TANPA banner error atau tombol coba
+      // lagi -- orang tua nyangkut nggak bisa lanjut sama sekali. Sekarang
+      // ini juga dihitung sebagai kegagalan yang keliatan & bisa dicoba
+      // ulang, sama kayak error lain di bawah.
       final childDb = await ref.read(childDataProvider.future);
-      if (childDb == null) return false;
+      if (childDb == null) {
+        if (mounted) setState(() => _syncFailed = true);
+        return false;
+      }
 
       final String childId = childDb['id'];
       final String nowLocal = DateTime.now().toIso8601String();

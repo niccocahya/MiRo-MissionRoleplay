@@ -427,6 +427,16 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               mission: mission,
               capturedPhotos: photos,
               isViewOnly: true,
+              // Ini yang tadinya kelewat -- tanpa `existingMissionLogId`,
+              // `_buildReflectionCard` di MissionJournalScreen (yang butuh
+              // id log ini buat nge-query tabel `mission_reflections`)
+              // nggak akan pernah nampilin apa-apa, walau refleksinya
+              // beneran ada di database. Efeknya: buka riwayat misi dari
+              // sini SELALU keliatan seolah nggak ada refleksi tersimpan,
+              // padahal jalur lain (map misi, lihat mission_path_screen.dart)
+              // yang udah ngasih id ini nunjukin refleksinya dengan benar.
+              existingMissionLogId: logItem['id'] as String?,
+              existingRating: logItem['rating'] as int?,
             ),
           ),
         );
