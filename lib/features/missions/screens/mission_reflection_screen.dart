@@ -108,7 +108,15 @@ class _MissionReflectionScreenState
         'parent_feeling': parentFeeling,
         'child_feeling': childFeeling,
         'notes': _notesController.text.trim(),
-        'created_at': DateTime.now().toIso8601String(),
+        // .toUtc() DULU baru toIso8601String() -- DateTime.now() itu
+        // waktu LOKAL, dan tanpa .toUtc() string ISO-nya nggak bawa
+        // penanda zona waktu sama sekali. Kolom `created_at` timestamptz
+        // di Postgres nganggep string tanpa offset itu UTC apa adanya,
+        // jadi jam lokal (mis. WIB) ketulis kayak UTC -- geser beberapa
+        // jam dari waktu sebenarnya begitu dibaca balik & dikonversi ke
+        // lokal lagi. Sama persis kelasnya kayak bug `completed_at` di
+        // mission_journal_screen.dart.
+        'created_at': DateTime.now().toUtc().toIso8601String(),
       });
 
       if (!mounted) return;

@@ -434,7 +434,19 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
       }
 
       final String childId = childDb['id'];
-      final String nowLocal = DateTime.now().toIso8601String();
+      // .toUtc() DULU baru toIso8601String() -- tanpa itu, string yang
+      // dihasilin nggak punya penanda zona waktu sama sekali (bukan
+      // "Z", bukan offset), soalnya DateTime.now() itu WAKTU LOKAL.
+      // Kolom `completed_at` di database timestamptz, dan Postgres
+      // nganggep string TANPA offset sebagai UTC apa adanya -- jadi jam
+      // lokal WIB (UTC+7) ketulis kayak UTC, mundur... err, MAJU 7 jam
+      // dari yang seharusnya. Contoh nyata: misi kelar jam 23:00 WIB
+      // ketulis sebagai "23:00 UTC", yang pas dibaca balik & dikonversi
+      // ke lokal (lihat catatan panjang di date_utils.dart/
+      // parseDateSafely -- itu FIX buat sisi BACA-nya) jadi kebaca 06:00
+      // WIB *besok*-nya -- nyasar ke hari kalender yang salah di
+      // kalender streak, hitungan "misi hari ini", dst.
+      final String nowUtc = DateTime.now().toUtc().toIso8601String();
 
       // Cegah XP/skill/level kecatat dobel kalau misi ini kebetulan udah
       // pernah diselesaikan sebelumnya buat anak ini — bisa kejadian kalau
@@ -480,7 +492,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
                 'status': 'replayed',
                 'earned_xp': 0,
                 'earned_skills': {},
-                'completed_at': nowLocal,
+                'completed_at': nowUtc,
               })
               .select('id')
               .single();
@@ -505,7 +517,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
               'status': 'completed',
               'earned_xp': widget.mission.xpReward,
               'earned_skills': widget.mission.skillsReward,
-              'completed_at': nowLocal,
+              'completed_at': nowUtc,
             })
             .select('id')
             .single();
@@ -613,7 +625,7 @@ class _MissionJournalScreenState extends ConsumerState<MissionJournalScreen> {
           await supabase.from('child_achievements').insert({
             'child_id': childId,
             'achievement_id': earnedAchievementId,
-            'unlocked_at': nowLocal,
+            'unlocked_at': nowUtc,
           });
           debugPrint("✅ LENCANA BERHASIL TERCATAT!");
           _stepAchievementApplied = true;
