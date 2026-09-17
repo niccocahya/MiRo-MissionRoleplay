@@ -136,6 +136,14 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
   int step = 1;
   bool isLoading = false;
 
+  // Keisi kalau submit sebelumnya sempat berhasil bikin baris `children`
+  // tapi gagal di salah satu insert berikutnya (koneksi putus dkk) --
+  // dioper balik ke submitOnboardingData() pas orang tua pencet submit
+  // lagi, biar percobaan ulang LANJUTIN baris yang sama, bukan bikin anak
+  // duplikat/hantu baru tiap gagal separuh jalan. Lihat
+  // OnboardingSubmitException di supabase_repository.dart.
+  String? _partialChildId;
+
   // Form State
   File? _imageFile;
   String childName = "";
@@ -305,10 +313,14 @@ class _IdentifyPageState extends ConsumerState<IdentifyPage> {
             parentGoals: childDevelops,
             timePreference: bondTime ?? "15_min",
             avatarUrl: uploadedPhotoUrl,
+            existingChildId: _partialChildId,
           );
 
       ref.read(selectedChildIdProvider.notifier).setId(childId);
       if (mounted) context.go('/home');
+    } on OnboardingSubmitException catch (e) {
+      _partialChildId = e.childId;
+      if (mounted) _showError('${texts['err_submit']}${e.cause}');
     } catch (e) {
       if (mounted) _showError('${texts['err_submit']}${e.toString()}');
     } finally {

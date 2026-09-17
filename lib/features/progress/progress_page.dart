@@ -429,7 +429,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               isViewOnly: true,
               // Ini yang tadinya kelewat -- tanpa `existingMissionLogId`,
               // `_buildReflectionCard` di MissionJournalScreen (yang butuh
-              // id log ini buat nge-query tabel `mission_reflections`)
+              // id log ini buat nge-query tabel `reflections`)
               // nggak akan pernah nampilin apa-apa, walau refleksinya
               // beneran ada di database. Efeknya: buka riwayat misi dari
               // sini SELALU keliatan seolah nggak ada refleksi tersimpan,
