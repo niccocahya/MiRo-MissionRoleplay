@@ -19,41 +19,59 @@ class SkillTrendPoint {
 /// didapat dari misi itu) + `completed_at`, jadi tren historis bisa
 /// dihitung ulang dari situ tanpa perlu tabel/skema baru: jumlahkan
 /// `earned_skills` berurutan berdasarkan tanggal selesai.
+///
+/// Dulu `FutureProvider` -- sekali ambil per `childId`, nggak pernah
+/// kehitung ulang lagi buat sisa sesi app (sama kayak bug yang sempat ada
+/// di `childRoleProgressProvider`). Efeknya: misi baru yang diselesaikan
+/// nggak nongol di grafik tren Progress sampai app ditutup total & dibuka
+/// ulang, walau angka XP/level di layar lain udah keupdate realtime.
+/// Sekarang `StreamProvider` yang dengerin `mission_logs`, sama kayak
+/// `streakProvider`/`weeklyMissionCountStreamProvider` yang baca tabel
+/// yang sama.
 final skillTrendProvider =
-    FutureProvider.family<List<SkillTrendPoint>, String>((ref, childId) async {
-  if (childId.isEmpty) return [];
+    StreamProvider.family<List<SkillTrendPoint>, String>((ref, childId) {
+  if (childId.isEmpty) return Stream.value([]);
 
-  final rows = await Supabase.instance.client
+  return Supabase.instance.client
       .from('mission_logs')
-      .select('completed_at, earned_skills')
+      .stream(primaryKey: ['id'])
       .eq('child_id', childId)
-      .eq('status', 'completed')
-      .order('completed_at', ascending: true);
+      .map((event) {
+        final completedRows = event.where((r) => r['status'] == 'completed').toList()
+          ..sort((a, b) {
+            final da = parseDateSafely(a['completed_at']?.toString() ?? '');
+            final db = parseDateSafely(b['completed_at']?.toString() ?? '');
+            if (da == null || db == null) return 0;
+            return da.compareTo(db);
+          });
 
-  // Daftar skill-nya dari core/constants/skills.dart (dulu ditulis ulang
-  // di sini) -- biar skill baru otomatis kebawa ke grafik tren juga.
-  final Map<String, double> running = {for (final s in kSkills) s.key: 0};
+        // Daftar skill-nya dari core/constants/skills.dart (dulu ditulis
+        // ulang di sini) -- biar skill baru otomatis kebawa ke grafik
+        // tren juga.
+        final Map<String, double> running = {for (final s in kSkills) s.key: 0};
 
-  final List<SkillTrendPoint> points = [];
-  for (final row in rows) {
-    final date = parseDateSafely(row['completed_at']?.toString() ?? '');
-    if (date == null) continue;
+        final List<SkillTrendPoint> points = [];
+        for (final row in completedRows) {
+          final date = parseDateSafely(row['completed_at']?.toString() ?? '');
+          if (date == null) continue;
 
-    // Loop atas KEY YANG BENERAN ADA di earned_skills, bukan cuma 5 nama
-    // yang di-hardcode di atas -- sebelumnya kalau satu baris punya key
-    // yang nggak persis cocok sama daftar itu (typo, skill baru yang belum
-    // ditambahin ke daftar, dsb.) poinnya ke-skip diem-diem tanpa
-    // ketauan, bikin tren keliatan lebih rendah dari yang seharusnya.
-    final skills = (row['earned_skills'] as Map?) ?? {};
-    for (final entry in skills.entries) {
-      final gained = entry.value;
-      if (gained is num) {
-        final key = entry.key.toString();
-        running[key] = (running[key] ?? 0) + gained.toDouble();
-      }
-    }
-    points.add(SkillTrendPoint(date: date, cumulative: Map.of(running)));
-  }
+          // Loop atas KEY YANG BENERAN ADA di earned_skills, bukan cuma 5
+          // nama yang di-hardcode di atas -- sebelumnya kalau satu baris
+          // punya key yang nggak persis cocok sama daftar itu (typo,
+          // skill baru yang belum ditambahin ke daftar, dsb.) poinnya
+          // ke-skip diem-diem tanpa ketauan, bikin tren keliatan lebih
+          // rendah dari yang seharusnya.
+          final skills = (row['earned_skills'] as Map?) ?? {};
+          for (final entry in skills.entries) {
+            final gained = entry.value;
+            if (gained is num) {
+              final key = entry.key.toString();
+              running[key] = (running[key] ?? 0) + gained.toDouble();
+            }
+          }
+          points.add(SkillTrendPoint(date: date, cumulative: Map.of(running)));
+        }
 
-  return points;
+        return points;
+      });
 });
