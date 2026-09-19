@@ -315,13 +315,23 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   /// nyoba ulang). Jadi retry ini nggak bikin orang nunggu sia-sia kalau
   /// password-nya emang salah -- cuma nyoba ulang buat kegagalan yang
   /// KEMUNGKINAN besar sembuh sendiri.
+  ///
+  /// Awalnya cuma 1x percobaan ulang setelah jeda 2 detik -- laporan
+  /// tester nunjukin itu masih belum cukup (server-nya kekonfirmasi
+  /// ACTIVE_HEALTHY pas dicek, jadi hiccup-nya beneran cuma butuh waktu
+  /// lebih lama buat pulih). Sekarang 2x percobaan ulang, jeda makin
+  /// lama tiap kali (2 detik lalu 4 detik) -- total ngasih kesempatan
+  /// ~6 detik buat koneksinya pulih sendiri sebelum beneran nyerah.
   Future<T> _withNetworkRetry<T>(Future<T> Function() action) async {
-    try {
-      return await action();
-    } on AuthRetryableFetchException {
-      await Future.delayed(const Duration(seconds: 2));
-      return await action();
+    const delays = [Duration(seconds: 2), Duration(seconds: 4)];
+    for (final delay in delays) {
+      try {
+        return await action();
+      } on AuthRetryableFetchException {
+        await Future.delayed(delay);
+      }
     }
+    return await action();
   }
 
   String _friendlyAuthError(Object e, Map<String, String> texts) {
