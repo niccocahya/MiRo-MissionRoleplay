@@ -810,7 +810,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (context, setModalState) {
-            return AppBottomSheet(
+            // `texts`/`currentLang` di-shadow di sini dengan versi yang
+            // BENERAN reaktif (Consumer + ref.watch), bukan pakai
+            // parameter statis dari luar apa adanya. Dulu pemilih Bahasa
+            // di bawah ini (satu-satunya kontrol di sheet ini yang nggak
+            // dibungkus Consumer sendiri, beda dari toggle notifikasi &
+            // dropdown ukuran teks yang udah benar) kalau dipencet ganti
+            // bahasa, PILIHANNYA BENERAN kesimpen & kepakai di seluruh
+            // app -- tapi tampilan dropdown-nya sendiri, plus SEMUA teks
+            // lain di sheet ini (judul, label toggle, dst), tetap nyangkut
+            // di bahasa lama sampai sheet ini ditutup & dibuka ulang.
+            return Consumer(
+              builder: (context, ref, _) {
+                final currentLang = ref.watch(languageProvider);
+                final texts = _t[currentLang] ?? _t['en']!;
+                return AppBottomSheet(
               title: texts['menu_settings']!,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1038,6 +1052,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ],
               ),
+            );
+              },
             );
           },
         );
