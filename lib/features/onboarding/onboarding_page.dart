@@ -244,7 +244,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
     if (session.isExpired) {
       try {
-        final res = await auth.refreshSession();
+        final res = await _withNetworkRetry(() => auth.refreshSession());
         session = res.session;
       } catch (e) {
         // Refresh token-nya sendiri juga udah nggak berlaku (atau server
@@ -298,6 +298,32 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   /// teknis banget (mis. "AuthApiException: User already registered").
   /// Sekarang dipetakan ke pesan yang jelas & ngikutin bahasa aktif —
   /// error asli-nya tetap di-log ke console buat debugging.
+  /// Dulu satu kegagalan jaringan SESAAT langsung nampilin error ke orang
+  /// tua ("Couldn't reach the server") -- padahal servernya sendiri baik-
+  /// baik aja (dicek langsung lewat Supabase: project berstatus
+  /// ACTIVE_HEALTHY, database-nya kekonfirmasi jalan terus lewat log
+  /// pgbouncer). Laporan tester nunjukin ini masih kejadian walau bukan
+  /// gara-gara project-nya paused (beda dari kasus sebelumnya) -- jadi
+  /// kemungkinan besar hiccup koneksi sesaat di HP-nya sendiri, yang mana
+  /// coba lagi beberapa detik kemudian biasanya langsung berhasil.
+  ///
+  /// `AuthRetryableFetchException` itu tipe exception KHUSUS dari gotrue
+  /// (SDK auth-nya Supabase) -- dilempar CUMA kalau request-nya beneran
+  /// nggak sampai/gagal total (timeout, koneksi putus, error server 5xx),
+  /// BUKAN buat respons valid dari server kayak "password salah" (itu
+  /// AuthApiException biasa, lewat begitu aja di sini tanpa nunggu/
+  /// nyoba ulang). Jadi retry ini nggak bikin orang nunggu sia-sia kalau
+  /// password-nya emang salah -- cuma nyoba ulang buat kegagalan yang
+  /// KEMUNGKINAN besar sembuh sendiri.
+  Future<T> _withNetworkRetry<T>(Future<T> Function() action) async {
+    try {
+      return await action();
+    } on AuthRetryableFetchException {
+      await Future.delayed(const Duration(seconds: 2));
+      return await action();
+    }
+  }
+
   String _friendlyAuthError(Object e, Map<String, String> texts) {
     final String raw = e is AuthException ? e.message : e.toString();
     final String lower = raw.toLowerCase();
@@ -334,10 +360,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     setState(() => _isLoading = true);
     try {
       final supabase = Supabase.instance.client;
-      final AuthResponse res = await supabase.auth.signUp(
+      final AuthResponse res = await _withNetworkRetry(() => supabase.auth.signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-      );
+      ));
 
       if (res.user != null) {
         // auth.signUp() sudah berhasil (user Supabase Auth udah kebuat)
@@ -385,10 +411,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     setState(() => _isLoading = true);
     try {
       final supabase = Supabase.instance.client;
-      final res = await supabase.auth.signInWithPassword(
+      final res = await _withNetworkRetry(() => supabase.auth.signInWithPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
-      );
+      ));
 
       if (res.user != null) {
         // UPDATE database pakai bahasa yang baru user pilih! (upsert, bukan
