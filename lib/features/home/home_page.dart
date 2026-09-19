@@ -323,18 +323,39 @@ class _HomePageState extends ConsumerState<HomePage> {
         body: AppErrorView(message: "${texts['err_loading']}$error"),
       ),
       data: (data) {
-        final String childId = data?['id'] ?? '';
+        if (data == null) {
+          // Parent ini nggak punya anak sama sekali -- state yang BARU
+          // bisa kejadian sejak fitur hapus anak ada (dulu anak cuma bisa
+          // nambah, nggak bisa hilang, jadi Home nggak pernah perlu
+          // mikirin ini). Tanpa penjaga ini, Home tetap "jalan" dibangun
+          // pakai childId kosong -- semua provider di bawah punya
+          // fallback nol/kosong buat itu, TAPI kartu "Misi Hari Ini"
+          // tetap nawarin misi role rekomendasi default meski nggak ada
+          // anak yang beneran bisa ngerjainnya, dan mulai misi dari situ
+          // bakal gagal pas nyoba nyimpen progres (butuh anak aktif,
+          // lihat mission_journal_screen.dart). Sama kayak
+          // login/onboarding: nggak ada anak, arahin ke /identify.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) context.go('/identify');
+          });
+          return Scaffold(
+            backgroundColor: AppColors.background,
+            body: const AppLoading(),
+          );
+        }
+
+        final String childId = data['id'];
         _repairProgressOnce(childId);
         // Fallback-nya sekarang ikut bahasa, dan ikut jalan buat nama
         // yang KOSONG -- bukan cuma null. `?? "Anak Hebat"` yang dulu
         // nggak nangkep string kosong, dan orang tua yang milih English
         // tetap disapa pakai teks Indonesia.
-        final String rawChildName = (data?['name'] as String? ?? '').trim();
+        final String rawChildName = (data['name'] as String? ?? '').trim();
         final String childName =
             rawChildName.isEmpty ? texts['child_fallback']! : rawChildName;
 
         final realtimeXpAsync = ref.watch(childRealtimeXpProvider(childId));
-        final int totalXp = realtimeXpAsync.value ?? data?['total_xp'] ?? 0;
+        final int totalXp = realtimeXpAsync.value ?? data['total_xp'] ?? 0;
 
         final levelData = calculateLevelInfo(totalXp);
         final int childLevel = levelData.level;

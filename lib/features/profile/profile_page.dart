@@ -348,7 +348,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       await ref.read(selectedChildIdProvider.notifier).clear();
       if (mounted) {
         Navigator.pop(context);
-        context.go('/');
+        // BUKAN context.go('/') -- router ini nggak punya rute buat path
+        // '/' sama sekali (initialLocation-nya '/onboarding', tapi itu
+        // cuma dipakai SEKALI pas router pertama kali dibuat, bukan alias
+        // permanen buat '/'). go('/') jatuh ke errorBuilder ("Halaman
+        // nggak ketemu") tiap kali orang tua logout -- ketauan pas
+        // nyusurin app_router.dart, bukan dari laporan tester.
+        context.go('/onboarding');
       }
     } catch (e) {
       if (mounted) {
@@ -1310,7 +1316,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 if (!ctx.mounted) return;
                 Navigator.pop(ctx);
                 if (!mounted) return;
-                context.go('/');
+                // Sama kayak logout -- '/' bukan rute yang ada di
+                // app_router.dart, jatuh ke halaman "nggak ketemu".
+                context.go('/onboarding');
                 ScaffoldMessenger.of(
                   this.context,
                 ).showSnackBar(SnackBar(content: Text(texts['account_deleted']!)));
