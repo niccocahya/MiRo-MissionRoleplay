@@ -17,6 +17,11 @@ import '../../features/progress/progress_page.dart';
 import '../../features/profile/profile_page.dart';
 import '../../features/notifications/notifications_page.dart';
 
+// Urutan 4 tab navbar bawah -- SATU sumber kebenaran dipakai router (buat
+// nentuin tabIndex tiap rute, lihat appTabPage()) DAN CustomBottomNavBar
+// (buat gambar navbar-nya sendiri) biar dua-duanya nggak bisa nyimpang.
+const List<String> kTabRoutePaths = ['/home', '/missions', '/progress', '/profile'];
+
 class ScaffoldWithNavBar extends StatelessWidget {
   const ScaffoldWithNavBar({required this.child, super.key});
 
@@ -171,24 +176,25 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: HomePage()),
+              appTabPage(key: state.pageKey, tabIndex: 0, child: HomePage()),
         ),
         GoRoute(
           path: '/missions',
-          pageBuilder: (context, state) => appPage(
+          pageBuilder: (context, state) => appTabPage(
             key: state.pageKey,
+            tabIndex: 1,
             child: MissionsPage(roleId: state.uri.queryParameters['role']),
           ),
         ),
         GoRoute(
           path: '/progress',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: ProgressPage()),
+              appTabPage(key: state.pageKey, tabIndex: 2, child: ProgressPage()),
         ),
         GoRoute(
           path: '/profile',
           pageBuilder: (context, state) =>
-              appPage(key: state.pageKey, child: ProfilePage()),
+              appTabPage(key: state.pageKey, tabIndex: 3, child: ProfilePage()),
         ),
       ],
     ),

@@ -18,14 +18,14 @@ const Map<String, Map<String, String>> _t = {
   'en': {
     'close_photo': "Close photo",
     'title': "Memory Book",
-    'empty': "No photos yet -- complete a mission to start collecting memories.",
+    'empty': "No photos yet — complete a mission to start collecting memories.",
     'err': "Failed to load photos: ",
     'all_roles': "All",
   },
   'id': {
     'close_photo': "Tutup foto",
     'title': "Buku Kenangan",
-    'empty': "Belum ada foto -- selesaikan misi buat mulai ngumpulin kenangan.",
+    'empty': "Belum ada foto — selesaikan misi buat mulai ngumpulin kenangan.",
     'err': "Gagal memuat foto: ",
     'all_roles': "Semua",
   },

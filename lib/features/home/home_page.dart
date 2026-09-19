@@ -228,7 +228,7 @@ const Map<String, Map<String, String>> _t = {
     'streak_active_desc': "You're all set for today. Nice work!",
     'streak_start_title': "Start a streak today",
     'streak_start_desc': "Complete a mission to begin your streak.",
-    'streak_risk_title': "day streak -- about to break!",
+    'streak_risk_title': "day streak — about to break!",
     'streak_risk_desc': "Finish 1 mission today before it resets to zero.",
   },
   'id': {
@@ -257,7 +257,7 @@ const Map<String, Map<String, String>> _t = {
     'streak_active_desc': "Udah aman buat hari ini. Mantap!",
     'streak_start_title': "Mulai streak hari ini",
     'streak_start_desc': "Selesaikan misi buat mulai streak-mu.",
-    'streak_risk_title': "hari beruntun -- hampir putus!",
+    'streak_risk_title': "hari beruntun — hampir putus!",
     'streak_risk_desc': "Selesaikan 1 misi hari ini sebelum balik ke nol.",
   },
 };

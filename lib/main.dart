@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +25,29 @@ const String _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Status bar OS (jam, ikon notifikasi app lain, baterai) sempat
+  // keliatan kayak "ilang" di beberapa layar -- app ini sebelumnya
+  // nggak PERNAH ngatur gaya status bar-nya sama sekali, jadi Android
+  // milih sendiri warna ikonnya, dan kadang milih warna yang nge-blend
+  // sama latar app di baliknya (mis. ikon putih di atas layar app yang
+  // kebetulan juga terang), jadi ikonnya keliatan kayak nggak ada
+  // padahal cuma nggak keliatan gara-gara kontrasnya salah. Dikunci
+  // eksplisit di sini: mode edgeToEdge (status & navigation bar OS
+  // SELALU digambar, konten app boleh gambar di baliknya) + ikon status
+  // bar GELAP -- app ini sengaja satu mode terang doang (lihat catatan
+  // di MyApp di bawah), jadi ikon gelap yang konsisten kontras di
+  // hampir semua layar.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   // BUKAN assert() -- assert DIBUANG TOTAL di build --release (no-op),
   // jadi kalau APK release ke-build TANPA --dart-define-from-file=env.json,

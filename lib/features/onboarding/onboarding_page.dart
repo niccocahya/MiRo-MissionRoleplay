@@ -78,7 +78,7 @@ const Map<String, Map<String, String>> _t = {
     // pihak mana pun.
     'err_auth_generic': "Couldn't reach the server. Please try again in a moment.",
     'err_must_agree_terms': "Please check the box to agree to the Terms & Privacy Policy first.",
-    'err_profile_setup_failed': "Your account was created but we couldn't finish setting it up. Please try logging in -- if that doesn't work, try registering again.",
+    'err_profile_setup_failed': "Your account was created but we couldn't finish setting it up. Please try logging in — if that doesn't work, try registering again.",
     'recent_accounts': "Recent accounts on this device",
   },
   'id': {
@@ -115,7 +115,7 @@ const Map<String, Map<String, String>> _t = {
     'err_invalid_email': "Format emailnya kayaknya belum bener.",
     'err_auth_generic': "Server-nya lagi nggak bisa dihubungi. Coba lagi sebentar lagi ya.",
     'err_must_agree_terms': "Centang dulu kotak setuju Syarat & Kebijakan Privasi-nya ya.",
-    'err_profile_setup_failed': "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya -- kalau masih gagal, coba daftar ulang lagi.",
+    'err_profile_setup_failed': "Akunmu udah kebuat tapi ada masalah pas nyelesein setup-nya. Coba login dulu ya — kalau masih gagal, coba daftar ulang lagi.",
     'recent_accounts': "Akun yang pernah login di HP ini",
   },
 };

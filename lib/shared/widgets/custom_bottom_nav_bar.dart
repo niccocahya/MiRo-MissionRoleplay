@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/providers/language_provider.dart';
+import '../../core/router/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/responsive.dart';
 
-/// Empat rute yang punya tab di navbar bawah, dalam urutan tampil.
-const List<String> _kNavPaths = ['/home', '/missions', '/progress', '/profile'];
 const List<IconData> _kNavIcons = [
   Icons.home_filled,
   Icons.flag,
@@ -13,20 +14,30 @@ const List<IconData> _kNavIcons = [
   Icons.person_rounded,
 ];
 
+// Nama tab buat tooltip (tekan lama) -- dulu navbar cuma 4 ikon polos
+// tanpa label sama sekali, jadi nggak jelas artinya apa buat orang yang
+// belum hafal (masukan tester: "clueless kalo cuma logo").
+const Map<String, List<String>> _kNavLabels = {
+  'id': ['Beranda', 'Misi', 'Progress', 'Profil'],
+  'en': ['Home', 'Missions', 'Progress', 'Profile'],
+};
+
 bool _isActiveFor(String path, String location) {
   if (path == '/missions') return location.startsWith('/missions');
   if (path == '/home') return location == '/home' || location == '/';
   return location == path;
 }
 
-class CustomBottomNavBar extends StatelessWidget {
+class CustomBottomNavBar extends ConsumerWidget {
   const CustomBottomNavBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final String location = GoRouterState.of(context).uri.toString();
+    final String lang = ref.watch(languageProvider);
+    final labels = _kNavLabels[lang] ?? _kNavLabels['en']!;
 
-    final int activeIndex = _kNavPaths.indexWhere(
+    final int activeIndex = kTabRoutePaths.indexWhere(
       (path) => _isActiveFor(path, location),
     );
     // Kalau lagi di rute di luar 4 tab ini (nggak seharusnya kejadian,
@@ -55,7 +66,7 @@ class CustomBottomNavBar extends StatelessWidget {
       // dianimasikan (AnimatedPositioned) tiap kali tab aktif ganti.
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final double slotWidth = constraints.maxWidth / _kNavPaths.length;
+          final double slotWidth = constraints.maxWidth / kTabRoutePaths.length;
           const double circleSize = 48;
 
           return Stack(
@@ -87,13 +98,14 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
               Row(
-                children: List.generate(_kNavPaths.length, (i) {
+                children: List.generate(kTabRoutePaths.length, (i) {
                   return SizedBox(
                     width: slotWidth,
                     child: _NavItem(
                       icon: _kNavIcons[i],
+                      label: labels[i],
                       isActive: i == safeIndex,
-                      onTap: () => context.go(_kNavPaths[i]),
+                      onTap: () => context.go(kTabRoutePaths[i]),
                     ),
                   );
                 }),
@@ -109,11 +121,13 @@ class CustomBottomNavBar extends StatelessWidget {
 class _NavItem extends StatelessWidget {
   const _NavItem({
     required this.icon,
+    required this.label,
     required this.isActive,
     required this.onTap,
   });
 
   final IconData icon;
+  final String label;
   final bool isActive;
   final VoidCallback onTap;
 
@@ -123,14 +137,21 @@ class _NavItem extends StatelessWidget {
     // bergeser), jadi di sini cukup ikonnya doang -- warnanya masih
     // beda pas aktif/nggak, tapi nggak perlu dianimasikan sendiri lagi
     // karena lingkaran yang bergeser itu udah jadi penanda utamanya.
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Center(
-        child: Icon(
-          icon,
-          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.6),
-          size: 24,
+    //
+    // Tooltip: Flutter otomatis munculinnya pas ikonnya DITEKAN LAMA
+    // (long-press) -- tap biasa tetap langsung pindah tab kayak biasa,
+    // nggak keganggu/tertunda oleh tooltip-nya.
+    return Tooltip(
+      message: label,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Icon(
+            icon,
+            color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.6),
+            size: 24,
+          ),
         ),
       ),
     );

@@ -39,7 +39,7 @@ const Map<String, Map<String, String>> _t = {
     'back': "Back",
     'next': "Next",
     'leave_title': "Leave this mission?",
-    'leave_desc': "The steps you've done and the photos you've taken won't be saved -- you'd have to start this mission over.",
+    'leave_desc': "The steps you've done and the photos you've taken won't be saved — you'd have to start this mission over.",
     'leave_stay': "Keep going",
     'leave_confirm': "Leave",
     'voice_speed': "Voice speed",
@@ -61,7 +61,7 @@ const Map<String, Map<String, String>> _t = {
     'back': "Kembali",
     'next': "Lanjut",
     'leave_title': "Keluar dari misi ini?",
-    'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen -- misinya harus diulang dari awal.",
+    'leave_desc': "Langkah yang udah dikerjain sama foto yang udah diambil nggak bakal kesimpen — misinya harus diulang dari awal.",
     'leave_stay': "Lanjut Main",
     'leave_confirm': "Keluar",
     'voice_speed': "Kecepatan suara",
@@ -235,7 +235,13 @@ class _MissionPlayScreenState extends ConsumerState<MissionPlayScreen> {
 
     await flutterTts.setSpeechRate(ref.read(ttsSpeedProvider).rate);
     await flutterTts.setVolume(1.0);
-    await flutterTts.setPitch(2.0);
+    // Skala pitch flutter_tts itu 0.5 (paling rendah) - 2.0 (paling
+    // tinggi), 1.0 itu NORMAL/nada asli suara TTS-nya. Kode lama nyetel
+    // 2.0 -- nilai PALING TINGGI yang ada -- jadi suaranya selalu
+    // dibacain di nada paling melengking/cempreng. Masukan tester
+    // ("suaranya cempreng banget") ternyata bukan soal kualitas suara
+    // TTS device-nya, tapi ini.
+    await flutterTts.setPitch(1.0);
   }
 
   @override
