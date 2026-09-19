@@ -25,11 +25,29 @@ const String _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  assert(
-    _supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty,
-    'SUPABASE_URL / SUPABASE_ANON_KEY belum di-set. '
-    'Jalankan dengan --dart-define-from-file=env.json (copy dari env.example.json).',
-  );
+  // BUKAN assert() -- assert DIBUANG TOTAL di build --release (no-op),
+  // jadi kalau APK release ke-build TANPA --dart-define-from-file=env.json,
+  // _supabaseUrl/_supabaseAnonKey diam-diam kompilasi jadi STRING KOSONG,
+  // assert-nya nggak pernah sempat bunyi (udah dibuang duluan), dan
+  // Supabase.initialize() jalan dengan url kosong -- app kebuka normal,
+  // tapi SETIAP panggilan ke Supabase (login, daftar, apa pun) gagal
+  // total tanpa jejak DI SERVER SAMA SEKALI (nggak ada tempat yang
+  // dituju), keliatan persis kayak "nggak bisa reach server" padahal
+  // penyebabnya bukan jaringan ATAU server -- APK-nya sendiri yang
+  // ke-build salah. Ini KEJADIAN NYATA (baru ketauan setelah bongkar
+  // APK & nyari string URL-nya di binary -- nggak ketemu sama sekali).
+  // Sekarang ini nyata-nyata BERHENTI app-nya (di build APAPUN, release
+  // termasuk) dengan pesan yang jelas, bukan diam-diam lanjut jalan
+  // dengan client yang nggak akan pernah bisa connect ke mana pun.
+  if (_supabaseUrl.isEmpty || _supabaseAnonKey.isEmpty) {
+    throw StateError(
+      'SUPABASE_URL / SUPABASE_ANON_KEY belum ke-set (kosong). '
+      'Build ulang pakai --dart-define-from-file=env.json (copy dari '
+      'env.example.json) -- tanpa ini APK-nya kebuka normal tapi SETIAP '
+      'panggilan ke Supabase bakal gagal total, keliatan kayak masalah '
+      'jaringan padahal bukan.',
+    );
+  }
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
