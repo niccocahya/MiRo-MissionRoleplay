@@ -427,36 +427,59 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       ));
 
       if (res.user != null) {
-        // UPDATE database pakai bahasa yang baru user pilih! (upsert, bukan
-        // update biasa -- kalau baris parents-nya belum ada sama sekali,
-        // misalnya karena insert-nya gagal pas registrasi dulu, ini bikinin
-        // baris barunya sekarang juga daripada diem-diem gagal nge-update
-        // 0 baris. Lihat catatan self-heal di _handleRegister().)
-        await supabase.from('parents').upsert({
-          'id': res.user!.id,
-          'email': res.user!.email ?? _emailController.text.trim(),
-          'language_code': ref.read(languageProvider),
-        });
+        final currentUser = res.user!;
+        // Sign-in-nya SENDIRI udah kebukti berhasil di titik ini (baris
+        // if di atas) -- 3 langkah di bawah ini (sinkron baris parents,
+        // cek anak, simpan ke daftar akun terakhir) DIPISAH ke try/catch
+        // sendiri. Ketauan ini penting banget setelah laporan tester yang
+        // login-nya (email/password-nya BENAR) tetap nampilin
+        // "Couldn't reach the server" -- ternyata bukan sign-in-nya yang
+        // gagal, tapi salah satu dari 3 langkah SETELAHNYA yang kena
+        // hiccup transient, dan errornya kebawa ke catch di LUAR
+        // (`_friendlyAuthError`), yang nggak pernah dirancang buat
+        // kegagalan pasca-login -- jatuh ke pesan fallback yang keliru
+        // nuduh koneksi server, padahal kredensialnya valid dan sesi
+        // login-nya udah kebentuk. Orang tua yang LOGIN-NYA SUKSES jadi
+        // keliatan gagal total & disuruh coba lagi. Sama kayak
+        // _restoreSessionIfAny(): sesi valid = anggap login berhasil,
+        // jangan nyangkut di form ini gara-gara satu query lanjutan
+        // gagal -- /home sendiri punya provider yang re-fetch data anak
+        // dari nol begitu dibuka.
+        try {
+          // UPDATE database pakai bahasa yang baru user pilih! (upsert, bukan
+          // update biasa -- kalau baris parents-nya belum ada sama sekali,
+          // misalnya karena insert-nya gagal pas registrasi dulu, ini bikinin
+          // baris barunya sekarang juga daripada diem-diem gagal nge-update
+          // 0 baris. Lihat catatan self-heal di _handleRegister().)
+          await supabase.from('parents').upsert({
+            'id': currentUser.id,
+            'email': currentUser.email ?? _emailController.text.trim(),
+            'language_code': ref.read(languageProvider),
+          });
 
-        // Cek anak milik parent INI (dulu query ini nggak difilter
-        // `parent_id` sama sekali — cek "ada anak di seluruh tabel" bukan
-        // "anak milik akun ini". Juga pakai list+limit, bukan
-        // `.maybeSingle()`, biar nggak error kalau parent ini udah punya
-        // lebih dari 1 anak.)
-        final children = await supabase
-            .from('children')
-            .select('id')
-            .eq('parent_id', res.user!.id)
-            .limit(1);
+          // Cek anak milik parent INI (dulu query ini nggak difilter
+          // `parent_id` sama sekali — cek "ada anak di seluruh tabel" bukan
+          // "anak milik akun ini". Juga pakai list+limit, bukan
+          // `.maybeSingle()`, biar nggak error kalau parent ini udah punya
+          // lebih dari 1 anak.)
+          final children = await supabase
+              .from('children')
+              .select('id')
+              .eq('parent_id', currentUser.id)
+              .limit(1);
 
-        await ref.read(recentAccountsProvider.notifier).remember(
-              res.user!.email ?? _emailController.text,
-              res.user!.userMetadata?['full_name'] ??
-                  (res.user!.email ?? '').split('@').first,
-            );
+          await ref.read(recentAccountsProvider.notifier).remember(
+                currentUser.email ?? _emailController.text,
+                currentUser.userMetadata?['full_name'] ??
+                    (currentUser.email ?? '').split('@').first,
+              );
 
-        if (mounted) {
-          children.isEmpty ? context.go('/identify') : context.go('/home');
+          if (mounted) {
+            children.isEmpty ? context.go('/identify') : context.go('/home');
+          }
+        } catch (e) {
+          debugPrint("Login sukses tapi sinkronisasi lanjutan gagal, tetep lanjut ke /home: $e");
+          if (mounted) context.go('/home');
         }
       }
     } catch (e) {
