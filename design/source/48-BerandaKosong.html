@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Beranda, pengguna baru</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.noscroll{scrollbar-width:none}.noscroll::-webkit-scrollbar{display:none}
+.swap{animation:swap 280ms cubic-bezier(.22,1,.36,1)}
+@keyframes swap{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+.grow-y{transform-origin:center bottom;animation:growy 700ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.pulse{animation:pulse 1.4s ease-in-out .9s 3}
+.shine{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none}
+.shine::after{content:"";position:absolute;top:-20%;bottom:-20%;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-12deg);animation:shine 1.1s ease-out .5s 1 both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growy{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+@keyframes shine{to{left:130%}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+
+  <!-- TOP BAR -->
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between">
+    <a href="GantiAnak.dc.html" aria-label="Ganti anak: Rafi" class="press" style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:9999px;padding:3px 10px 3px 3px;box-shadow:0 2px 0 #D5DEEA;font-family:inherit;color:#0A264F">
+      <span style="width:34px;height:34px;border-radius:9999px;background:#D3E3F2;overflow:hidden;display:block"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span>
+      <span style="font-size:15px;font-weight:800">Rafi</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6F8A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </a>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;align-items:center;gap:4px" aria-label="0 ikan">
+        <svg width="26" height="24" viewBox="0 0 26 24" aria-hidden="true"><path d="M3 12c3-6 11-7 16-3l5-4v14l-5-4c-5 4-13 3-16-3Z" fill="#F1A22F"/><circle cx="8" cy="10.5" r="1.6" fill="#0A264F"/><path d="M6 8c1.5-1.6 3.5-2.4 5.5-2.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+        <span style="font-size:17px;font-weight:900;color:#8A5608;font-variant-numeric:tabular-nums">0</span>
+      </div>
+      <a href="Notifikasi.dc.html" aria-label="Notifikasi" class="press" style="box-sizing:border-box;position:relative;width:40px;height:40px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;display:flex;align-items:center;justify-content:center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span style="position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:9999px;background:#E57B65;border:2px solid #FFFFFF"></span>
+      </a>
+    </div>
+  </div>
+
+  <!-- STREAK PERTAMA (pengguna baru) -->
+  <div style="padding:6px 20px 0">
+    <div style="position:relative;background:#0A264F;border-radius:24px;box-shadow:0 6px 0 #04152E;padding:14px 16px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+      <img class="floaty" src="/mascot/maro-wave.webp" alt="" style="position:absolute;right:6px;top:6px;width:70px;height:84px;object-fit:contain">
+      <div style="display:flex;flex-direction:column;gap:2px;padding-right:76px">
+        <span style="font-size:20px;line-height:24px;font-weight:900;color:#FFFFFF">Halo Rafi, ayo mulai!</span>
+        <span style="font-size:13px;line-height:18px;font-weight:700;color:#A5CBEB">Selesaikan misi pertama untuk menyalakan kristal streak hari ini.</span>
+      </div>
+      <div style="display:flex;justify-content:space-between"><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">R</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">K</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#ECA091">J</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:3px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">M</span></span></div>
+    </div>
+  </div>
+
+  <!-- TAB PERAN -->
+  <div style="padding:16px 0 0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px 8px">
+      <span style="font-size:20px;font-weight:900">Pilih peran</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:56px;height:8px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span style="{{progressStyle}}"></span></span><span style="font-size:13px;font-weight:800;color:#3D5677">{{progressLabel}}</span></span>
+    </div>
+    <div class="noscroll" role="tablist" aria-label="Peran" style="display:flex;gap:10px;overflow-x:auto;padding:4px 20px 8px">
+      <sc-for list="{{roles}}" as="r" hint-placeholder-count="5">
+        <button role="tab" aria-selected="{{r.selected}}" onClick="{{r.pick}}" class="press" style="{{r.tabStyle}}">
+          <span style="{{r.thumbStyle}}"><img src="{{r.img}}" alt="" style="width:62px;height:76px;object-fit:cover;object-position:50% 12%"></span>
+          <span style="{{r.labelStyle}}">{{r.short}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- DAFTAR MISI (timeline kotak) -->
+  <div class="swap" key="{{listKey}}" style="position:relative;flex:1;min-height:0;padding:4px 20px 0;display:flex;flex-direction:column;gap:10px">
+    <span aria-hidden="true" style="{{railStyle}}"></span>
+    <sc-for list="{{missions}}" as="m" hint-placeholder-count="5">
+      <div style="position:relative;display:flex;gap:12px;align-items:flex-start">
+        <span style="{{m.badgeStyle}}">
+          <sc-if value="{{m.isDone}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></sc-if>
+          <sc-if value="{{m.isPerfect}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8Z" fill="#FFFFFF"/></svg></sc-if>
+          <sc-if value="{{m.isActive}}" hint-placeholder-val="{{false}}"><span style="font-size:17px;font-weight:900;color:#0A264F">{{m.num}}</span></sc-if>
+          <sc-if value="{{m.isLocked}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></sc-if>
+        </span>
+
+        <sc-if value="{{m.isActive}}" hint-placeholder-val="{{false}}">
+          <div style="{{m.activeCardStyle}}">
+            <img src="{{m.img}}" alt="" style="position:absolute;right:-4px;bottom:-6px;width:104px;height:128px;object-fit:contain">
+            <div style="position:relative;width:170px;display:flex;flex-direction:column;gap:6px">
+              <span style="{{m.nextTagStyle}}">Misi pertama</span>
+              <span style="font-size:20px;line-height:24px;font-weight:900">{{m.title}}</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span style="font-size:12px;font-weight:800;background:#FFFFFF;border-radius:9999px;padding:3px 9px">{{m.mins}} mnt</span>
+                <span style="font-size:12px;font-weight:800;background:#FFFFFF;border-radius:9999px;padding:3px 9px">{{m.skill}}</span>
+              </div>
+              <a href="Peserta.dc.html" class="press" style="margin-top:2px;align-self:flex-start;height:44px;padding:0 18px;display:flex;align-items:center;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;color:#FFFFFF;font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Mulai misi</a>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{m.notActive}}" hint-placeholder-val="{{true}}">
+          <button class="press" style="{{m.cardStyle}}" aria-label="{{m.aria}}">
+            <span style="flex:1;display:flex;flex-direction:column;gap:2px;text-align:left">
+              <span style="{{m.titleStyle}}">{{m.title}}</span>
+              <span style="display:flex;gap:10px;font-size:13px;font-weight:700;color:#5B6F8A"><span style="{{m.statusStyle}}">{{m.status}}</span><span>{{m.detail}}</span></span>
+            </span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav aria-label="Navigasi utama" style="position:relative;z-index:2;height:80px;flex-shrink:0;background:#FFFFFF;border-top:2px solid #E8EEF5;display:flex;align-items:center;justify-content:space-around;padding:0 12px 6px;box-sizing:border-box">
+    <a href="Main.dc.html" aria-label="Petualangan" aria-current="page" style="width:56px;height:44px;border-radius:14px;background:#FBEBE8;border:2px solid #F4C6BC;box-sizing:border-box;display:flex;align-items:center;justify-content:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5Z" fill="#E57B65"/><path d="M9 4v13.5M15 6.5V20" stroke="#FBEBE8" stroke-width="1.6"/></svg>
+    </a>
+    <a href="Tantangan.dc.html" aria-label="Tantangan" style="width:56px;height:44px;display:flex;align-items:center;justify-content:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="#A3B1C4"/></svg>
+    </a>
+    <a href="Memori.dc.html" aria-label="Memori" style="width:56px;height:44px;display:flex;align-items:center;justify-content:center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="15" height="14" rx="2.5"/><path d="M21 8v11a2 2 0 0 1-2 2H7"/><path d="m3 16 4-4 4 4 2-2 5 5"/></svg>
+    </a>
+    <a href="Profil.dc.html" aria-label="Profil" style="width:56px;height:44px;display:flex;align-items:center;justify-content:center">
+      <span style="width:30px;height:30px;border-radius:9999px;background:#E8EEF5;border:2px solid #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#5B6F8A">D</span>
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { role: 'chef' }; }
+  renderVals() {
+    const ROLES = {
+      doctor:  { short: 'Dokter', name: 'Dokter Kecil', base: '#5FA873', lip: '#3F8253', soft: '#E8F2E6', img: '/mascot/maro-doctor-win.webp', done: 0, perfect: [],
+        missions: [['Kuman Takut Sabun',10,'Kognitif'],['Detak Jantung Boneka',10,'Empati'],['Klinik Boneka',15,'Empati'],['Perban Pahlawan',15,'Motorik'],['Puncak: Hari Dokter',20,'Komunikasi']] },
+      chef:    { short: 'Koki', name: 'Koki Kecil', base: '#5C9FD6', lip: '#3D7FB8', soft: '#EBF4FA', img: '/mascot/maro-chef-win.webp', done: 0, perfect: [],
+        missions: [['Salad Pelangi',10,'Kognitif'],['Roti Isi Wajah Lucu',10,'Kreativitas'],['Membuat Bola Biskuit',15,'Motorik'],['Jus Tiga Warna',10,'Kognitif'],['Puncak: Piknik Koki',20,'Komunikasi']] },
+      artist:  { short: 'Seniman', name: 'Seniman Kecil', base: '#F08A4B', lip: '#C86A30', soft: '#FDF1E8', img: '/mascot/maro-artist-win.webp', done: 0, perfect: [],
+        missions: [['Cap Jari Warna-warni',10,'Kreativitas'],['Jalan-jalan Kolase Alam',20,'Motorik'],['Topeng Kertas',15,'Kreativitas'],['Lukis Batu',15,'Motorik'],['Puncak: Pameran Mini',20,'Komunikasi']] },
+      teacher: { short: 'Guru', name: 'Guru Kecil', base: '#9B7FD4', lip: '#7A5FB3', soft: '#F6F0FA', img: '/mascot/maro-teacher-win.webp', done: 0, perfect: [],
+        missions: [['Mengajari Mainan',15,'Komunikasi'],['Kelas Huruf',10,'Literasi'],['Dongeng Boneka',15,'Literasi'],['Kuis Hewan',10,'Kognitif'],['Puncak: Hari Guru Kecil',20,'Empati']] },
+      athlete: { short: 'Atlet', name: 'Atlet Kecil', base: '#E56B7E', lip: '#BF4C5F', soft: '#FAF0F0', img: '/mascot/maro-athlete-win.webp', done: 0, perfect: [],
+        missions: [['Lari Estafet Bantal',10,'Motorik'],['Yoga Hewan',10,'Motorik'],['Lempar Tangkap',10,'Motorik'],['Lompat Melewati Warna',15,'Kognitif'],['Puncak: Olimpiade Rumah',20,'Empati']] }
+    };
+    const order = ['doctor', 'chef', 'artist', 'teacher', 'athlete'];
+    const cur = this.state.role, R = ROLES[cur];
+    const roles = order.map((id) => {
+      const r = ROLES[id], on = id === cur;
+      return {
+        short: r.short, img: r.img, selected: on ? 'true' : 'false',
+        pick: () => this.setState({ role: id }),
+        tabStyle: 'flex-shrink:0;width:62px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;background:none;border:0;font-family:inherit',
+        thumbStyle: 'width:60px;height:60px;border-radius:20px;overflow:hidden;display:flex;justify-content:center;box-sizing:border-box;background:' + r.soft + ';' + (on ? 'border:3px solid ' + r.base + ';box-shadow:0 4px 0 ' + r.lip : 'border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA'),
+        labelStyle: 'font-size:13px;' + (on ? 'font-weight:900;color:#0A264F' : 'font-weight:700;color:#5B6F8A')
+      };
+    });
+    const missions = R.missions.map((m, i) => {
+      const st = i < R.done ? (R.perfect.indexOf(i) >= 0 ? 'perfect' : 'done') : (i === R.done ? 'active' : 'locked');
+      const peak = i === 4 && st === 'locked';
+      const badgeBg = peak ? '#FFF4DF;box-shadow:0 3px 0 #F5D39A' : st === 'perfect' ? '#F1A22F;box-shadow:0 3px 0 #C67B0D' : st === 'done' ? R.base + ';box-shadow:0 3px 0 ' + R.lip : st === 'active' ? '#FFFFFF;border:3px solid ' + R.base + ';box-shadow:0 3px 0 ' + R.lip : '#E8EEF5;box-shadow:0 3px 0 #D5DEEA';
+      return {
+        num: i + 1, title: m[0].replace('Puncak: ', ''), mins: m[1], skill: m[2], img: R.img,
+        isDone: st === 'done', isPerfect: st === 'perfect', isActive: st === 'active', isLocked: st === 'locked', notActive: st !== 'active',
+        aria: 'Misi ' + (i + 1) + ': ' + m[0] + ', ' + (st === 'locked' ? 'terkunci' : 'selesai'),
+        status: peak ? 'Misi Puncak' : st === 'locked' ? 'Terkunci' : st === 'perfect' ? 'Sempurna' : 'Selesai',
+        detail: st === 'locked' ? m[1] + ' menit' : m[2],
+        statusStyle: 'font-weight:900;color:' + (peak ? '#8A5608' : st === 'locked' ? '#5B6F8A' : st === 'perfect' ? '#8A5608' : '#15803D'),
+        nextTagStyle: 'align-self:flex-start;font-size:12px;font-weight:900;color:' + R.lip + ';background:#FFFFFF;border-radius:9999px;padding:3px 10px',
+        badgeStyle: 'position:relative;z-index:1;width:40px;height:40px;flex-shrink:0;border-radius:12px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin-top:' + (st === 'active' ? '18px' : '8px') + ';background:' + badgeBg,
+        titleStyle: 'font-size:15px;font-weight:900;color:' + (st === 'locked' ? '#5B6F8A' : '#0A264F'),
+        cardStyle: 'flex:1;min-height:56px;display:flex;align-items:center;gap:8px;padding:8px 12px 8px 14px;border-radius:16px;font-family:inherit;box-sizing:border-box;' + (peak ? 'background:#FFF8E9;border:2px dashed #F1A22F' : st === 'locked' ? 'background:#F5F8FB;border:2px dashed #D5DEEA' : 'background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA'),
+        activeCardStyle: 'position:relative;flex:1;min-height:146px;box-sizing:border-box;padding:14px;border-radius:20px;background:' + R.soft + ';border:2px solid ' + R.base + ';box-shadow:0 4px 0 ' + R.lip + ';overflow:hidden'
+      };
+    });
+    const doneN = R.done;
+    const days = ['S', 'S', 'R', 'K', 'J', 'S', 'M'];
+    const week = days.map((d, i) => ({
+      label: d, done: i < 4, today: i === 4, future: i > 4,
+      cellStyle: 'width:36px;display:flex;flex-direction:column;align-items:center;gap:3px;animation-delay:' + (0.2 + i * 0.06).toFixed(2) + 's',
+      labelStyle: 'font-size:12px;font-weight:900;color:' + (i === 4 ? '#ECA091' : i < 4 ? '#D3E3F2' : '#5B6F8A')
+    }));
+    return {
+      roles, missions, week, roleKey: 'h' + cur, listKey: 'l' + cur,
+      roleName: R.name,
+      progressLabel: R.short + ' ' + doneN + '/5',
+      progressStyle: 'display:block;height:100%;border-radius:9999px;transition:width 400ms;background:' + R.base + ';width:' + (doneN / 5 * 100) + '%',
+      railStyle: 'position:absolute;left:39px;top:20px;bottom:0;width:0;border-left:3px dashed ' + R.base + ';opacity:.45'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Detail momen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px"><a href="Memori.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><span style="flex:1;font-size:17px;font-weight:900">Momen</span><a href="DetailMomen.dc.html" aria-label="Bagikan momen" class="press" style="width:44px;height:44px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0A264F"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg></a></div>
+  <div style="flex:1;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div class="popin" style="position:relative;height:300px;border-radius:24px;overflow:hidden;background:#EBF4FA;border:2px solid #D5DEEA">
+      <img src="/mascot/maro-cooking.webp" alt="Foto Rafi dan Nara membuat bola biskuit" style="width:100%;height:100%;object-fit:cover;object-position:50% 30%;display:block">
+      <span style="position:absolute;left:12px;top:12px;font-size:13px;font-weight:900;color:#3D7FB8;background:#FFFFFF;border-radius:9999px;padding:4px 12px">Koki</span>
+      <span style="position:absolute;right:12px;bottom:12px;display:flex;gap:6px">
+        <span style="width:8px;height:8px;border-radius:9999px;background:#FFFFFF"></span><span style="width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.55)"></span><span style="width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.55)"></span>
+      </span>
+    </div>
+    <div class="rise" style="display:flex;flex-direction:column;gap:6px">
+      <h1 style="margin:0;font-size:24px;line-height:30px;font-weight:900">Membuat Bola Biskuit</h1>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="display:flex"><span style="width:30px;height:30px;border-radius:9999px;border:2px solid #FFFFFF;overflow:hidden;display:block;flex-shrink:0;background:#D3E3F2"><img src="/mascot/maro-peek.webp" alt="Rafi" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span><span style="margin-left:-10px"><span style="width:30px;height:30px;border-radius:9999px;border:2px solid #FFFFFF;overflow:hidden;display:block;flex-shrink:0;background:#FBEBE8"><img src="/mascot/maro-peek.webp" alt="Nara" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></span></span>
+        <span style="font-size:13px;font-weight:800;color:#5B6F8A">Rafi dan Nara, Kamis 27 November</span>
+      </div>
+    </div>
+    <div class="rise" style="background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px;animation-delay:.08s">
+      <span style="font-size:13px;font-weight:800;color:#5B6F8A">Kata anak setelah main</span>
+      <p style="margin:0;font-size:17px;line-height:24px;font-weight:800;color:#0A264F">"Adonannya lengket! Aku yang bikin bolanya paling bulat."</p>
+      <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:#3D7FB8"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3D7FB8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#3D7FB8"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>Rekaman suara Rafi, 0:14</span>
+    </div>
+    <div class="rise" style="display:flex;flex-wrap:wrap;gap:8px;animation-delay:.14s"><span style="height:32px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;background:#FFF4DF;font-size:13px;font-weight:900;color:#8A5608">+30 XP untuk tiap anak</span><span style="height:32px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;background:#E8F2E6;font-size:13px;font-weight:900;color:#2B5E3A">Motorik halus +3</span><span style="height:32px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;background:#EBF4FA;font-size:13px;font-weight:900;color:#1E467A">Main 18 menit</span></div>
+  </div>
+  <div style="padding:14px 20px 24px"><a href="KolaseBulanan.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Masukkan ke kolase</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

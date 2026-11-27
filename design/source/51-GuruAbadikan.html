@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Abadikan versi Guru</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;left:0;right:0;top:0;height:246px;background:#F6F0FA;border-radius:0 0 32px 32px"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between"><a href="Misi.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><span style="font-size:13px;font-weight:900;color:#7A5FB3;background:#FFFFFF;border-radius:9999px;padding:5px 12px">Sesi kelas selesai</span></div>
+
+  <div class="rise" style="position:relative;padding:8px 20px 0;display:flex;align-items:flex-end;gap:12px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-bottom:10px"><h1 style="margin:0;font-size:28px;line-height:34px;font-weight:900">Abadikan karya kelas</h1><p style="margin:0;font-size:15px;line-height:22px;font-weight:600;color:#3D5677">Masuk ke Memori TK B Melati. Fokus ke hasil karya, bukan wajah.</p></div>
+    <img class="floaty" src="/mascot/maro-main.webp" alt="" style="width:76px;height:106px;object-fit:contain;flex-shrink:0">
+  </div>
+  <div style="position:relative;padding:20px 20px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px"><span style="height:180px;box-sizing:border-box;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:14px;padding:8px 8px 6px;display:flex;flex-direction:column;box-shadow:0 3px 0 #D5DEEA"><span style="position:relative;flex:1;border-radius:6px;background:#FDF1E8;overflow:hidden;display:block"><img src="/mascot/maro-artist-win.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block"></span><span style="font-size:11px;font-weight:800;color:#5B6F8A;padding-top:6px;text-align:center">Karya 1</span></span><span style="height:180px;box-sizing:border-box;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:14px;padding:8px 8px 6px;display:flex;flex-direction:column;box-shadow:0 3px 0 #D5DEEA"><span style="position:relative;flex:1;border-radius:6px;background:#EBF4FA;overflow:hidden;display:block"><img src="/mascot/maro-cooking.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block"><span style="position:absolute;left:46%;top:14%;width:44px;height:44px;border-radius:9999px;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);background:rgba(255,255,255,.3)"></span></span><span style="font-size:11px;font-weight:800;color:#5B6F8A;padding-top:6px;text-align:center">Wajah diburamkan</span></span><span style="height:180px;box-sizing:border-box;border:2px dashed #A5CBEB;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D7FB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg><span style="font-size:13px;font-weight:900;color:#3D7FB8">Tambah</span></span></div>
+  <div style="position:relative;padding:14px 20px 0;display:flex;flex-direction:column;gap:10px">
+    <div style="background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:20px;box-shadow:none;padding:12px 14px;display:flex;align-items:center;gap:12px">
+      <span style="width:36px;height:36px;border-radius:11px;background:#F6F0FA;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7A5FB3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></svg></span>
+      <span style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:900">Buramkan wajah otomatis</span><span style="font-size:12px;line-height:16px;font-weight:700;color:#5B6F8A">Wajah murid diburamkan sebelum tersimpan</span></span><span role="switch" aria-checked="true" style="width:48px;height:28px;border-radius:9999px;background:#17843F;position:relative;flex-shrink:0;display:block"><span style="position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:9999px;background:#FFFFFF"></span></span>
+    </div>
+    <div style="display:flex;gap:10px;background:#FFF4DF;border:2px solid #F5D39A;border-radius:16px;padding:10px 12px"><span style="flex-shrink:0;display:flex"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C67B0D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#C67B0D"><path d="M12 3 4 7v6c0 4.5 3.4 7.6 8 8.5 4.6-.9 8-4 8-8.5V7Z"/></svg></span>
+      <span style="font-size:13px;line-height:18px;font-weight:700;color:#6B4307">Foto hanya untuk Memori kelas, tanpa nama murid. Pastikan sekolah sudah punya izin foto dari orang tua.</span>
+    </div>
+  </div>
+  <div style="position:relative;margin-top:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:4px"><a href="GuruBeranda.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Simpan ke memori kelas</a><a href="GuruBeranda.dc.html" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#B24A34">Lewati, tanpa foto</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

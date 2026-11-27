@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Ganti anak</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div aria-hidden="true" style="position:absolute;inset:0;background:#F5F8FB"><div style="margin:72px 20px 0;height:200px;border-radius:24px;background:#0A264F"></div></div>
+  <div aria-hidden="true" style="position:absolute;inset:0;background:rgba(4,21,46,.55)"></div>
+  <div role="dialog" aria-label="Ganti anak" class="rise" style="position:absolute;left:0;right:0;bottom:0;top:300px;background:#FFFFFF;border-radius:28px 28px 0 0;padding:10px 20px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px">
+    <span style="align-self:center;width:40px;height:5px;border-radius:9999px;background:#D5DEEA"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:20px;font-weight:900">Main bersama siapa?</span><a href="Profil.dc.html" style="font-size:13px;font-weight:800">Kelola anak</a></div>
+    <div role="radiogroup" aria-label="Pilih anak" style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{kids}}" as="k" hint-placeholder-count="4">
+        <button role="radio" aria-checked="{{k.sel}}" onClick="{{k.pick}}" class="press" style="{{k.style}}">
+          <sc-if value="{{k.isAll}}" hint-placeholder-val="{{false}}"><span style="display:flex;width:52px;flex-shrink:0"><span style="width:32px;height:32px;flex-shrink:0;border-radius:9999px;background:#D3E3F2;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span><span style="width:32px;height:32px;flex-shrink:0;border-radius:9999px;background:#FBEBE8;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;margin-left:-14px"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></span></sc-if>
+          <sc-if value="{{k.isKid}}" hint-placeholder-val="{{true}}"><span style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:{{k.bg}};border:0;box-sizing:border-box;overflow:hidden;display:block;"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></sc-if>
+          <span style="flex:1;display:flex;flex-direction:column;text-align:left"><span style="font-size:17px;font-weight:900;color:#0A264F">{{k.name}}</span><span style="font-size:13px;font-weight:700;color:#3D5677">{{k.meta}}</span></span>
+          <span style="{{k.dotStyle}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+        </button>
+      </sc-for>
+    </div>
+    <a href="SetupAnak.dc.html" class="press" style="height:52px;border-radius:16px;border:2px dashed #A3B1C4;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:#3D5677"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3D5677" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Tambah anak</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { pick: 'rafi' }; }
+  renderVals() {
+    const K = [['rafi','Rafi','6 tahun, level 6','#D3E3F2'],['nara','Nara','3 tahun, level 3','#FBEBE8'],['dimas','Dimas','8 tahun, level 8','#E8F2E6'],['all','Semua anak','Misi disesuaikan untuk anak termuda','']];
+    const kids = K.map(([id, name, meta, bg]) => { const on = this.state.pick === id; return { name, meta, bg, isAll: id === 'all', isKid: id !== 'all', sel: on ? 'true' : 'false', pick: () => this.setState({ pick: id }),
+      style: 'display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;border-radius:18px;font-family:inherit;' + (on ? 'background:#FFE8B6;border:2px solid #E57B65;box-shadow:0 3px 0 #E57B65' : 'background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA'),
+      dotStyle: 'width:26px;height:26px;flex-shrink:0;border-radius:9999px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;' + (on ? 'background:#22C55E' : 'background:#FFFFFF;border:2px solid #D5DEEA') }; });
+    return { kids };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Ubah data anak</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px"><a href="KelolaAnak.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><span style="flex:1;font-size:17px;font-weight:900">Ubah data Rafi</span></div>
+  <div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <span class="popin" style="position:relative"><span style="width:88px;height:88px;border-radius:9999px;border:3px solid #5C9FD6;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#D3E3F2"><img src="/mascot/maro-peek.webp" alt="Rafi" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span><span style="position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3D7FB8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#3D7FB8"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></span></span>
+      <div style="display:flex;gap:10px"><button aria-pressed="true" class="press" style="padding:0;border:0;background:none;border-radius:9999px;box-shadow:0 0 0 3px #5C9FD6"><span style="width:48px;height:48px;border-radius:9999px;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#D3E3F2"><img src="/mascot/maro-peek.webp" alt="Avatar" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></button><button aria-pressed="false" class="press" style="padding:0;border:0;background:none;border-radius:9999px;"><span style="width:48px;height:48px;border-radius:9999px;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#FBEBE8"><img src="/mascot/maro-peek.webp" alt="Avatar" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></button><button aria-pressed="false" class="press" style="padding:0;border:0;background:none;border-radius:9999px;"><span style="width:48px;height:48px;border-radius:9999px;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#E8F2E6"><img src="/mascot/maro-peek.webp" alt="Avatar" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></button><button aria-pressed="false" class="press" style="padding:0;border:0;background:none;border-radius:9999px;"><span style="width:48px;height:48px;border-radius:9999px;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#F6F0FA"><img src="/mascot/maro-peek.webp" alt="Avatar" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></button><button aria-pressed="false" class="press" style="padding:0;border:0;background:none;border-radius:9999px;"><span style="width:48px;height:48px;border-radius:9999px;border:2px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;flex-shrink:0;background:#FFF4DF"><img src="/mascot/maro-peek.webp" alt="Avatar" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></button></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px"><label for="nm" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:#3D5677"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3D5677" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Nama panggilan</label><input id="nm" type="text" value="Rafi" style="height:52px;box-sizing:border-box;border:2px solid #D5DEEA;border-radius:12px;padding:0 16px;font-family:inherit;font-size:15px;font-weight:700;color:#0A264F;background:#FFFFFF;outline:none"></div>
+    <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:800;color:#3D5677">Usia</span>
+      <div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:20px;padding:6px;box-shadow:none"><span class="press" style="width:44px;height:44px;border-radius:12px;background:#F5F8FB;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900">−</span><span style="flex:1;text-align:center;font-size:20px;font-weight:900">6 tahun</span><span class="press" style="width:44px;height:44px;border-radius:12px;background:#F5F8FB;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900">+</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:800;color:#3D5677">Kesukaan (maks 3)</span><div style="display:flex;flex-wrap:wrap;gap:8px"><span style="height:36px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;font-size:13px;font-weight:900;background:#0A264F;color:#FFFFFF;box-sizing:border-box">Memasak</span><span style="height:36px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;font-size:13px;font-weight:900;background:#0A264F;color:#FFFFFF;box-sizing:border-box">Dokter-dokteran</span><span style="height:36px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;font-size:13px;font-weight:900;background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-sizing:border-box">Menggambar</span><span style="height:36px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;font-size:13px;font-weight:900;background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-sizing:border-box">Olahraga</span><span style="height:36px;display:flex;align-items:center;padding:0 12px;border-radius:9999px;font-size:13px;font-weight:900;background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-sizing:border-box">Bercerita</span></div></div>
+    <a href="HapusAnak.dc.html" style="margin-top:4px;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:900;color:#B42318"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B42318" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>Hapus profil Rafi</a>
+  </div>
+  <div style="padding:12px 20px 24px"><a href="KelolaAnak.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Simpan perubahan</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Memori kosong</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+  <div style="padding:20px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
+    <h1 style="margin:0;font-size:32px;line-height:38px;font-weight:900">Memori</h1>
+    <span style="font-size:15px;font-weight:800;color:#3D5677">{{countLabel}}</span>
+  </div>
+  <div role="tablist" aria-label="Filter anak" style="padding:12px 20px 0;display:flex;gap:8px">
+    <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+      <button role="tab" aria-selected="{{f.sel}}" onClick="{{f.pick}}" class="press" style="{{f.style}}">
+        <sc-if value="{{f.hasAv}}" hint-placeholder-val="{{false}}"><span style="width:24px;height:24px;border-radius:9999px;background:{{f.bg}};overflow:hidden;display:block"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></sc-if>{{f.label}}
+      </button>
+    </sc-for>
+  </div>
+
+  <div class="rise" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 28px 0;text-align:center;gap:10px">
+    <div style="position:relative;width:260px;height:190px"><span style="position:absolute;left:30px;top:30px;width:96px;height:112px;background:#FFFFFF;border-radius:10px;padding:6px 6px 18px;box-sizing:border-box;transform:rotate(-9deg);box-shadow:0 3px 0 #D5DEEA"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:#EBF4FA;border:2px dashed #D5DEEA;box-sizing:border-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></span></span><span style="position:absolute;left:140px;top:10px;width:96px;height:112px;background:#FFFFFF;border-radius:10px;padding:6px 6px 18px;box-sizing:border-box;transform:rotate(4deg);box-shadow:0 3px 0 #D5DEEA"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:#FDF1E8;border:2px dashed #D5DEEA;box-sizing:border-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></span></span><span style="position:absolute;left:96px;top:60px;width:96px;height:112px;background:#FFFFFF;border-radius:10px;padding:6px 6px 18px;box-sizing:border-box;transform:rotate(-2deg);box-shadow:0 3px 0 #D5DEEA"><span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:#E8F2E6;border:2px dashed #D5DEEA;box-sizing:border-box"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></span></span><img class="floaty" src="/mascot/maro-main.webp" alt="" style="position:absolute;right:0;bottom:0;width:80px;height:110px;object-fit:contain"></div>
+    <h2 style="margin:0;font-size:24px;line-height:30px;font-weight:900">Album masih kosong</h2>
+    <p style="margin:0;font-size:15px;line-height:22px;font-weight:600;color:#3D5677">Setiap misi selesai, ambil satu foto. Di akhir bulan Maro merangkainya jadi kolase untuk keluarga.</p>
+    <div style="margin-top:6px;width:100%;display:flex;flex-direction:column;gap:6px;text-align:left">
+      <span style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800"><span style="width:28px;height:28px;border-radius:9px;background:#EBF4FA;color:#3D7FB8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900">1</span>Mainkan misi bersama anak</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800"><span style="width:28px;height:28px;border-radius:9px;background:#EBF4FA;color:#3D7FB8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900">2</span>Foto hasil karyanya</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800"><span style="width:28px;height:28px;border-radius:9px;background:#EBF4FA;color:#3D7FB8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900">3</span>Kolase jadi otomatis tiap bulan</span>
+    </div>
+    <div style="width:100%;margin-top:8px"><a href="BerandaKosong.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Mulai misi pertama</a></div>
+  </div>
+  </div>
+<nav aria-label="Navigasi utama" style="position:relative;z-index:2;height:80px;flex-shrink:0;background:#FFFFFF;border-top:2px solid #E8EEF5;display:flex;align-items:center;justify-content:space-around;padding:0 12px 6px;box-sizing:border-box"><a href="Main.dc.html" aria-label="Petualangan" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5Z" fill="none" stroke="#A3B1C4" stroke-width="2.6" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="#A3B1C4" stroke-width="1.8"/></svg></a><a href="Tantangan.dc.html" aria-label="Tantangan" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#A3B1C4" stroke-width="2.6"/><circle cx="12" cy="12" r="5" fill="none" stroke="#A3B1C4" stroke-width="2.4"/><circle cx="12" cy="12" r="1.4" fill="#A3B1C4"/></svg></a><a href="Memori.dc.html" aria-label="Memori" aria-current="page" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#FBEBE8;border:2px solid #F4C6BC"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="14" rx="2.5" fill="#E57B65" stroke="#E57B65" stroke-width="0"/><path d="M21 8v11a2 2 0 0 1-2 2H7" fill="none" stroke="#E57B65" stroke-width="2.6" stroke-linecap="round"/><path d="m3 16 4-4 4 4 2-2 5 5" fill="none" stroke="#FBEBE8" stroke-width="2.2" stroke-linejoin="round"/></svg></a><a href="Profil.dc.html" aria-label="Profil" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><span style="width:30px;height:30px;border-radius:9999px;background:#E8EEF5;border:2px solid #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#5B6F8A">D</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { who: 'all' }; }
+  renderVals() {
+    const KID = { rafi: ['Rafi','#D3E3F2'], nara: ['Nara','#FBEBE8'], dimas: ['Dimas','#E8F2E6'] };
+    const ROLE = { chef: ['Koki','#EBF4FA','#3D7FB8','/mascot/maro-chef-win.webp'], doctor: ['Dokter','#E8F2E6','#3F8253','/mascot/maro-doctor-win.webp'], artist: ['Seniman','#FDF1E8','#C86A30','/mascot/maro-artist-win.webp'], athlete: ['Atlet','#FAF0F0','#BF4C5F','/mascot/maro-athlete-win.webp'], teacher: ['Guru','#F6F0FA','#7A5FB3','/mascot/maro-teacher-win.webp'] };
+    const all0 = [
+      ['Membuat Bola Biskuit','chef','27 Nov',['rafi','nara'],170],
+      ['Kuman Takut Sabun','doctor','25 Nov',['rafi'],130],
+      ['Jalan-jalan Kolase Alam','artist','22 Nov',['nara','dimas'],130],
+      ['Yoga Hewan','athlete','20 Nov',['dimas'],170],
+      ['Mengajari Mainan','teacher','18 Nov',['nara'],150],
+      ['Salad Pelangi','chef','15 Nov',['rafi','dimas'],150]
+    ];
+    const who = this.state.who;
+    const all = [];
+    const list = all.filter((m) => who === 'all' || m[3].indexOf(who) >= 0).map((m, i) => {
+      const r = ROLE[m[1]];
+      return { title: m[0], role: r[0], date: m[2], img: r[3], aria: 'Momen ' + m[0] + ', ' + m[2],
+        photoStyle: 'position:relative;display:block;height:' + m[4] + 'px;border-radius:11px;overflow:hidden;background:' + r[1],
+        tagStyle: 'position:absolute;left:8px;top:8px;font-size:12px;font-weight:900;color:' + r[2] + ';background:#FFFFFF;border-radius:9999px;padding:2px 9px',
+        kids: m[3].map((k, j) => ({ name: KID[k][0], style: 'width:22px;height:22px;border-radius:9999px;border:2px solid #FFFFFF;overflow:hidden;display:block;background:' + KID[k][1] + (j ? ';margin-left:-8px' : '') }))
+      };
+    });
+    const cols = [{ items: list.filter((_, i) => i % 2 === 0) }, { items: list.filter((_, i) => i % 2 === 1) }];
+    const filters = [['all','Semua'],['rafi','Rafi'],['nara','Nara'],['dimas','Dimas']].map(([id, label]) => {
+      const on = who === id;
+      return { label, sel: on ? 'true' : 'false', hasAv: id !== 'all', bg: id === 'all' ? '' : KID[id][1],
+        pick: () => this.setState({ who: id }),
+        style: 'height:36px;display:flex;align-items:center;gap:6px;padding:0 12px 0 ' + (id === 'all' ? '12px' : '6px') + ';border-radius:9999px;font-family:inherit;font-size:13px;font-weight:900;' + (on ? 'background:#0A264F;color:#FFFFFF;border:2px solid #0A264F;box-shadow:0 2px 0 #04152E' : 'background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA')
+      };
+    });
+    return { cols, filters, filterKey: 'f' + who, countLabel: list.length + ' momen' };
+  }
+}
+</script>
+</body>
+</html>

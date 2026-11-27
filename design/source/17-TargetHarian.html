@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Target harian</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,#A5CBEB 0%,#D3E3F2 55%,#E9DFCE 100%);font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;inset:0;background-image:url(/mascot/snow.webp);background-size:cover;opacity:.5;pointer-events:none"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:14px"><a href="TambahAnak.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.75);border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div role="progressbar" aria-label="Langkah 6 dari 7" style="flex:1;height:16px;border-radius:9999px;background:rgba(255,255,255,.6);overflow:hidden"><div style="width:86%;height:100%;border-radius:9999px;background:#22C55E;position:relative"><div style="position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9999px;background:rgba(255,255,255,.4)"></div></div></div></div>
+  <div style="position:relative;padding:6px 20px 0;display:flex;align-items:flex-end;gap:6px">
+    <img class="floaty" src="/mascot/maro-wave.webp" alt="Maro" style="width:92px;height:113px;object-fit:contain;flex-shrink:0">
+    <div class="popin" style="transform-origin:left bottom;position:relative;margin-bottom:36px;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:20px;padding:12px 14px;font-size:17px;line-height:23px;font-weight:800">Berapa lama mau main bersama Rafi setiap hari?<span style="position:absolute;left:-10px;bottom:16px;width:16px;height:16px;background:#FFFFFF;border-left:2px solid #D5DEEA;border-bottom:2px solid #D5DEEA;transform:rotate(45deg)"></span></div>
+  </div>
+  <div role="radiogroup" aria-label="Target harian" style="position:relative;padding:14px 20px 0;display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{opts}}" as="o" hint-placeholder-count="4">
+      <button role="radio" aria-checked="{{o.sel}}" onClick="{{o.pick}}" class="press" style="{{o.style}}">
+        <span style="{{o.ringStyle}}"><span style="font-size:17px;font-weight:900;line-height:18px">{{o.min}}</span><span style="font-size:11px;font-weight:800">menit</span></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px;text-align:left">
+          <span style="display:flex;align-items:center;gap:8px"><span style="font-size:17px;font-weight:900;color:#0A264F">{{o.name}}</span><sc-if value="{{o.rec}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;font-weight:900;color:#15803D;background:#DCFCE7;border-radius:9999px;padding:2px 8px">Disarankan</span></sc-if></span>
+          <span style="font-size:13px;font-weight:700;color:#3D5677">{{o.desc}}</span>
+        </span>
+      </button>
+    </sc-for>
+  </div>
+  <p style="position:relative;margin:12px 24px 0;font-size:13px;line-height:18px;font-weight:700;color:#3D5677">Target ini mengisi kristal streak. Bisa diubah kapan saja di Pengaturan.</p>
+  <div style="position:relative;margin-top:auto;padding:16px 20px 28px"><a href="IzinNotif.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Lanjut</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { pick: 1 }; }
+  renderVals() {
+    const O = [[10,'Santai','Sedikit tapi rutin, cocok untuk hari sibuk'],[15,'Rutin','Satu misi pendek setiap hari'],[30,'Serius','Dua misi atau satu misi panjang'],[45,'Penuh','Untuk akhir pekan yang longgar']];
+    const opts = O.map(([min, name, desc], i) => { const on = this.state.pick === i; return { min, name, desc, rec: i === 1, sel: on ? 'true' : 'false', pick: () => this.setState({ pick: i }),
+      style: 'display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;border-radius:20px;font-family:inherit;' + (on ? 'background:#FFE8B6;border:2px solid #E57B65;box-shadow:0 4px 0 #E57B65' : 'background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 4px 0 #D5DEEA'),
+      ringStyle: 'width:52px;height:52px;flex-shrink:0;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 200ms cubic-bezier(.34,1.56,.64,1);' + (on ? 'background:#E57B65;color:#FFFFFF;transform:scale(1.06)' : 'background:#FBEBE8;color:#B24A34') }; });
+    return { opts };
+  }
+}
+</script>
+</body>
+</html>

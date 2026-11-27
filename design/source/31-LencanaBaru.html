@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Lencana baru</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+.spin{animation:spin 8s linear 1}@keyframes spin{to{transform:rotate(90deg)}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0A264F;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;padding:90px 20px 0;text-align:center">
+    <div style="position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center">
+      <span class="popin" aria-hidden="true" style="position:absolute;inset:0;border-radius:9999px;border:2px dashed rgba(241,162,47,.45)"></span><span class="popin" aria-hidden="true" style="position:absolute;inset:20px;border-radius:9999px;background:rgba(241,162,47,.08);animation-delay:.08s"></span>
+      <span aria-hidden="true" style="position:absolute;inset:40px;border-radius:9999px;background:rgba(241,162,47,.18)"></span>
+      <span class="popin" style="position:relative;animation-delay:.15s"><svg width="150" height="157" viewBox="0 0 80 84" aria-hidden="true"><path d="M40 4 72 22v36L40 76 8 58V22Z" transform="translate(0 6)" fill="#A86A3E"/><path d="M40 4 72 22v36L40 76 8 58V22Z" fill="#C8865A"/><path d="M40 13 64 27v26L40 67 16 53V27Z" fill="#FFFFFF"/><g transform="translate(28 28)" fill="none" stroke="#0A264F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.9V20h12v-6.1"/><path d="M6 14a4 4 0 0 1-1-7.9 5 5 0 0 1 9.6-1.5A4 4 0 1 1 18 14Z"/></g></svg></span>
+    </div>
+    <span class="rise" style="margin-top:8px;font-size:15px;font-weight:900;color:#F5B555;animation-delay:.4s">Lencana baru untuk Rafi</span>
+    <h1 class="rise" style="margin:4px 0 0;font-size:36px;line-height:40px;font-weight:900;color:#FFFFFF;animation-delay:.5s">Koki Rajin</h1>
+    <span class="rise" style="margin-top:8px;display:inline-flex;font-size:13px;font-weight:900;color:#0A264F;background:#E0B08E;border-radius:9999px;padding:4px 12px;animation-delay:.55s">Tingkat Perunggu</span>
+    <p class="rise" style="margin:12px 0 0;font-size:15px;line-height:22px;font-weight:700;color:#A5CBEB;max-width:28ch;animation-delay:.6s">3 misi Koki selesai. Selesaikan 7 lagi untuk naik ke Perak.</p>
+    <div class="rise" style="width:100%;max-width:260px;margin-top:14px;display:flex;flex-direction:column;gap:6px;animation-delay:.7s">
+      <span style="height:10px;border-radius:9999px;background:#1E467A;overflow:hidden;display:block"><span class="grow-x" style="display:block;width:30%;height:100%;border-radius:9999px;background:#F1A22F"></span></span>
+      <span style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;color:#A5CBEB"><span>Perunggu</span><span>3 dari 10</span><span>Perak</span></span>
+    </div>
+  </div>
+  <div class="rise" style="padding:16px 20px 24px;display:flex;flex-direction:column;gap:4px;animation-delay:.9s">
+    <a href="Main.dc.html" class="press" style="height:56px;border-radius:16px;background:#F1A22F;box-shadow:0 4px 0 #C67B0D;display:flex;align-items:center;justify-content:center;color:#0A264F;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Lanjut</a>
+    <a href="Lencana.dc.html" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#A5CBEB">Lihat koleksi lencana</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

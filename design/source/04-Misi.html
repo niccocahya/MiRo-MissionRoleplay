@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Mainkan misi, langkah demi langkah</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.stepin{animation:stepin 320ms cubic-bezier(.22,1,.36,1)}
+.noscroll{scrollbar-width:none}.noscroll::-webkit-scrollbar{display:none}
+@keyframes stepin{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;left:0;right:0;top:0;height:200px;background:#EBF4FA;border-radius:0 0 32px 32px"></span>
+
+  <!-- top bar: X + lesson bar + peserta -->
+  <div style="position:relative;height:64px;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px">
+    <a href="KonfirmasiKeluar.dc.html" aria-label="Keluar dari misi" style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A3B1C4" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </a>
+    <div role="progressbar" aria-label="{{progressLabel}}" style="flex:1;height:16px;border-radius:9999px;background:#E8EEF5;overflow:hidden">
+      <div style="{{barStyle}}"><div style="position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9999px;background:rgba(255,255,255,.4)"></div></div>
+    </div>
+    <div aria-label="Peserta: Rafi dan Nara" style="display:flex;flex-shrink:0">
+      <span style="width:32px;height:32px;border-radius:9999px;background:#D3E3F2;border:2px solid #FFFFFF;overflow:hidden;display:block"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span>
+      <span style="width:32px;height:32px;margin-left:-10px;border-radius:9999px;background:#FBEBE8;border:2px solid #FFFFFF;overflow:hidden;display:block"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span>
+    </div>
+  </div>
+
+  <!-- siapkan dulu -->
+  <div style="position:relative;padding:8px 20px 0;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline">
+      <span style="font-size:15px;font-weight:900">Siapkan dulu</span>
+      <span style="font-size:13px;font-weight:800;color:#3D5677">{{readyLabel}}</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+        <button onClick="{{t.toggle}}" aria-pressed="{{t.pressed}}" class="press" style="{{t.style}}">
+          <span style="{{t.boxStyle}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>{{t.name}}
+        </button>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- kartu langkah -->
+  <div style="position:relative;flex:1;min-height:0;padding:12px 20px 0;display:flex;flex-direction:column">
+    <div class="stepin" key="{{stepKey}}" style="flex:1;min-height:0;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:28px;padding:20px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+      <div style="height:150px;flex-shrink:0;border-radius:20px;background:#EBF4FA;position:relative;overflow:hidden">
+        <img src="/mascot/maro-chef-win.webp" alt="Maro sebagai koki" style="position:absolute;left:50%;bottom:-14px;transform:translateX(-50%);width:140px;height:172px;object-fit:contain">
+        <span style="position:absolute;left:12px;top:12px;background:#FFFFFF;border-radius:9999px;padding:4px 12px;font-size:13px;font-weight:900;color:#3D7FB8">{{stepLabel}}</span>
+      </div>
+      <h1 style="margin:0;font-size:24px;line-height:30px;font-weight:900">{{title}}</h1>
+      <p style="margin:0;font-size:17px;line-height:26px;font-weight:600;color:#0A264F">{{desc}}</p>
+      <div style="background:#EBF4FA;border-radius:16px">
+        <button onClick="{{toggleTips}}" aria-expanded="{{tipsExpanded}}" style="width:100%;min-height:48px;padding:0 14px;display:flex;align-items:center;gap:10px;background:none;border:0;font-family:inherit;cursor:pointer;text-align:left">
+          <span aria-hidden="true" style="width:32px;height:32px;flex-shrink:0;border-radius:10px;background:#FFFFFF;border:2px solid #A5CBEB;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 4.5h14a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5h-6.5L8 21v-3.5H5A2.5 2.5 0 0 1 2.5 15V7A2.5 2.5 0 0 1 5 4.5Z" fill="none" stroke="#3D7FB8" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 14.3 9.6 12a1.5 1.5 0 0 1 2.1-2.1l.3.3.3-.3a1.5 1.5 0 0 1 2.1 2.1Z" fill="#E57B65"/></svg></span>
+          <span style="flex:1;font-size:15px;font-weight:800;color:#0A264F">Tips untuk Ayah/Bunda</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3D5677" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{chevStyle}}"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <sc-if value="{{showTips}}" hint-placeholder-val="{{true}}">
+          <p style="margin:0;padding:0 14px 14px 56px;font-size:15px;line-height:22px;font-weight:600;color:#3D5677">{{tip}}</p>
+        </sc-if>
+      </div>
+      <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding-top:12px;border-top:2px dashed #E8EEF5">
+        <span style="width:28px;height:28px;flex-shrink:0;border-radius:9px;background:#E8EEF5;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6F8A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        <span style="font-size:13px;font-weight:700;color:#5B6F8A">{{nextLabel}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer -->
+  <div style="padding:16px 20px 28px">
+    <sc-if value="{{notLast}}" hint-placeholder-val="{{true}}">
+      <button onClick="{{next}}" class="press" style="width:100%;height:56px;border:0;border-radius:16px;background:#17843F;box-shadow:0 4px 0 #0F582A;color:#FFFFFF;font-family:inherit;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sudah!
+      </button>
+    </sc-if>
+    <sc-if value="{{isLast}}" hint-placeholder-val="{{false}}">
+      <a href="Abadikan.dc.html" class="press" style="height:56px;border-radius:16px;background:#17843F;box-shadow:0 4px 0 #0F582A;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Sudah! Selesaikan misi
+      </a>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { step: 0, tips: true, have: { a: true, b: true, c: false, d: false } }; }
+  renderVals() {
+    const steps = [
+      { title: 'Hancurkan!', desc: 'Cuci tangan dulu. Masukkan biskuit ke plastik bersih, lalu pukul dan tekan sampai jadi remahan halus.', tip: 'Libatkan indra: "Coba rasakan, remahannya kasar atau halus?"' },
+      { title: 'Campur dan bentuk', desc: 'Tuang sedikit susu kental manis ke remahan dan aduk. Ambil adonan, lalu bulatkan dengan tangan si kecil.', tip: 'Kenalkan sebab-akibat: "Kalau susunya kebanyakan, adonannya jadi lembek."' },
+      { title: 'Waktunya topping!', desc: 'Tambahkan meses, keju, atau gula halus. Cicipi bersama dan minta anak menceritakan rasanya.', tip: 'Biarkan anak memilih topping dan ukuran bola. Ini melatih rasa mandiri.' }
+    ];
+    const i = this.state.step, s = steps[i], total = steps.length;
+    const have = this.state.have;
+    const tools = [['a','Biskuit kering'],['b','Plastik bersih'],['c','Susu kental manis'],['d','Topping']].map(([k, name]) => {
+      const on = !!have[k];
+      return { name, pressed: on ? 'true' : 'false',
+        toggle: () => this.setState({ have: Object.assign({}, have, { [k]: !on }) }),
+        style: 'flex-shrink:0;height:36px;padding:0 12px 0 8px;border-radius:9999px;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:13px;font-weight:800;color:#0A264F;' + (on ? 'background:#FFFFFF;border:2px solid #5C9FD6;box-shadow:0 2px 0 #3D7FB8' : 'background:rgba(255,255,255,.6);border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA'),
+        boxStyle: 'width:18px;height:18px;border-radius:6px;display:flex;align-items:center;justify-content:center;' + (on ? 'background:#5C9FD6' : 'background:#FFFFFF;border:2px solid #A3B1C4;box-sizing:border-box')
+      };
+    });
+    const pct = Math.round((i / total) * 100);
+    return {
+      tools, title: s.title, desc: s.desc, tip: s.tip, stepKey: 'k' + i,
+      readyLabel: Object.values(have).filter(Boolean).length + ' dari 4 siap',
+      nextLabel: i < total - 1 ? 'Berikutnya: ' + steps[i + 1].title : 'Ini langkah terakhir. Sebentar lagi selesai!',
+      stepLabel: 'Langkah ' + (i + 1) + ' dari ' + total,
+      progressLabel: i + ' dari ' + total + ' langkah selesai',
+      barStyle: 'position:relative;height:100%;border-radius:9999px;background:#22C55E;transition:width 450ms cubic-bezier(.22,1,.36,1);width:' + pct + '%',
+      showTips: this.state.tips, tipsExpanded: this.state.tips ? 'true' : 'false',
+      chevStyle: 'transition:transform 200ms;transform:rotate(' + (this.state.tips ? 180 : 0) + 'deg)',
+      toggleTips: () => this.setState({ tips: !this.state.tips }),
+      notLast: i < total - 1, isLast: i === total - 1,
+      next: () => this.setState({ step: Math.min(i + 1, total - 1), tips: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Undang pendamping</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px"><a href="KelolaAnak.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><span style="flex:1;font-size:17px;font-weight:900">Undang pendamping</span></div>
+  <div style="flex:1;overflow:hidden;padding:4px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:flex-end;gap:10px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-bottom:6px"><h1 style="margin:0;font-size:24px;line-height:30px;font-weight:900">Main bareng lebih seru berdua</h1><p style="margin:0;font-size:15px;line-height:22px;font-weight:600;color:#3D5677">Pendamping bisa memulai misi dan melihat memori anak yang sama.</p></div>
+      <img class="floaty" src="/mascot/maro-wave.webp" alt="" style="width:80px;height:96px;object-fit:contain">
+    </div>
+    <div class="popin" style="background:#0A264F;border-radius:24px;box-shadow:0 6px 0 #04152E;padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#FFFFFF">
+      <span style="font-size:13px;font-weight:800;color:#A5CBEB">Kode undangan</span>
+      <span style="display:flex;gap:6px"><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">M</span><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">R</span><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">O</span><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">4</span><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">8</span><span style="width:40px;height:52px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">2</span></span>
+      <span style="font-size:12px;font-weight:700;color:#A5CBEB">Berlaku 48 jam</span>
+    </div>
+    <div style="display:flex;gap:10px"><a href="UndangPendamping.dc.html" class="press" style="flex:1;height:56px;box-sizing:border-box;border-radius:16px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 4px 0 #D5DEEA;color:#0A264F;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Salin kode</a><a href="UndangPendamping.dc.html" class="press" style="flex:1;height:56px;box-sizing:border-box;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#FFFFFF"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Kirim link</a></div>
+    <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:13px;font-weight:800;color:#5B6F8A">Pendamping (2 dari 3)</span>
+      <div style="background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:20px;padding:10px 12px;display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;border-radius:9999px;background:#FBEBE8;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#B24A34">D</span><span style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:900">Bunda Dinda</span><span style="font-size:12px;font-weight:700;color:#5B6F8A">Pemilik akun</span></span></div>
+      <div style="background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:20px;padding:10px 12px;display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;border-radius:9999px;background:#EBF4FA;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#3D7FB8">B</span><span style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:900">Ayah Bima</span><span style="font-size:12px;font-weight:700;color:#5B6F8A">Bisa memulai misi dan melihat memori</span></span><span style="font-size:13px;font-weight:900;color:#B42318">Hapus</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

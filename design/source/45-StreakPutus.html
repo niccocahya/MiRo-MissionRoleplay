@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Streak terhenti</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#0A264F;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:56px 20px 0;text-align:center;gap:10px">
+    <div style="position:relative;width:250px;height:190px">
+      <img src="/mascot/maro-main.webp" alt="" style="position:absolute;left:20px;bottom:0;width:120px;height:170px;object-fit:contain;filter:saturate(.75)">
+      <span class="popin" style="position:absolute;right:0;top:40px;width:64px;height:64px;border-radius:20px;background:#1E467A;display:flex;align-items:center;justify-content:center;animation-delay:.2s"><svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#3B4E6B"/><path d="M12 2 10 9l3 3-2 9" stroke="#0A264F" stroke-width="1.6" fill="none"/></svg></span>
+    </div>
+    <span class="rise" style="font-size:15px;font-weight:900;color:#ECA091">Streak 12 hari terhenti</span>
+    <h1 class="rise" style="margin:0;font-size:30px;line-height:36px;font-weight:900;color:#FFFFFF;animation-delay:.08s">Tidak apa-apa, kita mulai lagi</h1>
+    <p class="rise" style="margin:0;font-size:15px;line-height:22px;font-weight:700;color:#A5CBEB;max-width:30ch;animation-delay:.14s">Kemarin terlewat dan belum ada Pembeku Streak. Satu misi hari ini langsung memulai streak baru.</p>
+    <div class="rise" style="margin-top:6px;width:100%;background:#123462;border-radius:20px;padding:12px 14px;display:flex;justify-content:space-between;animation-delay:.2s"><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#6FA6D6"/></svg><span style="font-size:12px;font-weight:900;color:#D3E3F2">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#6FA6D6"/></svg><span style="font-size:12px;font-weight:900;color:#D3E3F2">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#6FA6D6"/></svg><span style="font-size:12px;font-weight:900;color:#D3E3F2">R</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#3B4E6B"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">K</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#ECA091">J</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">S</span></span><span style="display:flex;flex-direction:column;align-items:center;gap:4px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 20 8 17 21H7L4 8Z" fill="#1E467A"/></svg><span style="font-size:12px;font-weight:900;color:#5B6F8A">M</span></span></div>
+    <div class="rise" style="width:100%;display:flex;align-items:center;gap:12px;background:#123462;border-radius:20px;padding:12px 14px;text-align:left;animation-delay:.26s">
+      <span style="width:40px;height:40px;border-radius:12px;background:#1E467A;display:flex;align-items:center;justify-content:center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#A5CBEB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></svg></span>
+      <span style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;font-weight:900;color:#FFFFFF">Pulihkan dengan 200 ikan</span><span style="font-size:12px;font-weight:700;color:#A5CBEB">Berlaku 24 jam setelah putus. Ikanmu 340.</span></span>
+      <a href="Main.dc.html" class="press" style="height:40px;padding:0 14px;border-radius:12px;background:#F1A22F;box-shadow:0 3px 0 #C67B0D;display:flex;align-items:center;font-size:13px;font-weight:900;color:#0A264F">Pulihkan</a>
+    </div>
+  </div>
+  <div style="padding:16px 20px 24px;display:flex;flex-direction:column;gap:4px"><a href="Peserta.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Mulai misi hari ini</a><a href="Main.dc.html" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#A5CBEB">Nanti saja</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

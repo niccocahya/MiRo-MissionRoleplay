@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Abadikan momen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes popr{0%{opacity:0;transform:scale(.6) rotate(var(--r))}100%{opacity:1;transform:rotate(var(--r))}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;left:0;right:0;top:0;height:246px;background:#EBF4FA;border-radius:0 0 32px 32px"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between">
+    <a href="Misi.dc.html" aria-label="Kembali ke langkah misi" class="press" style="width:44px;height:44px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    <span style="font-size:13px;font-weight:900;color:#3D7FB8;background:#FFFFFF;border-radius:9999px;padding:5px 12px">Semua langkah selesai</span>
+  </div>
+
+  <div class="rise" style="position:relative;padding:12px 20px 0;display:flex;align-items:flex-end;gap:12px">
+    <div style="flex:1;display:flex;flex-direction:column;gap:6px;padding-bottom:10px">
+      <h1 style="margin:0;font-size:28px;line-height:34px;font-weight:900">Abadikan momen ini?</h1>
+      <p style="margin:0;font-size:15px;line-height:22px;font-weight:600;color:#3D5677">Foto masuk ke Kolase Memori Rafi dan Nara. Hanya kamu yang bisa melihatnya.</p>
+    </div>
+    <img class="floaty" src="/mascot/maro-main.webp" alt="Maro" style="width:84px;height:118px;object-fit:contain;flex-shrink:0">
+  </div>
+
+  <!-- slot foto -->
+  <div style="position:relative;padding:22px 20px 0;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:12px">
+    <sc-for list="{{slots}}" as="s" hint-placeholder-count="3">
+      <button onClick="{{s.tap}}" aria-label="{{s.aria}}" class="press" style="{{s.style}}">
+        <sc-if value="{{s.filled}}" hint-placeholder-val="{{false}}">
+          <span style="flex:1;width:100%;border-radius:6px;background:{{s.bg}};overflow:hidden;display:block"><img src="{{s.img}}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 20%;display:block"></span>
+          <span style="font-size:11px;font-weight:800;color:#5B6F8A;padding-top:6px">Foto {{s.n}}</span>
+        </sc-if>
+        <sc-if value="{{s.empty}}" hint-placeholder-val="{{true}}">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3D7FB8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.8l1.5-2h6.4l1.5 2h1.8A2.5 2.5 0 0 1 21 8.5V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          <span style="font-size:13px;font-weight:900;color:#3D7FB8">Tambah</span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </div>
+  <p style="position:relative;margin:10px 20px 0;font-size:13px;font-weight:700;color:#5B6F8A">{{countLabel}}</p>
+
+  <!-- tips foto -->
+  <div style="position:relative;padding:18px 20px 0">
+    <div style="background:#FFFFFF;border:2px solid #D5DEEA;border-radius:20px;padding:14px;display:flex;gap:12px">
+      <span aria-hidden="true" style="width:32px;height:32px;flex-shrink:0;border-radius:10px;background:#FFFFFF;border:2px solid #A5CBEB;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 4.5h14a2.5 2.5 0 0 1 2.5 2.5v8a2.5 2.5 0 0 1-2.5 2.5h-6.5L8 21v-3.5H5A2.5 2.5 0 0 1 2.5 15V7A2.5 2.5 0 0 1 5 4.5Z" fill="none" stroke="#3D7FB8" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 14.3 9.6 12a1.5 1.5 0 0 1 2.1-2.1l.3.3.3-.3a1.5 1.5 0 0 1 2.1 2.1Z" fill="#E57B65"/></svg></span>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:15px;font-weight:900">Tips foto dari Maro</span>
+        <span style="font-size:15px;line-height:22px;font-weight:600;color:#3D5677">Ambil dari setinggi mata si kecil dan foto hasil karyanya, bukan hanya wajahnya.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- bonus -->
+  <div style="position:relative;padding:12px 20px 0">
+    <div style="display:flex;align-items:center;gap:10px;background:#FEF7EE;border:2px solid #F5B555;border-radius:16px;padding:10px 14px">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8Z" fill="#F1A22F"/></svg>
+      <span style="font-size:15px;font-weight:800;color:#8A5608">Dengan foto, tiap anak dapat +5 XP</span>
+    </div>
+  </div>
+
+  <div style="position:relative;margin-top:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:4px">
+    <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{true}}"><a href="Perayaan.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Simpan</a></sc-if>
+    <sc-if value="{{noPhoto}}" hint-placeholder-val="{{false}}"><button disabled style="width:100%;height:56px;border:0;border-radius:16px;background:#E8EEF5;box-shadow:0 4px 0 #D5DEEA;color:#A3B1C4;font-family:inherit;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Simpan</button></sc-if>
+    <a href="Perayaan.dc.html" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#B24A34">Lewati, tanpa foto</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { n: 1 }; }
+  renderVals() {
+    const n = this.state.n;
+    const pics = [['/mascot/maro-cooking.webp','#EBF4FA'],['/mascot/maro-chef-win.webp','#FBEBE8'],['/mascot/maro-main.webp','#E8F2E6']];
+    const tilt = ['-3deg','2deg','-1.5deg'];
+    const slots = [0,1,2].map((i) => {
+      const filled = i < n;
+      return { n: i + 1, filled, empty: !filled, img: pics[i][0], bg: pics[i][1],
+        aria: filled ? 'Foto ' + (i + 1) + ', ketuk untuk menghapus' : 'Tambah foto',
+        tap: () => this.setState({ n: filled ? i : Math.min(i + 1, 3) }),
+        style: 'height:150px;padding:' + (filled ? '8px 8px 6px' : '0') + ';border-radius:' + (filled ? '10px' : '20px') + ';font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;' +
+          (filled ? 'background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 4px 0 #D5DEEA;--r:' + tilt[i] + ';transform:rotate(var(--r));animation:popr 420ms cubic-bezier(.34,1.56,.64,1) both' : 'background:rgba(255,255,255,.6);border:2px dashed #8BBCE6')
+      };
+    });
+    return { slots, hasPhoto: n > 0, noPhoto: n === 0, countLabel: n + ' dari 3 foto. Ketuk foto untuk menghapus.' };
+  }
+}
+</script>
+</body>
+</html>

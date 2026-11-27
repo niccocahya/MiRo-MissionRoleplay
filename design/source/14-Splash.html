@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,#A5CBEB 0%,#D3E3F2 55%,#E9DFCE 100%);font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;inset:0;background-image:url(/mascot/snow.webp);background-size:cover;opacity:.5;pointer-events:none"></span>
+  <a href="Bahasa.dc.html" aria-label="Mulai" style="position:absolute;inset:0;z-index:3"></a>
+  <div class="rise" style="position:relative;padding:64px 32px 0;display:flex;flex-direction:column;gap:10px">
+    <img class="popin" src="/brand/miro-logo-512.png" alt="Logo MiRO" style="width:72px;height:72px;border-radius:16px;box-shadow:0 4px 0 rgba(4,21,46,.35);display:block">
+    <h1 style="margin:14px 0 0;font-size:56px;line-height:58px;font-weight:900;letter-spacing:-.02em;color:#0A264F">MiRO</h1>
+    <p style="margin:0;font-size:20px;line-height:28px;font-weight:800;color:#1E467A;max-width:15ch">Petualangan seru tanpa layar gawai</p>
+  </div>
+  <img class="floaty" src="/mascot/maro-wave.webp" alt="Maro melambai" style="position:absolute;right:24px;bottom:150px;width:250px;height:306px;object-fit:contain">
+  <div style="position:absolute;left:32px;right:32px;bottom:56px;display:flex;flex-direction:column;align-items:center;gap:14px">
+    <span style="display:flex;gap:6px" aria-hidden="true"><span style="width:24px;height:8px;border-radius:9999px;background:#0A264F"></span><span style="width:8px;height:8px;border-radius:9999px;background:rgba(10,38,79,.25)"></span><span style="width:8px;height:8px;border-radius:9999px;background:rgba(10,38,79,.25)"></span></span>
+    <span style="font-size:13px;font-weight:800;color:#3D5677">Memuat petualangan...</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
