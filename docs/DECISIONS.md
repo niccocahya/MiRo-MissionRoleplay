@@ -15,9 +15,9 @@ Dokumen ini mengalahkan dokumen lain, termasuk gambar layar, untuk hal yang dise
 
 | # | Fitur di aplikasi sekarang | Keputusan |
 |---|---|---|
-| B1 | **Nama maskot "Mink"** vs "Maro" di desain | Satu konstanta `kMascotName` di `lib/core/app_info.dart`. Nilai **menunggu keputusan Nic** (lihat §F). Semua copy memakai konstanta ini, bukan nama tertulis. |
+| B1 | **Nama maskot "Mink"** vs "Maro" di desain | **FINAL: "Mink"** (lihat §F1). Satu konstanta `kMascotName = 'Mink'` di `lib/core/app_info.dart`. Semua copy memakai konstanta ini, bukan nama tertulis. Widget memakai awalan netral `Mascot` (`MascotImage`, `MascotTip`, `MascotPose`). |
 | B2 | **Bottom nav lama** (Home, Misi, Progres, Profil) | Diganti 4 tab desain: **Petualangan** (gabungan Home + Misi), **Tantangan**, **Memori**, **Profil**. Isi Progres pindah ke Perkembangan anak (20) dan Profil (06). |
-| B3 | **5 skill** di data (cognitive, empathy, creativity, literacy, motoric) vs 6 di desain (+Komunikasi) | Ikut **data: 5 skill**. Radar jadi segi lima. Teks "Komunikasi" di mockup diganti skill yang setara di data misi. Penambahan Komunikasi = keputusan terpisah (butuh kolom baru + isi ulang bobot misi). |
+| B3 | **5 skill** di data (cognitive, empathy, creativity, literacy, motoric) vs 6 di desain (+Komunikasi) | **FINAL: 5 skill** (lihat §F2), tanpa Komunikasi. Radar jadi segi lima. Teks "Komunikasi" di mockup diganti skill yang setara di data misi. |
 | B4 | **Kurva level** lama (4 level, berhenti di 500 XP) | Ganti ke rumus desain: XP level n→n+1 = `40 + 20 × (n − 1)`, tanpa batas. Level dihitung ulang dari `child_stats.total_xp`, tidak disimpan. Level pengguna uji coba bisa berubah; tidak apa-apa. |
 | B5 | **Streak per anak** (dihitung dari `mission_logs`) | Streak menjadi **milik akun** (PRD F9): hari dihitung tercapai jika total menit misi selesai (dari `missions_master.duration`) dari semua anak ≥ target harian. Tetap dihitung dari `mission_logs`, tanpa tabel baru, kecuali untuk pembeku dan pemulihan (lihat §D). |
 | B6 | **Jurnal: foto per langkah + rating bintang** | Ikut desain: **Abadikan setelah misi, maksimal 3 foto** (07), rating bintang dihapus dari alur (refleksi 08 sudah menangkap perasaan). Baris `journals` lama tetap tampil di Memori. |
@@ -80,11 +80,11 @@ Dokumen ini mengalahkan dokumen lain, termasuk gambar layar, untuk hal yang dise
 
 Catat semua pengganti sementara di `docs/ASSET_TODO.md`.
 
-## F. Menunggu keputusan Nic
+## F. Keputusan Nic
 
-1. **Nama maskot:** "Maro" (desain) atau "Mink" (aplikasi sekarang). Default sementara: `kMascotName = 'Maro'`.
-2. **Skill Komunikasi:** tetap 5 skill (default) atau tambah jadi 6.
-3. **Harga paket:** Rp39.000/bulan dan Rp299.000/tahun masih contoh.
+1. **Nama maskot: FINAL "Mink".** `kMascotName = 'Mink'`. Semua tulisan "Maro" di dokumen, mockup, dan copy desain dibaca sebagai Mink. Nama widget di kode memakai awalan netral `Mascot` (`MascotImage`, `MascotTip`, `MascotPose`), bukan `Maro`. Nama file aset `maro-*.webp` boleh tetap.
+2. **Skill: FINAL 5 skill** (`cognitive`, `empathy`, `creativity`, `literacy`, `motoric`), tanpa Komunikasi. Radar segi lima.
+3. **Harga paket (masih menunggu keputusan):** Rp39.000/bulan dan Rp299.000/tahun masih contoh.
 
 ## G. Backlog v2.2
 

@@ -45,7 +45,7 @@ Tujuan: fondasi visual siap, aplikasi lama tetap bisa jalan.
 5. Arahkan AppColors/AppTextStyles/AppSpacing lama ke token baru (alias) supaya layar lama langsung ikut Nunito dan warna baru tanpa rusak. Tandai @Deprecated.
 6. Daftarkan assets/mascot/ dan assets/brand/ di pubspec.
 7. Ikon aplikasi: perbarui konfigurasi flutter_launcher_icons ke assets/brand/miro-launcher-1024.png, adaptive foreground assets/brand/miro-adaptive-foreground-1024.png, background #FFE8B6. Jalankan dart run flutter_launcher_icons.
-8. lib/core/app_info.dart: tambah kMascotName = 'Maro' (DECISIONS F1).
+8. lib/core/app_info.dart: tambah kMascotName = 'Mink' (DECISIONS F1).
 9. Buat struktur folder kosong sesuai docs/standards/ARCHITECTURE.md §2.
 10. analysis_options.yaml: aturan dari CODE_QUALITY §1.
 11. Siapkan golden test: helper test/helpers/golden.dart (ukuran 390x844, DPR 2, load font Nunito dari aset, disableAnimations) + satu golden contoh.
