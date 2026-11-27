@@ -18,8 +18,8 @@ Dokumen ini mengalahkan dokumen lain, termasuk gambar layar, untuk hal yang dise
 | B1 | **Nama maskot "Mink"** vs "Maro" di desain | **FINAL: "Mink"** (lihat §F1). Satu konstanta `kMascotName = 'Mink'` di `lib/core/app_info.dart`. Semua copy memakai konstanta ini, bukan nama tertulis. Widget memakai awalan netral `Mascot` (`MascotImage`, `MascotTip`, `MascotPose`). |
 | B2 | **Bottom nav lama** (Home, Misi, Progres, Profil) | Diganti 4 tab desain: **Petualangan** (gabungan Home + Misi), **Tantangan**, **Memori**, **Profil**. Isi Progres pindah ke Perkembangan anak (20) dan Profil (06). |
 | B3 | **5 skill** di data (cognitive, empathy, creativity, literacy, motoric) vs 6 di desain (+Komunikasi) | **FINAL: 5 skill** (lihat §F2), tanpa Komunikasi. Radar jadi segi lima. Teks "Komunikasi" di mockup diganti skill yang setara di data misi. |
-| B4 | **Kurva level** lama (4 level, berhenti di 500 XP) | Ganti ke rumus desain: XP level n→n+1 = `40 + 20 × (n − 1)`, tanpa batas. Level dihitung ulang dari `child_stats.total_xp`, tidak disimpan. Level pengguna uji coba bisa berubah; tidak apa-apa. |
-| B5 | **Streak per anak** (dihitung dari `mission_logs`) | Streak menjadi **milik akun** (PRD F9): hari dihitung tercapai jika total menit misi selesai (dari `missions_master.duration`) dari semua anak ≥ target harian. Tetap dihitung dari `mission_logs`, tanpa tabel baru, kecuali untuk pembeku dan pemulihan (lihat §D). |
+| B4 | **Kurva level** lama (4 level, berhenti di 500 XP) | Ganti ke rumus desain: XP level n→n+1 = `40 + 20 × (n − 1)`, tanpa batas. Level dihitung ulang dari `children.total_xp` (dikoreksi di §H6), tidak disimpan. Level pengguna uji coba bisa berubah; tidak apa-apa. |
+| B5 | **Streak per anak** (dihitung dari `mission_logs`) | Streak menjadi **milik akun** (PRD F9): hari dihitung tercapai jika total menit misi selesai (dari `missions_master.duration_minutes`, lihat §H7) dari semua anak ≥ target harian. Tetap dihitung dari `mission_logs`, tanpa tabel baru, kecuali untuk pembeku dan pemulihan (lihat §D). |
 | B6 | **Jurnal: foto per langkah + rating bintang** | Ikut desain: **Abadikan setelah misi, maksimal 3 foto** (07), rating bintang dihapus dari alur (refleksi 08 sudah menangkap perasaan). Baris `journals` lama tetap tampil di Memori. |
 | B7 | **Chat AI Mink** (`penguin_chat_bot.dart`, Edge Function `mink-chat`) | Tetap **disembunyikan** seperti sekarang. Kode dipertahankan, tidak di-redesign di v2. |
 | B8 | **Narasi suara (TTS) + pilihan kecepatan** | **Dipertahankan.** Tombol speaker 44px di `StepCard` (04), kecepatan di Pengaturan (37) sebagai `SegmentedControl` Lambat/Normal/Cepat. |
@@ -89,3 +89,29 @@ Catat semua pengganti sementara di `docs/ASSET_TODO.md`.
 ## G. Backlog v2.2
 
 Co-teacher dan kode kelas, rekaman suara, tantangan mingguan, laporan bulanan kelas, paket guru berbayar, redesign chat AI.
+
+## H. Jawaban Prompt 0 (Flutter)
+
+### Pertanyaan
+
+| # | Topik | Keputusan |
+|---|---|---|
+| H1 | Paket pengguna uji coba lama | Otomatis paket Keluarga gratis: `parents.plan = 'family'`, `parents.plan_source = 'legacy'`. Tidak boleh ada anak atau peran mereka yang terkunci. |
+| H2 | XP | `missions_master.xp_reward` tetap sumber kebenaran. Migrasi data: misi biasa dengan `xp_reward` 10 → 20, Misi Puncak → 60. Bonus (+5 foto, +5 refleksi, +5 misi pertama hari itu) ditulis ke `mission_logs.earned_xp` di baris yang sama, supaya `progress_repair_service` tetap benar. |
+| H3 | Foto lama (publik di `mission-assets`) | **Semua** disalin ke bucket privat baru, dan referensinya diperbarui. File lama di `mission-assets` baru dihapus **per path** (diambil dari tabel `journals`) di Fase 9, setelah salinan terverifikasi. **Dilarang hapus massal**: bucket itu juga berisi artwork misi. |
+| H4 | Staging | Project Supabase terpisah `miro-staging` (dibuat Nic, kredensial lewat `env.staging.json`). Semua migrasi dan RLS diuji di staging dulu. **Produksi hanya disentuh setelah Nic setuju eksplisit.** |
+| H5 | Teks UI | Kamus `context.tr('key')` (ID/EN) dibangun mulai Fase 0. Layar baru wajib memakai kamus; layar lama dipindah saat disentuh. |
+
+### Konflik
+
+| # | Topik | Keputusan |
+|---|---|---|
+| H6 | Kolom XP | XP ada di `children.total_xp`, bukan `child_stats.total_xp` (koreksi B4). `child_stats` berisi poin skill. |
+| H7 | Durasi misi | Tambah kolom `missions_master.duration_minutes int`, diisi dari hasil parse kolom teks `duration`; gagal parse → 10. B5 memakai kolom ini. |
+| H8 | Misi Puncak | Tambah kolom `missions_master.is_capstone boolean default false`. Misi dengan `unlocked_level` tertinggi per peran = Puncak. Jumlah misi per peran ikut data, tidak dipaksa 5. |
+| H9 | RLS | Contoh di SECURITY_PRIVACY §3 memakai `parents` (bukan `accounts`); `account_members.account_id` merujuk `parents.id`. Kebijakan baru dibuat aditif; kebijakan lama dicabut hanya setelah tes lintas akun lulus di staging. |
+| H10 | `progress_repair_service` | Diperbarui ke aturan baru di Fase 2, lalu dimatikan begitu RPC `complete_mission_run` aktif. Klien lama berhenti menulis langsung ke tabel progres setelah RPC aktif. |
+| H11 | Akun lama dan onboarding baru | Akun lama dianggap sudah selesai onboarding: default `account_type = 'parent'`, `daily_goal_minutes = 15`, bahasa diambil dari pengaturan lama. Route lama (`/home`, `/missions`, `/progress`, `/identify`, `/onboarding`) di-redirect ke route baru. |
+| H12 | Lint | Aturan lint baru (CODE_QUALITY §1) aktif, tapi pelanggaran lama hanya diperbaiki di file yang disentuh. Baseline jumlah temuan `flutter analyze` disimpan di `docs/LINT_BASELINE.md`; angka ini tidak boleh naik. |
+| H13 | Buram wajah Guru (51) | `google_mlkit_face_detection` diizinkan hanya jika menambah APK < 10 MB per ABI (diukur di Fase 7). Jika lebih, pakai buram manual saja. |
+| H14 | Build | Script dan catatan build wajib memakai `--dart-define-from-file`. Pengecekan di `main.dart` yang melempar error jika `SUPABASE_URL`/`SUPABASE_ANON_KEY` kosong dipertahankan. |

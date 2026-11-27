@@ -26,9 +26,9 @@ MiRO menyimpan data tentang **anak**: nama panggilan, usia, foto, dan perkembang
 **RLS wajib aktif di semua tabel**, tanpa pengecualian. Pola dasar:
 
 ```sql
--- Anggota keluarga/akun
+-- Anggota keluarga/akun. Di MiRO, "akun" = tabel parents (DECISIONS §H9).
 create table account_members (
-  account_id uuid references accounts(id) on delete cascade,
+  account_id uuid references parents(id) on delete cascade,
   user_id uuid references auth.users(id) on delete cascade,
   role text check (role in ('owner','companion')),
   primary key (account_id, user_id)
@@ -58,6 +58,7 @@ Aturan:
 - Ikan dan pembeku streak dikurangi di RPC dengan pengecekan saldo dalam transaksi.
 - Service role key dan kunci pihak ketiga (Groq) **hanya** di Supabase secrets dan dipakai di Edge Function. Aplikasi hanya membawa `SUPABASE_URL` dan anon key (lewat `--dart-define-from-file`).
 - Uji RLS: tes otomatis yang login sebagai akun A dan memastikan tidak bisa membaca atau mengubah data akun B.
+- **Perubahan RLS pada tabel lama dibuat aditif** (DECISIONS §H9): kebijakan baru ditambahkan di samping yang lama, dan kebijakan lama dicabut hanya setelah tes lintas akun lulus di project staging `miro-staging`.
 
 ## 4. Foto
 

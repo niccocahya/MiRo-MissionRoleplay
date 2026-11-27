@@ -63,7 +63,7 @@ Laporkan file yang diubah, keputusan, dan hal yang perlu aku cek di HP.
 ```
 Kerjakan Fase 1 di branch feat/phase-1-widgets.
 
-Tujuan: semua widget di docs/standards/COMPONENTS.md §5.1, §5.2, §5.4, helper animasi (ANIMATION §2: MiroRise, MiroPopIn, MiroFloat, MiroPulse, Odometer), dan MaroImage/SpeechBubble/MaroTip selesai dengan semua varian dan state, tampil di /dev/gallery.
+Tujuan: semua widget di docs/standards/COMPONENTS.md §5.1, §5.2, §5.4, helper animasi (ANIMATION §2: MiroRise, MiroPopIn, MiroFloat, MiroPulse, Odometer), dan MascotImage/SpeechBubble/MascotTip selesai dengan semua varian dan state, tampil di /dev/gallery.
 
 Aturan:
 - Mulai dari MiroPressable (COMPONENTS §3.1), lalu MiroButton, MiroCard, ChoiceCard, dst.

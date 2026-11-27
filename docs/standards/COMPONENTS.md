@@ -142,9 +142,9 @@ Nomor layar dari `design/SCREENS.md`.
 | `CertificateCard` | `child`, `role`, `date` | 32 |
 | `PlanOption`, `TrialTimeline` | | 38 |
 | `NotificationItem` | `kind`, `unread`, `onTap` | 54 |
-| `MaroImage` | `pose`: main, wave, peek, cooking, `<role>Win`; `height`; `float` | banyak |
+| `MascotImage` | `pose`: main, wave, peek, cooking, `<role>Win`; `height`; `float` | banyak |
 | `SpeechBubble` | `text` | 01, 16, 23 sampai 27, 29 |
-| `MaroTip` | `title`, `body` (ikon `TipIcon`, bukan bola lampu) | 04, 07 |
+| `MascotTip` | `title`, `body` (ikon `TipIcon`, bukan bola lampu) | 04, 07 |
 
 ### 5.4 Ikon (`lib/shared/icons/`)
 
@@ -159,7 +159,7 @@ Nomor layar dari `design/SCREENS.md`.
 | `BoxShadow(blurRadius: …)` untuk kedalaman | Lip lewat `MiroPressable` |
 | Menyalin baris 7 kristal | `CrystalWeek` |
 | `MissionCardLocked`, `MissionCardDone` terpisah | `MissionCard(status: …)` |
-| `Image.asset('assets/images/penguin_splash2.png')` di layar | `MaroImage(pose: MaroPose.wave)` |
+| `Image.asset('assets/images/penguin_splash2.png')` di layar | `MascotImage(pose: MascotPose.wave)` |
 | `Text('🧠 Kognitif')` | Ikon Phosphor + `Text` |
 | `showModalBottomSheet` langsung | `showMiroSheet` |
 | `GestureDetector` untuk tombol | `MiroPressable` / `MiroButton` (semantik + fokus) |

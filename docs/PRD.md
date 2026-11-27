@@ -275,7 +275,7 @@ Milik **profil anak** (orang tua) atau **kelas** (guru).
 
 **Kurva level:** XP untuk naik dari level *n* ke *n+1* = `40 + 20 × (n − 1)`. Jadi L1→2 = 40 XP (2 misi), L4→5 = 100 XP, L9→10 = 200 XP. Level tidak punya batas atas.
 
-**Poin keahlian:** setiap misi punya bobot keahlian (mis. "Kuman Takut Sabun": Kognitif 3, Empati 2, Motorik 1). Setiap peserta menerima poin sebesar bobot tersebut. Keahlian: **Kognitif, Motorik, Kreativitas, Empati, Literasi, Komunikasi** (6 sumbu radar; "Kesabaran" digabung ke Empati agar radar konsisten).
+**Poin keahlian:** setiap misi punya bobot keahlian (mis. "Kuman Takut Sabun": Kognitif 3, Empati 2, Motorik 1). Setiap peserta menerima poin sebesar bobot tersebut. Keahlian: **5 skill**, yaitu Kognitif (`cognitive`), Empati (`empathy`), Kreativitas (`creativity`), Literasi (`literacy`), dan Motorik (`motoric`), sesuai data yang ada (radar segi lima; "Kesabaran" digabung ke Empati; tanpa Komunikasi, lihat DECISIONS §F2).
 
 ### F9. Streak & target harian (P0)
 
@@ -303,7 +303,7 @@ Milik **akun** (kebiasaan orang dewasa), bukan per anak, supaya orang tua dengan
 ### F12. Perkembangan & statistik (P0)
 
 **Per anak (orang tua):**
-- Radar 6 keahlian (dibandingkan bulan lalu sebagai garis putus-putus).
+- Radar 5 keahlian (dibandingkan bulan lalu sebagai garis putus-putus).
 - "Keahlian paling berkembang bulan ini" + kalimat insight + tombol misi rekomendasi.
 - Riwayat misi (daftar), total menit bermain, jumlah momen.
 - Mode **Semua anak**: kartu per anak berdampingan (perbandingan ringan, tanpa peringkat).
@@ -397,7 +397,7 @@ Pertanyaanmu: apakah akun guru perlu statistik, dan bentuknya seperti apa? Ini p
 ### Rekomendasi: **C + B** (per kelas anonim + profil guru)
 
 **Statistik kelas** (Profil → kelas → Statistik):
-- **Cakupan keahlian** (radar 6 sumbu): total poin keahlian dari misi yang dijalankan di kelas itu. Labelnya harus jujur: *"Keahlian yang sudah dilatih"*, **bukan** "kemampuan kelas". Tanpa observasi per siswa, aplikasi tidak bisa mengklaim siswa berkembang; yang bisa diukur adalah **paparan latihan**.
+- **Cakupan keahlian** (radar 5 sumbu): total poin keahlian dari misi yang dijalankan di kelas itu. Labelnya harus jujur: *"Keahlian yang sudah dilatih"*, **bukan** "kemampuan kelas". Tanpa observasi per siswa, aplikasi tidak bisa mengklaim siswa berkembang; yang bisa diukur adalah **paparan latihan**.
 - Jumlah sesi & total menit per minggu/bulan.
 - Rata-rata kehadiran per sesi (dari stepper jumlah siswa).
 - Suasana kelas: rata-rata skala perasaan dari refleksi guru ("Bagaimana antusiasme kelas?").

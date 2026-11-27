@@ -51,7 +51,7 @@ dart run flutter_launcher_icons
 8. **Tanpa ciri "AI slop"**: tidak ada `·` atau `—` sebagai pemisah, tidak ada eyebrow huruf kapital renggang, tidak ada kartu harga gaya SaaS, tidak ada daftar fitur bercentang, tidak ada gradien acak. Detail di `docs/standards/DESIGN.md` §6.
 9. **Logika gamifikasi (XP, level, streak, lencana, rekomendasi) adalah fungsi Dart murni** di `lib/core/game/` dengan unit test.
 10. File layar maksimal ±250 baris. File lama yang lebih dari itu dipecah saat disentuh.
-11. Semua teks lewat `context.tr('key')` (kamus ID/EN yang sudah ada). Akun Guru mengganti istilah otomatis.
+11. Semua teks lewat `context.tr('key')` (kamus ID/EN). **Kamus ini belum ada**: dibuat di Fase 0 (DECISIONS §H5). Kode lama masih memakai `lang == 'id' ? … : …` langsung di layar; layar baru wajib memakai kamus, layar lama dipindah saat disentuh. Akun Guru mengganti istilah otomatis.
 
 ## Cara kerja per tugas
 

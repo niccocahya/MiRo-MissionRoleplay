@@ -11,17 +11,17 @@
 | 01 | Onboarding: tipe akun | `01-TipeAkun` | `/welcome/account-type` | `features/onboarding/account_type_page.dart` | onboarding_page.dart | OnboardingShell, SpeechBubble, ChoiceCard, AvatarStack | 3 |
 | 02 | Beranda: peran dan misi | `02-Main` | `/adventure` | `features/adventure/adventure_page.dart` | home_page.dart, missions_page.dart, mission_path_screen.dart | MiroTopBar, StreakCard, CrystalWeek, RoleTabs, MissionTimeline | 4 |
 | 03 | Pilih peserta | `03-Peserta` | `/mission/:id/participants` | `features/mission/participants_page.dart` | (baru) | MiroPageHeader, ParticipantPicker, RewardChip | 4 |
-| 04 | Mainkan misi | `04-Misi` | `/mission/:id/play` | `features/mission/play_page.dart` | mission_play_screen.dart | SegmentBar, StepCard (+TTS), MaroTip | 4 |
+| 04 | Mainkan misi | `04-Misi` | `/mission/:id/play` | `features/mission/play_page.dart` | mission_play_screen.dart | SegmentBar, StepCard (+TTS), MascotTip | 4 |
 | 05 | Perayaan | `05-Perayaan` | `/mission/:id/done` | `features/mission/done_page.dart` | mission_win_screen.dart | CelebrationLayout, StatTile, RewardChip | 4 |
 | 06 | Profil | `06-Profil` | `/profile` | `features/profile/profile_page.dart` | profile_page.dart (sebagian), progress_page.dart (grafik minggu) | MiroCard (krem), WeekBars, MiroAvatar, MiroProgressBar | 6 |
-| 07 | Abadikan momen | `07-Abadikan` | `/mission/:id/capture` | `features/mission/capture_page.dart` | mission_journal_screen.dart | ScreenHero, PhotoSlot, MaroTip | 4 |
+| 07 | Abadikan momen | `07-Abadikan` | `/mission/:id/capture` | `features/mission/capture_page.dart` | mission_journal_screen.dart | ScreenHero, PhotoSlot, MascotTip | 4 |
 | 08 | Refleksi | `08-Refleksi` | `/mission/:id/reflect` | `features/mission/reflect_page.dart` | mission_reflection_screen.dart | FeelingScale, MiroSwitch, MiroTextField | 4 |
 | 09 | Memori | `09-Memori` | `/memories` | `features/memories/memories_page.dart` | memory_book_page.dart | MiroChip, MemoryTile, Polaroid | 5 |
 | 10 | Tantangan | `10-Tantangan` | `/challenges` | `features/challenges/challenges_page.dart` | (baru) | ChestWidget, QuestRow, FishCounter | 5 |
 | 11 | Kalender streak | `11-StreakSheet` | `sheet: StreakCalendarSheet` | `shared/sheets/streak_calendar_sheet.dart` | streak_calendar_page.dart | MiroSheet, StreakCalendar | 4 |
 | 12 | Beranda Guru | `12-GuruBeranda` | `/adventure (Guru)` | `features/adventure/adventure_page.dart` | (baru) | MiroTopBar, StreakCard, StatTile, RoleTabs, MissionTimeline | 7 |
 | 13 | Mulai misi di kelas | `13-GuruPeserta` | `/mission/:id/participants (Guru)` | `features/mission/participants_page.dart` | (baru) | MiroStepper, MiroSwitch, MiroBanner | 7 |
-| 14 | Splash | `14-Splash` | `/` | `features/onboarding/splash_page.dart` | onboarding_page.dart | MaroImage, logo | 3 |
+| 14 | Splash | `14-Splash` | `/` | `features/onboarding/splash_page.dart` | onboarding_page.dart | MascotImage, logo | 3 |
 | 15 | Daftar atau masuk | `15-Masuk` | `/auth` | `features/onboarding/auth_page.dart` | onboarding_page.dart | MiroSegmented, MiroTextField, MiroButton, akun terakhir | 3 |
 | 16 | Setup anak | `16-SetupAnak` | `/setup/child` | `features/setup/child_basic_page.dart` | identify_page.dart | SpeechBubble, MiroAvatar, MiroTextField, grid usia | 3 |
 | 17 | Target harian | `17-TargetHarian` | `/setup/daily-goal` | `features/setup/daily_goal_page.dart` | identify_page.dart (timePreference) | RadioCard, MiroPill | 3 |
@@ -35,7 +35,7 @@
 | 25 | Setup anak: gaya belajar | `25-GayaBelajar` | `/setup/child/learning-style` | `features/setup/child_learning_style_page.dart` | identify_page.dart | ChoiceCard multi | 3 |
 | 26 | Setup anak: keahlian | `26-Keahlian` | `/setup/child/skills` | `features/setup/child_skills_page.dart` | identify_page.dart (parentGoals) | ChoiceCard multi (maks 3, 5 skill) | 3 |
 | 27 | Ada si kecil lain? | `27-TambahAnak` | `/setup/more-children` | `features/setup/more_children_page.dart` | (baru) | MiroCard, MiroChip, SpeechBubble | 3 |
-| 28 | Izin notifikasi | `28-IzinNotif` | `/setup/notifications` | `features/setup/notifications_permission_page.dart` | (baru) | MaroImage, NotificationItem, RadioCard jam | 3 |
+| 28 | Izin notifikasi | `28-IzinNotif` | `/setup/notifications` | `features/setup/notifications_permission_page.dart` | (baru) | MascotImage, NotificationItem, RadioCard jam | 3 |
 | 29 | Setup kelas (Guru) | `29-SetupKelas` | `/setup/class` | `features/setup/class_setup_page.dart` | (baru) | MiroTextField, MiroChip, MiroStepper | 7 |
 | 30 | Statistik kelas (Guru) | `30-StatistikKelas` | `/class/stats` | `features/classroom/class_stats_page.dart` | (baru) | StatTile, SkillRadar, SkillBars | 7 |
 | 31 | Lencana baru | `31-LencanaBaru` | `/celebrate/badge` | `features/celebrate/new_badge_page.dart` | (baru) | CelebrationLayout, BadgeHex | 4 |
