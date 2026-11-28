@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:miro_app/core/l10n/tr.dart';
 import 'package:miro_app/core/theme/miro_theme.dart';
 import 'package:miro_app/core/theme/miro_tokens.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Ukuran golden dasar (CODE_QUALITY §3): 390×844 logical, DPR 2, sama
 /// dengan design/screens/*.png (780×1688).
@@ -45,6 +46,15 @@ Future<void> loadMiroFonts() async {
     nunito.addFont(rootBundle.load('assets/google_fonts/$file'));
   }
   await nunito.load();
+
+  // Ikon UI Phosphor (font paket). Nama keluarga mengikuti
+  // `PhosphorIconData`: 'packages/phosphor_flutter/Phosphor<Gaya>'.
+  for (final style in const ['Bold', 'Fill', 'Duotone']) {
+    final file = 'Phosphor-$style.ttf';
+    final loader = FontLoader('packages/phosphor_flutter/Phosphor$style')
+      ..addFont(rootBundle.load('packages/phosphor_flutter/lib/fonts/$file'));
+    await loader.load();
+  }
   _fontsLoaded = true;
 }
 
@@ -102,6 +112,8 @@ Future<void> pumpGolden(
   List<Override> overrides = const [],
 }) async {
   final guard = OverflowGuard.install();
+  // Provider pengaturan membaca shared_preferences (plugin native).
+  SharedPreferences.setMockInitialValues({});
   tester.view
     ..physicalSize = size * 2
     ..devicePixelRatio = 2;
@@ -125,7 +137,20 @@ Future<void> pumpGolden(
     ),
   );
   await tester.pumpAndSettle();
+  await precacheAllImages(tester);
   guard.check();
+}
+
+/// Gambar (WebP maskot, foto) di-decode secara asinkron oleh engine; tanpa
+/// ini golden diambil sebelum gambar selesai dimuat dan tampil kosong.
+Future<void> precacheAllImages(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      final image = element.widget as Image;
+      await precacheImage(image.image, element);
+    }
+  });
+  await tester.pumpAndSettle();
 }
 
 /// Membuat satu golden per varian di [kGoldenMatrix] untuk layar [id]

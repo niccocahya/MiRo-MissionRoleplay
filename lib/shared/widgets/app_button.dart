@@ -13,6 +13,7 @@ enum AppButtonVariant { primary, secondary, outline, danger }
 /// AppButton(label: 'Lanjut', onPressed: _next)
 /// AppButton(label: 'Batal', variant: AppButtonVariant.outline, onPressed: pop)
 /// ```
+@Deprecated('Pakai MiroButton (miro_button.dart). Dihapus di Fase 9.')
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,

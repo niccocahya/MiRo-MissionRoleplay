@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 /// Card putih bulat + shadow tipis — pola yang paling sering diulang di
 /// hampir semua layar (home, progress, profile, missions...) dengan radius
 /// & shadow yang beda-beda tiap tempat. Sekarang satu bentuk standar.
+@Deprecated('Pakai MiroCard (miro_card.dart). Dihapus di Fase 9.')
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,

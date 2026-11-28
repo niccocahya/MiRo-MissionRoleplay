@@ -48,7 +48,7 @@ abstract final class MiroTheme {
       textTheme: textTheme,
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: MiroColors.app,
         foregroundColor: MiroColors.ink,
         elevation: 0,

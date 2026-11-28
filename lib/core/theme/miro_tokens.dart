@@ -178,6 +178,10 @@ abstract final class MiroRadius {
   static const xxl = 24.0; // kartu besar, foto
   static const sheet = 28.0;
   static const pill = 999.0;
+
+  /// Kontrol segmen (HANDOFF 15): wadah 14, tab aktif 10.
+  static const segmented = 14.0;
+  static const segmentedTab = 10.0;
 }
 
 /// Tinggi "lip" (bayangan padat di bawah elemen yang bisa ditekan).
@@ -210,46 +214,93 @@ abstract final class MiroText {
   /// terdekat tanpa mencoba mengunduh dari internet.
   static const family = 'Nunito';
 
-  static TextStyle _n(
-    double size,
-    double lineHeight,
-    FontWeight w, {
-    Color color = MiroColors.ink,
-    double letterSpacing = 0,
-  }) =>
-      TextStyle(
-        fontFamily: family,
-        fontSize: size,
-        height: lineHeight / size,
-        fontWeight: w,
-        color: color,
-        letterSpacing: letterSpacing,
-      );
-
-  static final display = _n(40, 44, FontWeight.w900);
-  static final h1 = _n(32, 38, FontWeight.w900);
-  static final h2 = _n(24, 30, FontWeight.w900);
-  static final h3 = _n(20, 26, FontWeight.w900);
-  static final title = _n(17, 24, FontWeight.w900);
-  static final bodyLg = _n(17, 26, FontWeight.w600);
-  static final body = _n(15, 22, FontWeight.w600, color: MiroColors.ink2);
-  static final bodyStrong = _n(15, 22, FontWeight.w800);
-  static final caption = _n(13, 18, FontWeight.w700, color: MiroColors.ink2);
+  // Semua gaya `const` agar bisa dipakai di widget const (PERFORMANCE §2).
+  static const display = TextStyle(
+    fontFamily: family,
+    fontSize: 40,
+    height: 44 / 40,
+    fontWeight: FontWeight.w900,
+    color: MiroColors.ink,
+  );
+  static const h1 = TextStyle(
+    fontFamily: family,
+    fontSize: 32,
+    height: 38 / 32,
+    fontWeight: FontWeight.w900,
+    color: MiroColors.ink,
+  );
+  static const h2 = TextStyle(
+    fontFamily: family,
+    fontSize: 24,
+    height: 30 / 24,
+    fontWeight: FontWeight.w900,
+    color: MiroColors.ink,
+  );
+  static const h3 = TextStyle(
+    fontFamily: family,
+    fontSize: 20,
+    height: 26 / 20,
+    fontWeight: FontWeight.w900,
+    color: MiroColors.ink,
+  );
+  static const title = TextStyle(
+    fontFamily: family,
+    fontSize: 17,
+    height: 24 / 17,
+    fontWeight: FontWeight.w900,
+    color: MiroColors.ink,
+  );
+  static const bodyLg = TextStyle(
+    fontFamily: family,
+    fontSize: 17,
+    height: 26 / 17,
+    fontWeight: FontWeight.w600,
+    color: MiroColors.ink,
+  );
+  static const body = TextStyle(
+    fontFamily: family,
+    fontSize: 15,
+    height: 22 / 15,
+    fontWeight: FontWeight.w600,
+    color: MiroColors.ink2,
+  );
+  static const bodyStrong = TextStyle(
+    fontFamily: family,
+    fontSize: 15,
+    height: 22 / 15,
+    fontWeight: FontWeight.w800,
+    color: MiroColors.ink,
+  );
+  static const caption = TextStyle(
+    fontFamily: family,
+    fontSize: 13,
+    height: 18 / 13,
+    fontWeight: FontWeight.w700,
+    color: MiroColors.ink2,
+  );
   // Pengganti eyebrow: huruf kalimat, bukan kapital renggang.
-  static final label = _n(
-    13,
-    18,
-    FontWeight.w800,
+  static const label = TextStyle(
+    fontFamily: family,
+    fontSize: 13,
+    height: 18 / 13,
+    fontWeight: FontWeight.w800,
     color: MiroColors.ink3,
   );
-  static final small = _n(12, 16, FontWeight.w800, color: MiroColors.ink3);
+  static const small = TextStyle(
+    fontFamily: family,
+    fontSize: 12,
+    height: 16 / 12,
+    fontWeight: FontWeight.w800,
+    color: MiroColors.ink3,
+  );
 
   /// Label tombol: 15 sampai 17px, 800, UPPERCASE, tracking 0.04em.
   static TextStyle button({double size = 17, Color color = MiroColors.white}) =>
-      _n(
-        size,
-        size + 4,
-        FontWeight.w800,
+      TextStyle(
+        fontFamily: family,
+        fontSize: size,
+        height: (size + 4) / size,
+        fontWeight: FontWeight.w800,
         color: color,
         letterSpacing: size * 0.04,
       );
@@ -267,6 +318,24 @@ abstract final class MiroMotion {
   static const slow = Duration(milliseconds: 400);
   static const grow = Duration(milliseconds: 900);
   static const celebrate = Duration(milliseconds: 1000);
+
+  /// Kilau skeleton melintas (DESIGN_SYSTEM §7.17).
+  static const skeleton = Duration(milliseconds: 1200);
+
+  /// Lama toast tampil (COMPONENTS §5.1).
+  static const toast = Duration(seconds: 4);
+
+  /// Goyang ±6px saat batas pilihan tercapai atau input error (M3, M4).
+  static const shake = Duration(milliseconds: 200);
+
+  /// Jeda sebelum bar mulai tumbuh (`grow-x`).
+  static const growDelay = Duration(milliseconds: 350);
+
+  /// Loop `floaty` (naik-turun 4px) dan `pulse` (skala 1.14).
+  static const floatPeriod = Duration(milliseconds: 2400);
+  static const floatDelay = Duration(milliseconds: 600);
+  static const pulsePeriod = Duration(milliseconds: 1400);
+  static const pulseDelay = Duration(milliseconds: 900);
 
   static const stagger = Duration(milliseconds: 60);
   static const staggerTight = Duration(milliseconds: 40);

@@ -9,7 +9,7 @@ Catatan kerja per fase: apa yang selesai, selisih dari desain yang tersisa, kepu
 | Dokumen | Selesai | `docs/v2-design-kit` (PR #1, merged) | Kit v2.1 Flutter, DECISIONS §F/§H, 5 skill, Mink |
 | 0. Fondasi | Selesai | `feat/phase-0-foundation` | Lihat di bawah |
 | Sentry (SDK) | Selesai, project ditunda | `chore/sentry-setup`, `fix/ci-sentry-kotlin` | SDK terpasang, nonaktif selama `SENTRY_DSN` kosong |
-| 1. Widget | Belum | | |
+| 1. Widget | Selesai | `feat/phase-1-widgets` | Lihat di bawah |
 | 2. Data dan logika | Belum | | Butuh baca skema produksi (lihat "Database") |
 | 3 sampai 9 | Belum | | |
 
@@ -65,6 +65,72 @@ Belum dijalankan; dilakukan Nic di HP. Hasil ditulis di sini.
 
 ---
 
+## Fase 1: Widget
+
+### Selesai
+
+Semua widget di COMPONENTS §5.1 (primitif), §5.2 (layout), §5.4 (ikon), helper animasi (ANIMATION §2), dan widget maskot. Nilai px, warna, radius, dan lip diambil dari `design/source/*.html` (01, 04, 13, 15, 19, 24, 25, 33, 37, 41, 02).
+
+| Widget | File |
+|---|---|
+| `MiroPressable` (sistem lip, fokus keyboard, semantik) | `lib/shared/widgets/miro_pressable.dart` |
+| `MiroButton` (7 varian, 3 ukuran, loading, nonaktif, ikon) | `miro_button.dart` |
+| `MiroIconButton` (surface, onMood, ghost, badge), `MiroTextLink` | `miro_icon_button.dart`, `miro_text_link.dart` |
+| `MiroCard` (surface, muted, selected, tinted, cream, navy) | `miro_card.dart` |
+| `ChoiceCard` (grid/list, multi, goyang M3), `RadioCard`, `RadioDot` | `choice_card.dart`, `radio_card.dart` |
+| `MiroChip`, `MiroPill` | `miro_chip.dart` |
+| `MiroTextField` (label + ikon, helper, error + goyang M4, tombol mata 44) | `miro_text_field.dart` |
+| `MiroSwitch`, `MiroSegmented`, `MiroStepper` (besar/compact) | `miro_controls.dart` |
+| `MiroProgressBar` (`scaleX`, highlight), `SegmentBar` (lesson bar) | `miro_progress.dart` |
+| `MiroAvatar` (foto, inisial, pinguin), `AvatarStack` | `miro_avatar.dart` |
+| `MiroListGroup`, `MiroListRow` | `miro_list.dart` |
+| `showMiroSheet`, `MiroSheet`, `MiroAlertSheet` | `miro_sheet.dart` |
+| `MiroBanner`, `showMiroToast`, `MiroEmptyState`, `MiroErrorView`, `MiroSkeleton`, `CodeBoxes` | `miro_feedback.dart` |
+| `MiroScaffold`, `MiroStickyFooter`, `MiroPageHeader`, `OnboardingShell`, `MoodBackground`, `ScreenHero`, `MiroMaxWidth`, `screenGutter` | `layout/miro_layout.dart` |
+| `MiroTopBar`, `MiroBottomNav`, `CelebrationLayout` | `layout/miro_nav.dart` |
+| `MiroRise`, `MiroPopIn`, `MiroFloat`, `MiroPulse`, `MiroGrowX`, `Odometer`, `MiroShake` | `motion/miro_motion.dart` |
+| `MascotImage` (`MascotPose`), `SpeechBubble`, `MascotTip` | `mascot/mascot.dart` |
+| `StreakCrystal`, `FishIcon`, `ChestIcon`, `CrownIcon`, `TipIcon`, `SnowflakeIcon`, `PotIcon` | `lib/shared/icons/game_icons.dart` |
+| `FeelingFace` (5 wajah) | `lib/shared/icons/feeling_face.dart` |
+
+- Galeri `/dev/gallery` (hanya debug): 6 bagian (`lib/features/dev/gallery_*.dart`) dengan semua varian dan state, plus saklar "Kurangi animasi".
+- Widget lama ditandai `@Deprecated` dan diarahkan ke pengganti (tidak dihapus): `AppButton`, `AppCard`, `AppChoiceChip`, `AppBottomSheet`, `StepProgressBar`, `ChildAvatar`, `CustomBottomNavBar`, `CustomBackButton`, `AppScreenHeader`.
+- Responsif: `screenGutter` (20, atau 16 di < 360), `MiroMaxWidth` (tablet ≥ 600 → konten 480), maskot dibatasi 22% tinggi layar di layar < 700, tombol dan field memakai tinggi minimal (bukan tetap) agar teks 2× membungkus, angka besar di-clamp 1.5×, footer dan nav menambah padding bawah sistem, sheet maks 90%.
+- Token baru di `miro_tokens.dart` (semua dari mockup/dokumen, tidak ada angka lepas di widget): `MiroMotion.shake/skeleton/toast/growDelay/floatPeriod/floatDelay/pulsePeriod/pulseDelay`, `MiroRadius.segmented/segmentedTab`. `MiroText` sekarang `const` (bisa dipakai di widget const).
+- Kamus: kunci `field.*`, `onboarding.stepOf`, `topbar.*`, `dev.reduceMotion`.
+- `docs/ASSET_TODO.md`: daftar pengganti aset sementara.
+
+### Verifikasi
+
+- `flutter analyze`: **251** (turun dari 252; baseline diperbarui), 0 warning, 0 error. Semua file baru bersih.
+- `flutter test`: **40 hijau** (9 tes perilaku widget, 18 golden galeri, 13 lainnya).
+- Golden galeri per bagian di **390**, **360**, dan **390 teks 1.3×**: tanpa overflow (penjaga overflow sempat menangkap baris avatar galeri di 360 dan sudah diperbaiki).
+- Dibandingkan manual dengan desain: tombol (01, 33), kartu pilihan (01, 24), list/switch (37), field error (15), stepper (13), balon bicara dan maskot (01), ikon dan wajah (02, 08, 10, 21) cocok gaya dan ukurannya.
+
+### Bug yang ditemukan dan diperbaiki selama fase ini
+
+1. `MiroPressable`: permukaan menyusut seukuran isi sementara lip selebar penuh (terlihat di golden). Diperbaiki dengan `StackFit.passthrough`.
+2. `AnimationController` lazy di `MiroShake`, `_LoadingDots`, `MiroSkeleton` dibuat pertama kali di `dispose()` saat kurangi animasi aktif. Sekarang dibuat di `initState`.
+3. Tombol nonaktif tidak diumumkan sebagai tombol ke pembaca layar. Diperbaiki.
+4. Tombol mata di `MiroTextField` tergabung ke node field (TalkBack tidak bisa memfokuskannya). Sekarang node sendiri.
+5. Gambar WebP kosong di golden (decode asinkron). Helper golden sekarang pra-muat semua gambar.
+
+### Selisih dari desain yang tersisa
+
+- `ChoiceCard` varian list memakai judul 17 dan ikon 48 (sesuai 25-GayaBelajar). Layar 01 (Tipe akun) memakai judul 20 dan ikon 56; parameter ukuran ditambahkan saat layar 01 dibangun di Fase 3.
+- `RadioCard` radius 20 (mockup 19: 18; token terdekat).
+- Widget domain (COMPONENTS §5.3: `StreakCard`, `MissionCard`, `StepCard`, dst.) dibangun di fase layar yang memakainya (4 sampai 7), sesuai cakupan Prompt Fase 1.
+
+### Perlu dicek di HP
+
+- [ ] Buka `/dev/gallery` (build debug): tekan setiap tombol/kartu, pastikan turun setinggi lip dan kembali.
+- [ ] TalkBack: semua tombol, kartu pilihan (terpilih/tidak), switch, dan tombol mata terbaca benar.
+- [ ] Saklar "Kurangi animasi" di galeri: animasi masuk, float, pulse, odometer langsung diam.
+- [ ] Teks sistem paling besar: galeri tetap terbaca, tidak ada yang terpotong.
+- [ ] Buka sheet dan konfirmasi keluar dari galeri: tombol kembali Android menutup sheet.
+
+---
+
 ## Sentry (laporan crash)
 
 ### Selesai (SDK, `chore/sentry-setup`)
@@ -111,6 +177,13 @@ CI pertama setelah Sentry: lint dan tes hijau, tetapi **build APK gagal**: `sent
 | K5 | 0 | Bahasa default kamus `context.tr` saat tidak ada `MiroLocaleScope` = `id`. | Bahasa utama produk. Di app sungguhan scope selalu terpasang. |
 | K6 | 0 | `design/**` dikecualikan dari `flutter analyze`. | `design/miro_tokens.dart` adalah file referensi, bukan kode app; ikut dianalisis membuat baseline tidak akurat. |
 | K7 | 0 | CI memakai runner Windows. | Golden dibuat di Windows; render font berbeda antar-OS membuat golden gagal palsu di Linux. |
+| K8 | 1 | `ChoiceCard` memakai lip 4 (bukan 3). | DECISIONS C8 menulis "kartu 3", tetapi kartu pilihan di semua mockup (01, 24, 25) dan DESIGN_SYSTEM §4 memakai lip 4 seperti tombol. "Kartu" di C8 dibaca sebagai kartu info/interaktif (`MiroCard`, lip 3). |
+| K9 | 1 | Tips yang bisa dilipat (`MascotTip`) hanya fade, tinggi tidak dianimasikan. | HANDOFF 04 menulis "tinggi beranimasi", tetapi ANIMATION §3.1 melarang menganimasikan tinggi. Aturan teknis animasi dipilih. |
+| K10 | 1 | Ikon game dan wajah perasaan dirender dari SVG mockup lewat `flutter_svg`, bukan `CustomPainter`. | COMPONENTS §5.4 mengizinkan keduanya; SVG dari mockup menjamin bentuk identik. File tetap di `lib/shared/icons/`. |
+| K11 | 1 | Radius yang tidak ada di token (14/10 kontrol segmen) dijadikan token bernama, bukan angka lepas. `RadioCard` 18 → token `xl` 20. | CLAUDE.md aturan 1. |
+| K12 | 1 | Tombol dan field memakai tinggi **minimal** 56/48/40/52, bukan tinggi tetap. | RESPONSIVE §4: teks 2× harus membungkus, bukan terpotong. Di skala 1× tampilannya sama dengan mockup. |
+| K13 | 1 | `MiroPressable` tidak memicu getar. | ANIMATION §8: getar hanya untuk momen tertentu, tidak untuk navigasi biasa; dipasang per layar sesuai tabel itu. |
+| K14 | 1 | `.mcp.json` dimasukkan `.gitignore`. | Konfigurasi lokal berisi project ref produksi. |
 
 ---
 

@@ -30,6 +30,7 @@ enum AppChipStyle {
 /// AppChoiceChip(label: 'Favorit', icon: Icons.favorite, selected: on, onTap: ...)
 /// AppChoiceChip(label: 'Visual', selected: on, style: AppChipStyle.soft, onTap: ...)
 /// ```
+@Deprecated('Pakai MiroChip atau ChoiceCard. Dihapus di Fase 9.')
 class AppChoiceChip extends StatelessWidget {
   const AppChoiceChip({
     super.key,
