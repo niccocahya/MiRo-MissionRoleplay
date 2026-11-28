@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../services/crash_reporting.dart';
+
 // ==========================================
 // 🔥 PROVIDER BARU: PENGINTAI STATUS LOGIN (Biar Riverpod melek!)
 // ==========================================
@@ -73,7 +75,14 @@ final childrenListProvider =
       .from('children')
       .stream(primaryKey: ['id'])
       .eq('parent_id', user.id)
-      .order('created_at');
+      .order('created_at')
+      .map((rows) {
+        // QA §2: nama anak dihapus dari laporan crash.
+        CrashReporting.registerSensitive(
+          rows.map((r) => r['name']?.toString()),
+        );
+        return rows;
+      });
 });
 
 // ==========================================
