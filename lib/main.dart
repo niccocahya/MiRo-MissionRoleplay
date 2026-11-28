@@ -9,6 +9,7 @@ import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/providers/text_size_provider.dart';
 import 'core/l10n/tr.dart';
+import 'core/services/crash_reporting.dart';
 import 'core/theme/app_scroll_behavior.dart';
 import 'core/theme/miro_theme.dart';
 
@@ -82,7 +83,11 @@ void main() async {
 
   await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
 
-  runApp(const ProviderScope(child: MyApp()));
+  // Laporan crash (QA §2). DSN kosong atau build debug = tanpa Sentry, app
+  // tetap jalan normal.
+  await CrashReporting.run(
+    () => runApp(const ProviderScope(child: MyApp())),
+  );
 }
 
 class MyApp extends ConsumerWidget {

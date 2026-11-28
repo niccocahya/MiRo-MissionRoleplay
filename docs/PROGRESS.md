@@ -8,7 +8,7 @@ Catatan kerja per fase: apa yang selesai, selisih dari desain yang tersisa, kepu
 |---|---|---|---|
 | Dokumen | Selesai | `docs/v2-design-kit` (PR #1, merged) | Kit v2.1 Flutter, DECISIONS §F/§H, 5 skill, Mink |
 | 0. Fondasi | Selesai | `feat/phase-0-foundation` | Lihat di bawah |
-| Sentry | Berikutnya | `chore/sentry-setup` | Menunggu persetujuan login CLI |
+| Sentry (SDK) | Selesai | `chore/sentry-setup` | SDK terpasang; CLI/login menunggu kode handoff baru |
 | 1. Widget | Belum | | |
 | 2. Data dan logika | Belum | | Butuh baca skema produksi (lihat "Database") |
 | 3 sampai 9 | Belum | | |
@@ -62,6 +62,38 @@ Belum ada layar baru di fase ini. Layar lama memakai Nunito dan palet v2 lewat a
 ### Uji manual (QA §7)
 
 Belum dijalankan; dilakukan Nic di HP. Hasil ditulis di sini.
+
+---
+
+## Sentry (laporan crash)
+
+### Selesai (SDK, `chore/sentry-setup`)
+
+- Paket `sentry_flutter` (diizinkan, CLAUDE.md). Versi yang cocok dengan dependensi sekarang: 8.14.x.
+- `lib/core/services/crash_reporting.dart` (QA §2):
+  - DSN hanya dari `String.fromEnvironment('SENTRY_DSN')`; **tidak ada DSN di kode**.
+  - **DSN kosong atau build debug → Sentry tidak dinyalakan**, app jalan normal. Handler `FlutterError.onError` dan `PlatformDispatcher.instance.onError` tetap dipasang (fallback) supaya error tidak hilang diam-diam dan app tidak tertutup.
+  - Di release dengan DSN: Sentry memasang kedua handler itu sendiri. `sendDefaultPii = false`, `tracesSampleRate = 0.1`, tanpa screenshot, tanpa thread, **session replay dan view hierarchy tidak disentuh (default mati)**.
+  - `beforeSend` dan `beforeBreadcrumb` men-scrub: email, URL/path foto (Storage dan file lokal), query string URL REST, nama anak yang didaftarkan, dan nilai kunci sensitif (`name`, `nickname`, `note`, `email`, `photo_url`, `path`, `url`, dst.). Data pengguna di event dikosongkan.
+  - `CrashReporting.report(error, stack)` untuk error yang sudah ditangani di `catch` (dipakai mulai Fase 1).
+- Nama anak didaftarkan untuk scrubbing setiap kali `childrenListProvider` memuat data (`child_provider.dart`).
+- `main.dart`: `runApp` dijalankan lewat `CrashReporting.run`.
+- `SENTRY_DSN` ditambahkan ke `env.example.json` (kosong) dan `env.json` lokal (kosong, belum ada DSN).
+- Tes: `test/core/services/crash_reporting_test.dart` (6 kasus scrubbing).
+
+### File lain yang berubah
+
+Wizard Sentry **tidak** berjalan (kode handoff kedaluwarsa), jadi tidak ada perubahan gradle, `Info.plist`, atau konfigurasi native. Yang berubah hanya file registrasi plugin yang di-generate otomatis oleh `flutter pub add` (`linux/`, `macos/`, `windows/` `generated_plugin*`) dan `pubspec.yaml`/`pubspec.lock`.
+
+### Belum (butuh Nic)
+
+- **Kode handoff Sentry kedaluwarsa** (berlaku 5 menit; installer baru jalan setelah Fase 0 selesai). Login CLI, pembuatan project, dan auth token upload debug symbols belum dilakukan.
+- Setelah ada DSN: isi `SENTRY_DSN` di `env.json`, build release, lalu picu satu error uji untuk memastikan event masuk tanpa data anak.
+- Auth token Sentry (upload debug symbols) hanya sebagai secret lokal/CI (`SENTRY_AUTH_TOKEN`), tidak di-commit.
+
+### Catatan keamanan
+
+`env.json` lokal masih berisi `GROQ_API_KEY`. Kode app tidak lagi membacanya (chat AI lewat Edge Function `mink-chat`), dan SECURITY_PRIVACY §3 melarang kunci Groq di app. **Saran: hapus baris itu dari `env.json`** supaya tidak ikut terbawa ke build. Nilainya tidak kusentuh.
 
 ---
 

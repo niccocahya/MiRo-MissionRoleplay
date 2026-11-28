@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_tts
   gal
   printing
+  sentry_flutter
   share_plus
   url_launcher_windows
 )

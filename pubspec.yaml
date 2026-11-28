@@ -47,6 +47,7 @@ dependencies:
   phosphor_flutter: ^2.1.0
   flutter_svg: ^2.3.4
   flutter_image_compress: ^2.5.1
+  sentry_flutter: ^8.14.2
 
 # ==================== DEV DEPENDENCIES ====================
 dev_dependencies:
