@@ -122,7 +122,7 @@ Layar utama. Menjawab dua pertanyaan: "sudah berapa lama main hari ini?" dan "mi
 | `RoleTabs` | `roles[]`, `active`, `onChange` | `role="tablist"`; tab `role="tab"` + `aria-selected` |
 | `MissionTimeline` | `role`, `missions[]` | Render `MissionRow` per misi |
 | `MissionRow` | `mission`, `state` | `done` / `perfect` / `active` / `locked`, lihat DS §7.12 |
-| `MissionActiveCard` | `mission`, `role` | Latar `-soft`, border & lip warna peran, Maro berkostum 104×128 **tidak terpotong** |
+| `MissionActiveCard` | `mission`, `role` | Latar `-soft`, border & lip warna peran, Mink berkostum 104×128 **tidak terpotong** |
 | `BottomNav` | `active="adventure"` | DS §7.11 |
 
 ### State & interaksi
@@ -167,7 +167,7 @@ Judul misi selain yang sudah ada di repo (Kuman Takut Sabun, Membuat Bola Biskui
 Muncul setelah "MULAI MISI" **hanya jika akun punya ≥ 2 anak** (PRD F5). Multi-select; default = anak aktif di switcher.
 
 ### Layout
-TopBar (IconButton kembali + `overline` "Misi 3 dari 5") → **kartu ringkasan misi** 96px (latar peran `-soft`, border & lip warna peran, Maro berkostum 96×118 di kanan, label "Koki Kecil" (13px 800) + judul `h3` + chip "15 menit") → `h2` "Siapa yang ikut main?" + `body` `ink-2` → baris "{n} dari {total} anak dipilih" + tautan ghost "Pilih semua" → grid 3 kolom gap 12 → kartu ringkasan hadiah → footer.
+TopBar (IconButton kembali + `overline` "Misi 3 dari 5") → **kartu ringkasan misi** 96px (latar peran `-soft`, border & lip warna peran, Mink berkostum 96×118 di kanan, label "Koki Kecil" (13px 800) + judul `h3` + chip "15 menit") → `h2` "Siapa yang ikut main?" + `body` `ink-2` → baris "{n} dari {total} anak dipilih" + tautan ghost "Pilih semua" → grid 3 kolom gap 12 → kartu ringkasan hadiah → footer.
 
 ### Komponen
 
@@ -212,11 +212,11 @@ TopBar: icon `X` 44 (warna `navy-300`) · `ProgressBar lesson` flex-1 · tumpuka
 
 | Elemen | State | Perilaku |
 |---|---|---|
-| "SUDAH!" | ketuk | (1) tombol morph jadi centang 250 ms; (2) lesson bar terisi ke `(i+1)/n` 450 ms `ease-out-soft` + kilau; (3) Maro acungan muncul 600 ms di pojok kanan bawah kartu; (4) suara `step`, getar 20; (5) kartu berikutnya masuk dari kanan 320 ms |
+| "SUDAH!" | ketuk | (1) tombol morph jadi centang 250 ms; (2) lesson bar terisi ke `(i+1)/n` 450 ms `ease-out-soft` + kilau; (3) Mink acungan muncul 600 ms di pojok kanan bawah kartu; (4) suara `step`, getar 20; (5) kartu berikutnya masuk dari kanan 320 ms |
 | "SUDAH!" | langkah terakhir | label "SUDAH! SELESAIKAN MISI" → layar Abadikan Momen (PRD F6), lalu Perayaan |
 | Tips | default | terbuka di langkah 1, terlipat di langkah 2+ |
 | Tips | toggle | chevron rotate 180°, tinggi beranimasi `spring-soft` |
-| `X` | ketuk | bottom sheet konfirmasi: Maro sedih, "Yakin berhenti? Progres misi ini belum tersimpan.", `Button secondary` "Lanjut main" + `danger` "Berhenti" |
+| `X` | ketuk | bottom sheet konfirmasi: Mink sedih, "Yakin berhenti? Progres misi ini belum tersimpan.", `Button secondary` "Lanjut main" + `danger` "Berhenti" |
 | Timer (jika misi punya) | — | icon button `Timer` di top bar kanan menggantikan avatar; membuka hitung mundur di dalam kartu |
 
 ### Konten
@@ -242,7 +242,7 @@ Momen reward setelah misi (DS §8.4). Satu tombol, satu konfeti.
 | t (ms) | Elemen | Animasi | Durasi | Easing |
 |---|---|---|---|---|
 | 0 | Latar `bg-mood` | circular reveal dari tombol terakhir | 400 | `ease-out-soft` |
-| 0 | Maro pose menang (190×234) | pop 0.6 → 1 | 520 | `spring-pop` |
+| 0 | Mink pose menang (190×234) | pop 0.6 → 1 | 520 | `spring-pop` |
 | 300–550 | Konfeti (7 kepingan) | jatuh 420px + rotasi 540°, sekali | 1600 | custom |
 | 350 | `display` "Misi selesai!" + subjudul nama anak | rise 16px + fade | 420 | `ease-out-soft` |
 | 900 / 1020 / 1140 | 3 stat tile (XP, Bermain, Peserta) | rise berurutan; angka odometer | 420 | `ease-out-soft` |
@@ -300,7 +300,7 @@ XP ke level berikutnya = `40 + 20 × (level − 1)` (PRD F8): Level 6 → 140, L
 ## 7. Abadikan momen (`07 Abadikan`)
 
 Muncul setelah langkah terakhir misi, sebelum Perayaan.
-- Pita atas `sky-50` 246px. Judul `h1` 28px "Abadikan momen ini?" + keterangan (foto masuk ke Kolase Memori anak peserta, privat). Maro utama 84×118 di kanan (`floaty`).
+- Pita atas `sky-50` 246px. Judul `h1` 28px "Abadikan momen ini?" + keterangan (foto masuk ke Kolase Memori anak peserta, privat). Mink utama 84×118 di kanan (`floaty`).
 - **3 slot foto** (grid 3 kolom, tinggi 150). Kosong: border 2px putus-putus `sky-400`, ikon kamera + "Tambah". Terisi: polaroid putih (padding 8/8/6, radius 10, lip `navy-200`), miring −3°/2°/−1.5°, animasi `popr`. Ketuk foto terisi = hapus (dengan konfirmasi di kode).
 - Kartu tips (ikon tips custom) dan pita bonus "Dengan foto, tiap anak dapat +5 XP" (`amber-50`).
 - Footer: primary "SIMPAN" (nonaktif jika 0 foto) + tautan "Lewati, tanpa foto". Keduanya ke Perayaan.
@@ -308,10 +308,10 @@ Muncul setelah langkah terakhir misi, sebelum Perayaan.
 ## 8. Refleksi (`08 Refleksi`)
 
 Dibuka dari tombol "LANJUT" di Perayaan.
-- Pill misi (thumbnail Maro berkostum + judul) + tautan "Lewati". Judul "Bagaimana misinya?" + chip "+5 XP".
+- Pill misi (thumbnail Mink berkostum + judul) + tautan "Lewati". Judul "Bagaimana misinya?" + chip "+5 XP".
 - **Perasaan Bunda/Guru:** 5 wajah pinguin SVG 48px dalam tombol 56px (`role="radio"`). Terpilih: latar `amber-100`, border 2px `coral-500`, scale 1.08; tidak terpilih: `grayscale(1)` + opacity 0.55. Label perasaan terpilih di kanan judul (`coral-700`).
 - **Perasaan anak:** satu baris per anak peserta (avatar 36 + nama) dengan wajah 36px; switch "Sama untuk semua" (40×24) menyamakan nilai semua anak.
-- Textarea catatan opsional (maks 280 karakter), kotak info "Jawabanmu membantu Maro memilih misi…", footer "SIMPAN" → Beranda.
+- Textarea catatan opsional (maks 280 karakter), kotak info "Jawabanmu membantu Mink memilih misi…", footer "SIMPAN" → Beranda.
 - Wajah: 1 kurang seru (alis turun, paruh terbalik), 2 biasa, 3 seru (senyum kecil), 4 seru banget (mata melengkung + pipi), 5 luar biasa (mata besar berbinar + pipi).
 
 ## 9. Memori (`09 Memori`)
@@ -319,7 +319,7 @@ Dibuka dari tombol "LANJUT" di Perayaan.
 - Judul `h1` + "{n} momen". Chip filter: Semua, lalu satu per anak (avatar 24 + nama); aktif = `navy-900` teks putih.
 - Kartu **Kolase November** (`coral-100`, border/lip `coral-200`): 2 polaroid kecil miring + judul + keterangan + chevron.
 - Judul bulan `h3`, lalu grid **masonry 2 kolom** (gap 12). Kartu momen: polaroid putih radius 16, foto tinggi bervariasi (130–170), tag peran di pojok kiri atas (pill putih, teks warna peran `-lip`), judul misi 15px 900, tanggal + tumpukan avatar peserta 22px.
-- Filter mengubah isi dengan animasi `rise`. Empty state: Maro utama + "Belum ada momen. Mainkan misi pertama dan abadikan keseruannya."
+- Filter mengubah isi dengan animasi `rise`. Empty state: Mink utama + "Belum ada momen. Mainkan misi pertama dan abadikan keseruannya."
 
 ## 10. Tantangan (`10 Tantangan`)
 
@@ -358,15 +358,15 @@ Pengganti Pilih peserta untuk akun Guru.
 
 | No | Layar | Inti spesifikasi |
 |---|---|---|
-| 14 | **Splash** | Latar `bg-mood` + salju. Logo aplikasi MiRO 72×72 (radius 20, bayangan `0 4px 0 rgba(4,21,46,.35)`, `popin`), "MiRO" 56px 900, tagline 20px. Maro melambai 250×306 kanan bawah (`floaty`). Indikator 3 titik + "Memuat petualangan...". Lanjut otomatis 1,8 s ke Tipe akun. |
+| 14 | **Splash** | Latar `bg-mood` + salju. Logo aplikasi MiRO 72×72 (radius 20, bayangan `0 4px 0 rgba(4,21,46,.35)`, `popin`), "MiRO" 56px 900, tagline 20px. Mink melambai 250×306 kanan bawah (`floaty`). Indikator 3 titik + "Memuat petualangan...". Lanjut otomatis 1,8 s ke Tipe akun. |
 | 15 | **Daftar atau masuk** | Segmented control 2 tab (`navy-100`, tab aktif putih + lip). Field: Nama panggilan (hanya Daftar), Email, Kata sandi dengan tombol mata 44px yang berfungsi. Contoh state error email: border `red-500` + pesan `red-700` dengan ikon. Footer: primary "BUAT AKUN"/"MASUK", pemisah "atau", tombol Google (`secondary`, logo Google asli). |
-| 16 | **Setup anak** (langkah nama, avatar, usia) | Maro utama + balon "Siapa nama pahlawan kecilmu?". 6 avatar 42px + tombol unggah foto (border putus-putus). Input nama dengan keterangan "Cukup nama panggilan". Usia: grid 5 kolom tombol 48px (2 sampai 10) + label "tahun". Langkah kesukaan, gaya belajar, dan keahlian memakai pola ChoiceCard yang sama. |
+| 16 | **Setup anak** (langkah nama, avatar, usia) | Mink utama + balon "Siapa nama pahlawan kecilmu?". 6 avatar 42px + tombol unggah foto (border putus-putus). Input nama dengan keterangan "Cukup nama panggilan". Usia: grid 5 kolom tombol 48px (2 sampai 10) + label "tahun". Langkah kesukaan, gaya belajar, dan keahlian memakai pola ChoiceCard yang sama. |
 | 17 | **Target harian** | 4 kartu radio (Santai 10, Rutin 15 + chip "Disarankan" hijau, Serius 30, Penuh 45). Kotak menit 52px di kiri (terpilih `coral-500`, scale 1.06). Catatan: "Target ini mengisi kristal streak." |
 | 18 | **Detail misi** (bottom sheet, top 70px) | Panel ilustrasi 168px `-soft` peran + pill "Koki Kecil, misi 3" + tombol tutup. Judul `h2`, chip (durasi, usia, keahlian), deskripsi, kotak "Yang dibutuhkan" (grid 2 kolom), "3 langkah" bernomor (kotak 28px). Primary "MULAI MISI". Dibuka dari kartu misi di Beranda. |
 | 19 | **Ganti anak** (bottom sheet, top 300px) | "Main bersama siapa?" + tautan "Kelola anak". Kartu radio per anak (avatar 44, nama, "6 tahun, level 6", lingkaran centang) + "Semua anak" (2 avatar bertumpuk). Tombol putus-putus "Tambah anak". Dibuka dari switcher di top bar Beranda. |
-| 20 | **Perkembangan anak** | Header avatar 56 + level + XP bar. Segmented "Minggu ini / Bulan ini". **Radar 6 keahlian** (SVG 340×256, 4 cincin grid `navy-100`, data sekarang: isi `chef` 25% + garis `navy-900` 2.5px + titik 4px; pembanding: garis putus-putus `navy-300`; label 12px 900). Kartu insight `sky-50` + Maro Atlet. Daftar 6 keahlian dengan bar warna khas + selisih hijau. Dibuka dari kartu anak di Profil. |
-| 21 | **Level naik** | Latar `bg-mood` + salju turun sekali. Mahkota 88×60 + kotak level 132px (`navy-900`, radius 40, lip 8px), keduanya `popin` bertahap. Judul + subjudul, 3 tile ringkasan (misi, peran, lencana baru), progres menuju level berikutnya. Maro + kartu hadiah (avatar dengan syal). Primary dark "PAKAI SYAL DAN LANJUT" + "Nanti saja". |
-| 22 | **Koleksi lencana** | Kartu sertifikat berikutnya (`navy-900`, Maro koki, bar amber). Grid 3 kolom lencana segi enam 76×80: bingkai warna tingkat (Perunggu `#C8865A`, Perak `#AFC0D3`, Emas `amber-500`) + lip lebih gelap, isi putih, ikon garis 24px. Terkunci: bingkai `navy-200`, ikon `navy-300`, progres "1 dari 5". Label tingkat memakai warna gelap agar kontras: Perunggu `#8E5530`, Perak `navy-500`, Emas `amber-800`. |
+| 20 | **Perkembangan anak** | Header avatar 56 + level + XP bar. Segmented "Minggu ini / Bulan ini". **Radar 5 keahlian** (segi lima, DECISIONS §F2) (SVG 340×256, 4 cincin grid `navy-100`, data sekarang: isi `chef` 25% + garis `navy-900` 2.5px + titik 4px; pembanding: garis putus-putus `navy-300`; label 12px 900). Kartu insight `sky-50` + Mink Atlet. Daftar 6 keahlian dengan bar warna khas + selisih hijau. Dibuka dari kartu anak di Profil. |
+| 21 | **Level naik** | Latar `bg-mood` + salju turun sekali. Mahkota 88×60 + kotak level 132px (`navy-900`, radius 40, lip 8px), keduanya `popin` bertahap. Judul + subjudul, 3 tile ringkasan (misi, peran, lencana baru), progres menuju level berikutnya. Mink + kartu hadiah (avatar dengan syal). Primary dark "PAKAI SYAL DAN LANJUT" + "Nanti saja". |
+| 22 | **Koleksi lencana** | Kartu sertifikat berikutnya (`navy-900`, Mink koki, bar amber). Grid 3 kolom lencana segi enam 76×80: bingkai warna tingkat (Perunggu `#C8865A`, Perak `#AFC0D3`, Emas `amber-500`) + lip lebih gelap, isi putih, ikon garis 24px. Terkunci: bingkai `navy-200`, ikon `navy-300`, progres "1 dari 5". Label tingkat memakai warna gelap agar kontras: Perunggu `#8E5530`, Perak `navy-500`, Emas `amber-800`. |
 
 ## 13c. Gelombang B: onboarding lanjutan dan versi Guru (layar 23 sampai 30)
 
@@ -375,9 +375,9 @@ Pengganti Pilih peserta untuk akun Guru.
 | 23 | **Pilih bahasa** | Layar pertama setelah Splash. 2 kartu radio besar dengan kode teks "ID" dan "EN" di kotak 48px (bukan ikon globe atau bendera). Primary "LANJUT" nonaktif sampai ada pilihan. Bisa diubah lagi di Pengaturan. |
 | 24 | **Kesukaan anak** | Pola ChoiceCard dari Setup anak, pilih banyak (maks 3). Grid 2 kolom kartu 72px: ikon garis 24px di kotak warna peran + label. Penghitung "2 dari 3 dipilih". Tiap pilihan mengurutkan peran di tab Beranda. |
 | 25 | **Gaya belajar** | Boleh lebih dari satu: Visual, Auditori, Kinestetik. Kartu pilihan dengan ikon + satu kalimat contoh, plus kartu info "Belum yakin? Tidak apa-apa". Dipakai untuk memilih varian langkah misi (lebih banyak gambar, suara, atau gerak). |
-| 26 | **Keahlian yang ingin dilatih** | Pilih banyak dari 6 keahlian (sama dengan radar Perkembangan). Chip besar yang membungkus ke baris baru, tidak boleh terpotong. Ikon tiap keahlian berbeda dan tidak boleh sama dengan ikon kesukaan di layar 24 (di 24, Memasak memakai ikon panci khusus). |
+| 26 | **Keahlian yang ingin dilatih** | Pilih banyak dari 5 keahlian (sama dengan radar Perkembangan). Chip besar yang membungkus ke baris baru, tidak boleh terpotong. Ikon tiap keahlian berbeda dan tidak boleh sama dengan ikon kesukaan di layar 24 (di 24, Memasak memakai ikon panci khusus). |
 | 27 | **Tambah anak lain** | Ringkasan anak yang sudah dibuat (kartu avatar + nama + usia) + tombol putus-putus "Tambah anak". Secondary "Nanti saja" lanjut ke Target harian. |
-| 28 | **Izin notifikasi** | Maro + bel, judul, 3 manfaat dalam daftar centang lebar penuh, pratinjau notifikasi mirip sistem. Primary "IZINKAN" memicu dialog OS; "Nanti saja" tetap lanjut. Jangan meminta izin sebelum layar ini. |
+| 28 | **Izin notifikasi** | Mink + bel, judul, 3 manfaat dalam daftar centang lebar penuh, pratinjau notifikasi mirip sistem. Primary "IZINKAN" memicu dialog OS; "Nanti saja" tetap lanjut. Jangan meminta izin sebelum layar ini. |
 | 29 | **Setup kelas (Guru)** | Stepper 3 langkah: nama kelas, rentang usia, jumlah murid (stepper angka, tanpa nama murid). Kode kelas otomatis ditampilkan di akhir. |
 | 30 | **Statistik kelas (Guru)** | Hanya data anonim per kelas: total misi, menit main, keterlibatan rata-rata, sebaran keahlian (bar), peran favorit. Tidak ada daftar nama murid di mana pun. Dibuka dari baris info di Beranda Guru. |
 
@@ -387,11 +387,11 @@ Pengganti Pilih peserta untuk akun Guru.
 |---|---|---|
 | 31 | **Lencana baru** (layar penuh `navy-900`) | Muncul setelah Refleksi jika ada lencana baru. Lencana segi enam 150px `popin`, sinar amber berputar 90° sekali (8 s, 1 iterasi). Label "Lencana baru untuk {nama}" `amber-400`, judul 36px, pill tingkat, progres ke tingkat berikutnya. Primary amber "LANJUT" ke Beranda + tautan "Lihat koleksi lencana". Bila lebih dari satu lencana, tampilkan berurutan. |
 | 32 | **Sertifikat peran** | Kertas krem `#FFF8E9`, bingkai amber 3px + garis putus-putus dalam, logo MiRO 40px, nama anak 40px 900, pose menang peran, kalimat capaian, footer tanggal dan pendamping. Tombol "BAGIKAN" (secondary) dan "UNDUH" (primary, ekspor PNG 1080×1350). Dibuka dari kartu "Sertifikat berikutnya" di Koleksi lencana setelah Misi Puncak selesai. |
-| 33 | **Konfirmasi keluar misi** (bottom sheet, `role="alertdialog"`) | Dibuka dari tombol X di layar Misi. Scrim `rgba(4,21,46,.55)`. Maro bingung + tanda tanya, progres langkah saat ini. "BERHENTI" (teks `red-700`, secondary) ke Beranda; "LANJUT MAIN" (success, lebih lebar) menutup sheet. Fokus awal di "Lanjut main". Tombol kembali Android = Lanjut main. |
+| 33 | **Konfirmasi keluar misi** (bottom sheet, `role="alertdialog"`) | Dibuka dari tombol X di layar Misi. Scrim `rgba(4,21,46,.55)`. Mink bingung + tanda tanya, progres langkah saat ini. "BERHENTI" (teks `red-700`, secondary) ke Beranda; "LANJUT MAIN" (success, lebih lebar) menutup sheet. Fokus awal di "Lanjut main". Tombol kembali Android = Lanjut main. |
 | 34 | **Detail momen** | Foto 300px radius 24 + pill peran + indikator halaman bila foto lebih dari satu. Judul, avatar anak bertumpuk + tanggal. Kartu kutipan anak (tanpa rekaman suara di v2). Chip ringkas (XP, keahlian, durasi). Primary "MASUKKAN KE KOLASE". Dibuka dari kartu di Memori. |
-| 35 | **Kolase bulanan** | Kanvas `cream-200` radius 24 dengan lip, judul bulan, nama anak, Maro melambai, grid 3×2 polaroid miring (−5° sampai 5°, `popr` bertahap 50 ms), footer jumlah momen. Pilihan gaya: Ceria, Grid, Album (segmented). "SIMPAN" dan "KIRIM". Bulan dengan kurang dari 3 momen: tampilkan kolase dengan slot kosong bertuliskan "Abadikan momen berikutnya". |
-| 36 | **Kelola anak** | Info Maro tentang batas paket, penghitung "3 dari 5 anak", kartu per anak (avatar 52, nama, usia, kesukaan, pill level, tombol ubah 44px) yang membuka Perkembangan. Tombol putus-putus "Tambah anak", baris "Pendamping lain". Hapus anak ada di layar ubah, dengan konfirmasi dua langkah. Dibuka dari "Kelola" di Profil dan Ganti anak. |
-| 37 | **Pengaturan** | Grup kartu: Pengingat (toggle + jam, Target harian), Suara dan gerak (Suara Maro, Getar, Kurangi animasi yang default mengikuti perangkat), Akun (Bahasa, Paket langganan, Privasi dan data anak). Toggle 48×28, aktif `success-600`, `role="switch"`. "Keluar dari akun" teks `red-700`. Versi + tautan Bantuan di bawah. |
+| 35 | **Kolase bulanan** | Kanvas `cream-200` radius 24 dengan lip, judul bulan, nama anak, Mink melambai, grid 3×2 polaroid miring (−5° sampai 5°, `popr` bertahap 50 ms), footer jumlah momen. Pilihan gaya: Ceria, Grid, Album (segmented). "SIMPAN" dan "KIRIM". Bulan dengan kurang dari 3 momen: tampilkan kolase dengan slot kosong bertuliskan "Abadikan momen berikutnya". |
+| 36 | **Kelola anak** | Info Mink tentang batas paket, penghitung "3 dari 5 anak", kartu per anak (avatar 52, nama, usia, kesukaan, pill level, tombol ubah 44px) yang membuka Perkembangan. Tombol putus-putus "Tambah anak", baris "Pendamping lain". Hapus anak ada di layar ubah, dengan konfirmasi dua langkah. Dibuka dari "Kelola" di Profil dan Ganti anak. |
+| 37 | **Pengaturan** | Grup kartu: Pengingat (toggle + jam, Target harian), Suara dan gerak (Suara Mink, Getar, Kurangi animasi yang default mengikuti perangkat), Akun (Bahasa, Paket langganan, Privasi dan data anak). Toggle 48×28, aktif `success-600`, `role="switch"`. "Keluar dari akun" teks `red-700`. Versi + tautan Bantuan di bawah. |
 | 38 | **Paket Keluarga** (desain ulang) | Tanpa kartu harga gaya SaaS. Atas: panel `sky-50` "Tiga peran baru menunggu {anak}" berisi 5 tile peran 56px; peran yang sudah ada abu, yang terbuka diberi bingkai warna peran + lencana gembok amber. Dua baris manfaat dengan visual nyata (avatar anak bertumpuk, polaroid mini). Pilihan bayar `role="radiogroup"`: Tahunan (default, Rp299.000, setara Rp24.900 per bulan, hemat 36%) dan Bulanan (Rp39.000). Garis waktu uji coba 3 titik: hari ini, pengingat H-2, tagihan pertama. CTA "COBA GRATIS 7 HARI" + teks tanggal tagihan dan cara batal. Harga masih contoh. |
 
 ### Alur prototipe tambahan
@@ -410,8 +410,8 @@ Pengganti Pilih peserta untuk akun Guru.
 | 41 | **Undang pendamping** | Kode 6 karakter di kartu `navy-900` (sel 40×52), berlaku 48 jam. "SALIN KODE" dan "KIRIM LINK" (share sheet OS). Daftar pendamping 2 dari 3 dengan peran; pemilik akun tidak bisa dihapus. Paket Gratis: 1 pendamping tambahan; Keluarga: 3. |
 | 42 | **Privasi dan data anak** | Kartu jaminan `green-50`. Grup Izin (toggle foto, laporan email; tanpa suara di v2) dan Data (unduh ZIP, kebijakan privasi, hapus akun keluarga merah). Catatan tanggal persetujuan orang tua. Mematikan "Simpan foto momen" menyembunyikan langkah Abadikan. Wajib untuk UU PDP. |
 | 43 | **Lupa kata sandi** | Field email terisi dari layar Masuk. Setelah kirim: kartu sukses `green-50` `role="status"` dengan hitung mundur kirim ulang 60 s. Jangan beri tahu apakah email terdaftar (keamanan): pesan sama untuk semua email. |
-| 44 | **Ubah profil orang tua** | Avatar inisial 88, nama panggilan dengan pratinjau sapaan Maro, segmented sapaan (Bunda, Ayah, Lainnya), email, baris "Ganti kata sandi". Dibuka dari "Ubah profil" di Profil. |
-| 45 | **Streak terhenti** (layar penuh `navy-900`) | Muncul sekali saat aplikasi dibuka setelah hari terlewat tanpa Pembeku. Nada tidak menyalahkan. Maro + kristal retak (terpisah, tidak menimpa). Baris 7 hari dengan hari terlewat abu `#3B4E6B`. Opsi pulihkan dengan 200 ikan, hanya 24 jam pertama. Primary "MULAI MISI HARI INI". |
+| 44 | **Ubah profil orang tua** | Avatar inisial 88, nama panggilan dengan pratinjau sapaan Mink, segmented sapaan (Bunda, Ayah, Lainnya), email, baris "Ganti kata sandi". Dibuka dari "Ubah profil" di Profil. |
+| 45 | **Streak terhenti** (layar penuh `navy-900`) | Muncul sekali saat aplikasi dibuka setelah hari terlewat tanpa Pembeku. Nada tidak menyalahkan. Mink + kristal retak (terpisah, tidak menimpa). Baris 7 hari dengan hari terlewat abu `#3B4E6B`. Opsi pulihkan dengan 200 ikan, hanya 24 jam pertama. Primary "MULAI MISI HARI INI". |
 | 46 | **Peran terkunci (paket Gratis)** | Beranda dengan tab Seniman, Guru, dan Atlet berisi lencana gembok 24px dan gambar `grayscale(.6) opacity(.7)`. Tab tetap bisa dipilih: isi daftar misi diganti kartu pratinjau `-soft` peran (3 misi pertama bergembok) + CTA "COBA GRATIS 7 HARI" ke Paket. Label kanan judul jadi "Paket Keluarga". |
 
 ## 13f. Gelombang C: Misi Puncak, state kosong dan error, versi Guru (layar 47 sampai 53)
@@ -419,8 +419,8 @@ Pengganti Pilih peserta untuk akun Guru.
 | No | Layar | Inti spesifikasi |
 |---|---|---|
 | 47 | **Detail Misi Puncak** | Varian Detail misi: header `navy-900` + salju, pill amber dengan ikon mahkota. Kotak "Syarat membuka" `cream` dengan centang per syarat. Tile hadiah (sertifikat, +60 XP). Tombol nonaktif bergembok "SELESAIKAN 2 MISI LAGI" sampai syarat terpenuhi. Di daftar Beranda, Misi Puncak yang terkunci memakai kartu `#FFF8E9` garis putus-putus `amber-500`, status "Misi Puncak" `amber-800`, badge `amber-50`. |
-| 48 | **Beranda pengguna baru** | Kartu streak diganti sapaan "Halo {anak}, ayo mulai!" + Maro melambai + 7 kristal kosong. Ikan 0. Misi 1 aktif dengan tag "Misi pertama", sisanya terkunci. Berganti ke kartu streak normal setelah misi pertama selesai. |
-| 49 | **Memori kosong** | Filter anak tetap tampil. Ilustrasi 3 polaroid kosong + Maro, judul "Album masih kosong", 3 langkah bernomor, primary "MULAI MISI PERTAMA". Varian per anak: "Belum ada momen Nara" dengan CTA sama. Pola ini juga dipakai Koleksi lencana kosong (semua lencana tampil terkunci, tanpa layar khusus). |
+| 48 | **Beranda pengguna baru** | Kartu streak diganti sapaan "Halo {anak}, ayo mulai!" + Mink melambai + 7 kristal kosong. Ikan 0. Misi 1 aktif dengan tag "Misi pertama", sisanya terkunci. Berganti ke kartu streak normal setelah misi pertama selesai. |
+| 49 | **Memori kosong** | Filter anak tetap tampil. Ilustrasi 3 polaroid kosong + Mink, judul "Album masih kosong", 3 langkah bernomor, primary "MULAI MISI PERTAMA". Varian per anak: "Belum ada momen Nara" dengan CTA sama. Pola ini juga dipakai Koleksi lencana kosong (semua lencana tampil terkunci, tanpa layar khusus). |
 | 50 | **Abadikan offline dan gagal unggah** | Banner `navy-900` `role="status"` dengan ikon wifi silang saat offline. Slot foto punya 3 state: menunggu (overlay navy 45% + jam), gagal (border `red-500`, overlay merah 55% + ikon ulang, label merah), normal. Pesan error `role="alert"` menyebut penyebab (ukuran lebih dari 15 MB, format, server) + "Coba lagi". Primary jadi "SIMPAN, UNGGAH NANTI": misi tetap tercatat, foto masuk antrean. |
 | 51 | **Abadikan versi Guru** | Foto tetap ada. Latar atas `teacher-soft`, judul "Abadikan karya kelas". Toggle "Buramkan wajah otomatis" default aktif (deteksi wajah di perangkat sebelum unggah). Peringatan `cream`: hanya untuk Memori kelas, tanpa nama murid, sekolah wajib punya izin foto orang tua. Foto tidak bisa diberi tag nama murid. |
 | 52 | **Pilih dan kelola kelas** (bottom sheet) | Dibuka dari switcher kelas di Beranda Guru. Kartu radio per kelas (ikon bintang di lingkaran warna kelas, jumlah siswa, usia, level kelas). "Tambah kelas" ke Setup kelas. Kode kelas untuk guru pendamping + tombol salin. |
@@ -457,7 +457,7 @@ Pengganti Pilih peserta untuk akun Guru.
 
 | Aset | Lokasi di repo Flutter | Catatan |
 |---|---|---|
-| Maro utama, melambai, peek, cooking, 5 pose menang, salju | `assets/mascot/*.webp` | Gantikan `assets/images/penguin_*.png` bertahap |
+| Mink utama, melambai, peek, cooking, 5 pose menang, salju | `assets/mascot/*.webp` | Gantikan `assets/images/penguin_*.png` bertahap |
 | Logo | `assets/brand/` | Ikon aplikasi: `miro-launcher-1024.png`, adaptive foreground `miro-adaptive-foreground-1024.png`, latar `#FFE8B6` |
 | Ikon game (kristal, ikan, peti, mahkota, tip, wajah perasaan) | `lib/shared/icons/` | `CustomPainter`/SVG, bentuk dari `design/source/*.html` |
 | Ikon UI | `phosphor_flutter` | Bold untuk garis, fill untuk aktif |

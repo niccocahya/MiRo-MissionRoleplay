@@ -279,7 +279,6 @@ Ikon fitur selalu dibungkus wadah agar terasa "chunky":
 | Kreativitas | `PaintBrushBroad` | coral |
 | Empati | `HandHeart` | role Guru (lavender) |
 | Literasi | `BookOpenText` | green |
-| Komunikasi | `ChatsCircle` | amber |
 
 **Kegiatan kesukaan** (onboarding): Menggambar `Palette`, Membaca `BookOpen`, Berbicara `Microphone`, Musik `MusicNotes`, Olahraga `SoccerBall`.
 
@@ -317,7 +316,7 @@ Tidak terpilih: grayscale 100%, opacity 0.5. Terpilih: berwarna penuh, animasi *
 
 ## 6. Maskot
 
-Placeholder nama: **Maro** (si pinguin).
+Nama maskot: **Mink** (si pinguin; FINAL, DECISIONS §F1). Nama lama "Mink" di mockup dibaca sebagai Mink. File aset `maro-*.webp` tetap.
 
 ### 6.1 Kapan muncul
 
@@ -473,7 +472,7 @@ Hapus `ProgressBar` (3 garis tipis) dan `IdentifyProgressBar` lama; gantikan den
 Jalur berupa lingkaran zig-zag **tidak dipakai** karena terlalu identik dengan Duolingo. Gantinya: tab peran di atas, lalu daftar misi berbentuk **kartu kotak** yang dihubungkan garis timeline.
 
 **Tab peran** (`role="tablist"`, scroll horizontal, gap 10)
-- Thumbnail 64×64, `radius-xl` (20), latar `-soft` peran, berisi Maro berkostum (crop kepala-badan, `object-position: 50% 12%`); label `caption` di bawah.
+- Thumbnail 64×64, `radius-xl` (20), latar `-soft` peran, berisi Mink berkostum (crop kepala-badan, `object-position: 50% 12%`); label `caption` di bawah.
 - Tidak aktif: border 2px `navy-200`, lip-sm `navy-200`, label `navy-500` 700.
 - Aktif: border 3px warna peran `-base`, lip-md peran `-lip`, label `navy-900` 900.
 - Ketuk: warna header, progress, garis timeline, dan isi daftar berganti ke peran tersebut (animasi `swap` 280 ms: fade + naik 10px).
@@ -488,7 +487,7 @@ Jalur berupa lingkaran zig-zag **tidak dipakai** karena terlalu identik dengan D
   - Aktif: putih, border 3px peran, angka misi `title` navy.
   - Terkunci: `navy-100`, gembok `navy-300`.
 - **Kartu misi biasa:** min-h 56, `radius-lg`, putih + border 2px `navy-200` + lip-sm; judul `body` 900 + meta `caption` (status berwarna + detail dipisah jarak 10px, tanpa titik tengah: **Selesai** (`green-700`) Kreativitas, **Terkunci** 10 menit); chevron kanan. Terkunci: latar `navy-50`, border **putus-putus**, tanpa lip.
-- **Kartu misi aktif (berikutnya):** min-h 146, `radius-xl`, latar peran `-soft`, border 2px peran `-base`, lip-md peran `-lip`; tag pill putih "Misi berikutnya" (teks warna peran `-lip`), judul `h3`, chip durasi & keahlian (putih), tombol primary M "MULAI MISI"; Maro berkostum 104×128 di kanan bawah (gambar **utuh**, tidak terpotong).
+- **Kartu misi aktif (berikutnya):** min-h 146, `radius-xl`, latar peran `-soft`, border 2px peran `-base`, lip-md peran `-lip`; tag pill putih "Misi berikutnya" (teks warna peran `-lip`), judul `h3`, chip durasi & keahlian (putih), tombol primary M "MULAI MISI"; Mink berkostum 104×128 di kanan bawah (gambar **utuh**, tidak terpotong).
 - Ketuk kartu biasa → bottom sheet detail misi. Ketuk "MULAI MISI" → Pilih peserta.
 
 **Kartu Streak + Target hari ini** (elemen paling menonjol di Beranda, di atas tab peran): kartu `navy-900`, lip-lg `navy-950`, `radius-2xl`, padding 14/16, gap 12.
@@ -599,7 +598,7 @@ Semua animasi hanya memakai `transform` dan `opacity` (murah untuk GPU, tidak me
 | `rise` | naik 14px + fade | 420 ms, `ease-out-soft` | Judul layar, sheet, isi yang berganti |
 | `grow-x` | `scaleX` 0 → 1 dari kiri | 900 ms, jeda 350 ms | Bar target hari ini, bar tantangan |
 | `grow-y` | `scaleY` 0 → 1 dari bawah | 700 ms, bertahap 70 ms | Grafik "Main bersama minggu ini" |
-| `floaty` | naik-turun 4px | 2,4 s × 3 putaran | Maro di onboarding/Abadikan, kristal besar, peti |
+| `floaty` | naik-turun 4px | 2,4 s × 3 putaran | Mink di onboarding/Abadikan, kristal besar, peti |
 | `pulse` | scale 1 → 1.14 | 1,4 s × 3 putaran | Cincin "hari ini" di kartu streak |
 | `shine` | kilau putih melintas sekali | 1,1 s, jeda 500 ms | Kotak kristal streak |
 | `popr` | pop dengan rotasi tetap (`--r`) | 420 ms | Polaroid foto momen |
@@ -743,7 +742,7 @@ Top: filter chip (anak/kelas, peran, bulan). Grid masonry 2 kolom foto `radius-l
 Header: avatar akun 80px, nama `h1`, tombol secondary S "UBAH PROFIL". Baris 3 kartu stat berwarna lembut (streak `sky-50`, total misi `coral-100`, waktu bermain `amber-50`). Kartu **"Main bersama minggu ini"**: 7 batang menit per hari (`chef`/sky untuk hari aktif, coral untuk hari ini) + kalimat insight. Seksi **Anak-anak** (kartu per anak: avatar, nama, level, XP bar, ketuk → Perkembangan) + kartu "Tambah anak" (border putus-putus). Guru: seksi **Kelas**. Seksi Lencana (6 terbaru + "Lihat semua"). Kartu Paket. List pengaturan. Tombol `danger` secondary "Keluar" paling bawah.
 
 ### 12.12 Perkembangan anak / Statistik kelas
-Header avatar + nama + level. Toggle periode "Minggu | Bulan". Radar 6 keahlian (polygon `navy-900` fill 15%, pembanding bulan lalu garis putus `navy-300`, label `caption` minimal 12px di chip putih, sumbu dengan ikon keahlian). Kartu insight + misi rekomendasi. Riwayat misi (list). Guru: label radar "Keahlian yang sudah dilatih", ditambah kartu kehadiran rata-rata dan suasana kelas.
+Header avatar + nama + level. Toggle periode "Minggu | Bulan". Radar 5 keahlian (polygon `navy-900` fill 15%, pembanding bulan lalu garis putus `navy-300`, label `caption` minimal 12px di chip putih, sumbu dengan ikon keahlian). Kartu insight + misi rekomendasi. Riwayat misi (list). Guru: label radar "Keahlian yang sudah dilatih", ditambah kartu kehadiran rata-rata dan suasana kelas.
 
 ---
 
