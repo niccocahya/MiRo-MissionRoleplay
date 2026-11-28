@@ -28,6 +28,7 @@ bool _isActiveFor(String path, String location) {
   return location == path;
 }
 
+@Deprecated('Pakai MiroBottomNav (layout/miro_nav.dart). Dihapus di Fase 9.')
 class CustomBottomNavBar extends ConsumerWidget {
   const CustomBottomNavBar({super.key});
 

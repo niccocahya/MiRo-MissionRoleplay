@@ -21,6 +21,20 @@ const Map<String, String> kStringsId = {
   'nav.memories': 'Memori',
   'nav.profile': 'Profil',
 
+  // Field
+  'field.showPassword': 'Tampilkan kata sandi',
+  'field.hidePassword': 'Sembunyikan kata sandi',
+
+  // Onboarding
+  'onboarding.stepOf': 'Langkah {n} dari {total}',
+
+  // Top bar
+  'topbar.switchProfile': 'Ganti anak: {name}',
+  'topbar.fish': '{n} ikan',
+  'topbar.search': 'Cari misi',
+  'topbar.notifications': 'Notifikasi',
+
   // Galeri debug
   'dev.galleryTitle': 'Galeri widget',
+  'dev.reduceMotion': 'Kurangi animasi',
 };

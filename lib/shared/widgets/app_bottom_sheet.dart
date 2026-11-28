@@ -17,6 +17,7 @@ import '../../core/theme/app_text_styles.dart';
 ///   builder: (_) => AppBottomSheet(title: 'Edit Profil', child: ...),
 /// );
 /// ```
+@Deprecated('Pakai showMiroSheet + MiroSheet (miro_sheet.dart). Dihapus di Fase 9.')
 class AppBottomSheet extends StatelessWidget {
   const AppBottomSheet({super.key, required this.child, this.title});
 
@@ -37,9 +38,9 @@ class AppBottomSheet extends StatelessWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,

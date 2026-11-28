@@ -16,6 +16,7 @@ const String kChildAvatarFallbackEmoji = "👦🏻";
 /// cuma beda ukuran lingkaran & ukuran emoji-nya, yang tiap kali dihitung
 /// manual (72/36, 48/24, ...). Sekarang tinggal kasih [size], ukuran
 /// emoji-nya ngikut otomatis.
+@Deprecated('Pakai MiroAvatar (miro_avatar.dart). Dihapus di Fase 9.')
 class ChildAvatar extends StatelessWidget {
   const ChildAvatar({
     super.key,

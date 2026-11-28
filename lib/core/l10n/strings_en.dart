@@ -18,6 +18,20 @@ const Map<String, String> kStringsEn = {
   'nav.memories': 'Memories',
   'nav.profile': 'Profile',
 
+  // Field
+  'field.showPassword': 'Show password',
+  'field.hidePassword': 'Hide password',
+
+  // Onboarding
+  'onboarding.stepOf': 'Step {n} of {total}',
+
+  // Top bar
+  'topbar.switchProfile': 'Switch child: {name}',
+  'topbar.fish': '{n} fish',
+  'topbar.search': 'Search missions',
+  'topbar.notifications': 'Notifications',
+
   // Debug gallery
   'dev.galleryTitle': 'Widget gallery',
+  'dev.reduceMotion': 'Reduce motion',
 };

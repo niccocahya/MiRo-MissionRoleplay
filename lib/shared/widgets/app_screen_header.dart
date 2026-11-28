@@ -17,6 +17,7 @@ import 'back_button.dart';
 /// AppScreenHeader(title: texts['title']!)
 /// AppScreenHeader(title: 'Judul', trailing: IconButton(...))
 /// ```
+@Deprecated('Pakai MiroPageHeader (layout/miro_layout.dart). Dihapus di Fase 9.')
 class AppScreenHeader extends StatelessWidget {
   const AppScreenHeader({
     super.key,

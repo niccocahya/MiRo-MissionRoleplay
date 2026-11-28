@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 /// Progress bar step-per-step (dipakai di Onboarding & Identify). Sebelumnya
 /// ada 2 file (`onboarding_progress_bar.dart` & `identify_progress_bar.dart`)
 /// isinya sama persis cuma beda `totalSteps` default — digabung jadi satu.
+@Deprecated('Pakai SegmentBar / MiroProgressBar (miro_progress.dart). Dihapus di Fase 9.')
 class StepProgressBar extends StatelessWidget {
   const StepProgressBar({
     super.key,

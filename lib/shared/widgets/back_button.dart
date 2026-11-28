@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 
 /// Tombol back bulat standar. Posisi/margin diatur oleh halaman pemanggil
 /// (lewat Padding/Align), widget ini cuma urus tampilannya.
+@Deprecated('Pakai MiroIconButton / MiroPageHeader. Dihapus di Fase 9.')
 class CustomBackButton extends StatelessWidget {
   const CustomBackButton({super.key, required this.onPressed});
 

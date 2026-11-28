@@ -18,17 +18,17 @@ void main() {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: MiroSpace.x4),
-                Text('Misi selesai!', style: MiroText.display),
-                Text('Pilih peran', style: MiroText.h1),
-                Text('Siapa yang ikut main?', style: MiroText.h2),
-                Text('Membuat Bola Biskuit', style: MiroText.h3),
-                Text('Salad Pelangi', style: MiroText.title),
-                Text(
+                const Text('Misi selesai!', style: MiroText.display),
+                const Text('Pilih peran', style: MiroText.h1),
+                const Text('Siapa yang ikut main?', style: MiroText.h2),
+                const Text('Membuat Bola Biskuit', style: MiroText.h3),
+                const Text('Salad Pelangi', style: MiroText.title),
+                const Text(
                   'Cuci tangan dulu. Masukkan biskuit ke plastik bersih.',
                   style: MiroText.bodyLg,
                 ),
-                Text('Hari ini 10 dari 15 menit', style: MiroText.body),
-                Text('Koki 2/5', style: MiroText.caption),
+                const Text('Hari ini 10 dari 15 menit', style: MiroText.body),
+                const Text('Koki 2/5', style: MiroText.caption),
                 Text('LANJUT', style: MiroText.button(color: MiroColors.ink)),
                 const SizedBox(height: MiroSpace.x6),
                 Wrap(
