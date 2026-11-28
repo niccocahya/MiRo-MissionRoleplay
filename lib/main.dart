@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Import router dan provider bahasa
 import 'core/router/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/providers/text_size_provider.dart';
+import 'core/l10n/tr.dart';
 import 'core/theme/app_scroll_behavior.dart';
-import 'core/theme/app_theme.dart';
+import 'core/theme/miro_theme.dart';
 
 // IMPORT WIDGET PINGUIN GLOBAL
 // Mink (PenguinChatButton) DISEMBUNYIKAN SEMENTARA atas permintaan --
@@ -25,6 +27,11 @@ const String _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Nunito dibundel di assets/google_fonts/ (DECISIONS B16): jangan pernah
+  // mengunduh font saat runtime, supaya teks tidak berkedip saat pertama
+  // dibuka dan tetap jalan tanpa internet.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Status bar OS (jam, ikon notifikasi app lain, baterai) sempat
   // keliatan kayak "ilang" di beberapa layar -- app ini sebelumnya
@@ -85,7 +92,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Di-watch (bukan cuma dibaca) supaya seluruh tree rebuild pas bahasa
     // diganti — banyak widget anak pilih field *_id / *_en berdasarkan ini.
-    ref.watch(languageProvider);
+    final lang = ref.watch(languageProvider);
     final textSize = ref.watch(textSizeProvider);
 
     // App ini SENGAJA satu mode aja (terang) -- dark mode sempat dibangun
@@ -96,7 +103,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'MiRO',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: MiroTheme.light,
       scrollBehavior: const AppScrollBehavior(),
       routerConfig: router,
 
@@ -110,30 +117,33 @@ class MyApp extends ConsumerWidget {
           data: MediaQuery.of(context).copyWith(
             textScaler: TextScaler.linear(textSize.scaleFactor),
           ),
-          child: Stack(
-            children: [
-              // 1. Seluruh layar aplikasi ditaruh di paling dasar
-              if (child != null) child,
+          child: MiroLocaleScope(
+            lang: lang,
+            child: Stack(
+              children: [
+                // 1. Seluruh layar aplikasi ditaruh di paling dasar
+                if (child != null) child,
 
-              // 2. Pinguin (Mink) DISEMBUNYIKAN SEMENTARA atas permintaan.
-              // Kode aslinya (Overlay tersarang + PenguinChatButton)
-              // dikomentari di bawah, bukan dihapus -- tinggal buka
-              // comment blok ini + import-nya di atas buat nyalain balik.
-              // Alasan Overlay tersarang itu ada (jangan dihapus infonya
-              // pas nyalain lagi): `child` di atas isinya Navigator (yang
-              // punya Overlay bawaannya sendiri), tapi PenguinChatButton
-              // itu SAUDARA-nya `child` di Stack, bukan turunan Navigator
-              // itu -- jadi dia nggak pernah kebagian Overlay dari mana
-              // pun secara alami, dan bakal crash "No Overlay widget
-              // found" begitu ada widget yang BUTUH Overlay ancestor
-              // (Tooltip di tombol tutup chat) direndernya.
-              //
-              // Overlay(
-              //   initialEntries: [
-              //     OverlayEntry(builder: (context) => const PenguinChatButton()),
-              //   ],
-              // ),
-            ],
+                // 2. Pinguin (Mink) DISEMBUNYIKAN SEMENTARA atas permintaan.
+                // Kode aslinya (Overlay tersarang + PenguinChatButton)
+                // dikomentari di bawah, bukan dihapus -- tinggal buka
+                // comment blok ini + import-nya di atas buat nyalain balik.
+                // Alasan Overlay tersarang itu ada (jangan dihapus infonya
+                // pas nyalain lagi): `child` di atas isinya Navigator (yang
+                // punya Overlay bawaannya sendiri), tapi PenguinChatButton
+                // itu SAUDARA-nya `child` di Stack, bukan turunan Navigator
+                // itu -- jadi dia nggak pernah kebagian Overlay dari mana
+                // pun secara alami, dan bakal crash "No Overlay widget
+                // found" begitu ada widget yang BUTUH Overlay ancestor
+                // (Tooltip di tombol tutup chat) direndernya.
+                //
+                // Overlay(
+                //   initialEntries: [
+                //     OverlayEntry(builder: (context) => const PenguinChatButton()),
+                //   ],
+                // ),
+              ],
+            ),
           ),
         );
       },

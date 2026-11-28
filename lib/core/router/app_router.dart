@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,11 +17,17 @@ import '../../features/missions/missions_page.dart';
 import '../../features/progress/progress_page.dart';
 import '../../features/profile/profile_page.dart';
 import '../../features/notifications/notifications_page.dart';
+import '../../features/dev/gallery_page.dart';
 
 // Urutan 4 tab navbar bawah -- SATU sumber kebenaran dipakai router (buat
 // nentuin tabIndex tiap rute, lihat appTabPage()) DAN CustomBottomNavBar
 // (buat gambar navbar-nya sendiri) biar dua-duanya nggak bisa nyimpang.
-const List<String> kTabRoutePaths = ['/home', '/missions', '/progress', '/profile'];
+const List<String> kTabRoutePaths = [
+  '/home',
+  '/missions',
+  '/progress',
+  '/profile',
+];
 
 class ScaffoldWithNavBar extends StatelessWidget {
   const ScaffoldWithNavBar({required this.child, super.key});
@@ -37,7 +44,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           Positioned.fill(child: child),
 
           // 2. Floating Bottom Nav Bar (Melayang di atas)
-          Positioned(
+          const Positioned(
             bottom: 24, // Jarak dari bawah layar
             left: 0,
             right: 0,
@@ -77,7 +84,7 @@ class _RouteNotFoundPage extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.explore_off_rounded,
                   size: 64,
                   color: AppColors.primaryLighter,
@@ -85,7 +92,7 @@ class _RouteNotFoundPage extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text(
                   isId ? "Halaman nggak ketemu" : "Page not found",
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -151,7 +158,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/onboarding',
       pageBuilder: (context, state) =>
-          appPage(key: state.pageKey, child: OnboardingPage()),
+          appPage(key: state.pageKey, child: const OnboardingPage()),
     ),
     GoRoute(
       path: '/identify',
@@ -163,11 +170,19 @@ final GoRouter router = GoRouter(
       ),
     ),
 
+    // Galeri widget v2 (COMPONENTS §7): hanya ada di build debug.
+    if (kDebugMode)
+      GoRoute(
+        path: '/dev/gallery',
+        pageBuilder: (context, state) =>
+            appPage(key: state.pageKey, child: const GalleryPage()),
+      ),
+
     // Rute Notifikasi diletakkan di luar ShellRoute agar menutupi Bottom Nav Bar saat dibuka
     GoRoute(
       path: '/notifications',
       pageBuilder: (context, state) =>
-          appPage(key: state.pageKey, child: NotificationsPage()),
+          appPage(key: state.pageKey, child: const NotificationsPage()),
     ),
 
     ShellRoute(
@@ -175,8 +190,11 @@ final GoRouter router = GoRouter(
       routes: [
         GoRoute(
           path: '/home',
-          pageBuilder: (context, state) =>
-              appTabPage(key: state.pageKey, tabIndex: 0, child: HomePage()),
+          pageBuilder: (context, state) => appTabPage(
+            key: state.pageKey,
+            tabIndex: 0,
+            child: const HomePage(),
+          ),
         ),
         GoRoute(
           path: '/missions',
@@ -188,13 +206,19 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: '/progress',
-          pageBuilder: (context, state) =>
-              appTabPage(key: state.pageKey, tabIndex: 2, child: ProgressPage()),
+          pageBuilder: (context, state) => appTabPage(
+            key: state.pageKey,
+            tabIndex: 2,
+            child: const ProgressPage(),
+          ),
         ),
         GoRoute(
           path: '/profile',
-          pageBuilder: (context, state) =>
-              appTabPage(key: state.pageKey, tabIndex: 3, child: ProfilePage()),
+          pageBuilder: (context, state) => appTabPage(
+            key: state.pageKey,
+            tabIndex: 3,
+            child: const ProfilePage(),
+          ),
         ),
       ],
     ),

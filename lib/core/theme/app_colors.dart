@@ -1,45 +1,39 @@
 import 'package:flutter/material.dart';
 
-/// Satu-satunya sumber warna di seluruh app. Diambil dari warna yang paling
-/// sering dipakai di kode lama (biar identitas visual MiRO tetap sama),
-/// cuma sekarang dikasih nama biar konsisten & gampang diganti.
-///
-/// Jangan tulis `Color(0xFF...)` langsung di widget — pakai token di sini.
-///
-/// App ini SENGAJA cuma punya satu mode (terang) -- dark mode sempat
-/// dibangun penuh (getter reaktif + palet gelap + toggle di Settings) lalu
-/// diminta dicabut total karena nggak cocok sama identitas visual MiRO
-/// yang colorful/playful. Field-field ini balik jadi `static const` biasa,
-/// bukan getter -- lebih simpel dan lebih cepat (const-foldable di seluruh
-/// widget tree), dan nutup jalan buat dark mode nyelinap balik nggak
-/// sengaja lewat provider lain.
+import 'miro_tokens.dart';
+
+/// Alias sementara ke token v2 (DECISIONS B17). Layar lama tetap memakai
+/// nama ini sampai di-redesign; nilainya sudah diarahkan ke `MiroColors`
+/// supaya warnanya langsung ikut palet baru. Dihapus di Fase 9.
+@Deprecated('Pakai MiroColors dari miro_tokens.dart. Dihapus di Fase 9.')
 abstract class AppColors {
   // Brand
-  static const Color primary = Color(0xFF0A264F); // navy tua, warna utama MiRO
-  static const Color primaryLight = Color(0xFF153E7E);
-  static const Color primaryLighter = Color(0xFFA5CBEB);
-  static const Color primaryTint = Color(0xFFEBF4FA); // background biru muda
+  static const Color primary = MiroColors.navy900;
+  static const Color primaryLight = MiroColors.navy700;
+  static const Color primaryLighter = MiroColors.sky300;
+  static const Color primaryTint = MiroColors.sky50;
 
-  static const Color accent = Color(0xFFE57B65); // coral, warna aksen/CTA
-  static const Color accentDark = Color(0xFFD46A55);
-  static const Color accentTint = Color(0xFFFDF1E8); // background peach
+  // Coral 600 (bukan 500) karena teks putih di atasnya butuh kontras AA.
+  static const Color accent = MiroColors.coral600;
+  static const Color accentDark = MiroColors.coral700;
+  static const Color accentTint = MiroColors.coral100;
 
-  static const Color gold = Color(0xFFF1A22F); // XP / bintang / reward
-  static const Color goldTint = Color(0xFFFFF4E5);
+  static const Color gold = MiroColors.amber500;
+  static const Color goldTint = MiroColors.amber75;
 
   // Status
-  static const Color success = Color(0xFF4CAF50);
-  static const Color successTint = Color(0xFFE8F2E6);
-  static const Color warning = Color(0xFFFFB74D);
-  static const Color danger = Color(0xFFE53935);
-  static const Color dangerTint = Color(0xFFFDE8E7);
-  static const Color info = Color(0xFF4DB6AC);
+  static const Color success = MiroColors.green600;
+  static const Color successTint = MiroColors.green50;
+  static const Color warning = MiroColors.amber300;
+  static const Color danger = MiroColors.red600;
+  static const Color dangerTint = MiroColors.red50;
+  static const Color info = MiroColors.sky500;
 
   // Neutral
-  static const Color background = Color(0xFFF5F8FB); // background dasar app
-  static const Color surface = Colors.white;
-  static const Color border = Color(0xFFE2E8F0);
-  static const Color textPrimary = Color(0xFF0A264F);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textMuted = Color(0xFF90A4AE);
+  static const Color background = MiroColors.app;
+  static const Color surface = MiroColors.surface;
+  static const Color border = MiroColors.line;
+  static const Color textPrimary = MiroColors.ink;
+  static const Color textSecondary = MiroColors.ink2;
+  static const Color textMuted = MiroColors.ink3;
 }
