@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Izin notifikasi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,#A5CBEB 0%,#D3E3F2 55%,#E9DFCE 100%);font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;inset:0;background-image:url(/mascot/snow.webp);background-size:cover;opacity:.5;pointer-events:none"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:14px"><a href="TargetHarian.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.75);border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div role="progressbar" aria-label="Langkah 7 dari 7" style="flex:1;height:16px;border-radius:9999px;background:rgba(255,255,255,.6);overflow:hidden"><div style="width:100%;height:100%;border-radius:9999px;background:#22C55E;position:relative"><div style="position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9999px;background:rgba(255,255,255,.4)"></div></div></div></div>
+  <div style="position:relative;padding:20px 20px 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px">
+    <div style="position:relative;width:200px;height:170px">
+      <img class="floaty" src="/mascot/maro-main.webp" alt="Maro" style="position:absolute;left:30px;bottom:0;width:116px;height:164px;object-fit:contain">
+      <span class="popin" style="position:absolute;right:8px;top:14px;width:64px;height:64px;border-radius:20px;background:#F1A22F;box-shadow:0 4px 0 #C67B0D;display:flex;align-items:center;justify-content:center;transform:rotate(12deg);animation-delay:.3s"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0A264F"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+    </div>
+    <h1 style="margin:6px 0 0;font-size:28px;line-height:34px;font-weight:900">Boleh Maro mengingatkan?</h1>
+    <p style="margin:0;font-size:15px;line-height:22px;font-weight:600;color:#3D5677;max-width:30ch">Satu pengingat sehari, hanya kalau target belum tercapai. Tidak ada pesan yang bikin merasa bersalah.</p>
+  </div>
+  <div class="rise" style="position:relative;padding:16px 20px 0;animation-delay:.4s">
+    <div style="display:flex;gap:12px;background:#FFFFFF;border-radius:20px;padding:12px 14px;box-shadow:0 6px 0 rgba(10,38,79,.08)">
+      <img src="/brand/miro-logo-512.png" alt="" style="width:40px;height:40px;border-radius:12px;flex-shrink:0">
+      <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:900">MiRO</span><span style="font-size:12px;font-weight:700;color:#5B6F8A">Contoh pengingat</span></span><span style="font-size:13px;line-height:18px;font-weight:700;color:#3D5677">Maro sudah pakai celemek. Masak bola biskuit bareng Rafi sore ini?</span></span>
+    </div>
+  </div>
+  <div style="position:relative;padding:16px 20px 0;display:flex;flex-direction:column;gap:8px">
+    <span style="font-size:15px;font-weight:900">Jam pengingat</span>
+    <div role="radiogroup" style="display:flex;gap:8px">
+      <sc-for list="{{times}}" as="t" hint-placeholder-count="3"><button role="radio" aria-checked="{{t.sel}}" onClick="{{t.pick}}" class="press" style="{{t.style}}"><span style="font-size:15px;font-weight:900">{{t.time}}</span><span style="font-size:12px;font-weight:800;opacity:.8">{{t.label}}</span></button></sc-for>
+    </div>
+  </div>
+  <div style="position:relative;margin-top:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:4px">
+    <a href="Main.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Izinkan</a>
+    <a href="Main.dc.html" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#1E467A">Nanti saja</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { t: 1 }; }
+  renderVals() {
+    const T = [['07.00','Pagi'],['16.30','Sore'],['19.00','Malam']];
+    return { times: T.map(([time, label], i) => { const on = this.state.t === i; return { time, label, sel: on ? 'true' : 'false', pick: () => this.setState({ t: i }),
+      style: 'flex:1;height:60px;border-radius:16px;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;' + (on ? 'background:#0A264F;color:#FFFFFF;border:2px solid #0A264F;box-shadow:0 3px 0 #04152E' : 'background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA') }; }) };
+  }
+}
+</script>
+</body>
+</html>

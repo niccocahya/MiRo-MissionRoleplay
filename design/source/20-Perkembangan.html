@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Perkembangan anak</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px">
+    <a href="Profil.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    <span style="font-size:17px;font-weight:900">Perkembangan</span>
+  </div>
+  <div style="flex:1;min-height:0;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="width:56px;height:56px;flex-shrink:0;border-radius:9999px;background:#D3E3F2;border:3px solid #FFFFFF;box-sizing:border-box;overflow:hidden;display:block;box-shadow:0 3px 0 #D5DEEA"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+        <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:24px;line-height:28px;font-weight:900">Rafi</span><span style="font-size:13px;font-weight:900;color:#8A5608">Level 6</span></span>
+        <span style="height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;width:50%;height:100%;border-radius:9999px;background:#F1A22F"></span></span>
+        <span style="font-size:12px;font-weight:800;color:#5B6F8A">70 dari 140 XP ke level 7</span>
+      </div>
+    </div>
+    <div role="tablist" style="display:flex;background:#E8EEF5;border-radius:14px;padding:4px">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="2"><button role="tab" aria-selected="{{t.sel}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button></sc-for>
+    </div>
+    <div style="background:#FFFFFF;border:2px solid #D5DEEA;border-radius:20px;padding:6px 0 10px;display:flex;flex-direction:column;align-items:center">
+      <sc-if value="{{isBulan}}" hint-placeholder-val="{{true}}"><svg width="340" height="256" viewBox="0 0 340 256" role="img" aria-label="Radar keahlian Rafi"><polygon points="170.0,106.0 189.1,117.0 189.1,139.0 170.0,150.0 150.9,139.0 150.9,117.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,84.0 208.1,106.0 208.1,150.0 170.0,172.0 131.9,150.0 131.9,106.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,62.0 227.2,95.0 227.2,161.0 170.0,194.0 112.8,161.0 112.8,95.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,40.0 246.2,84.0 246.2,172.0 170.0,216.0 93.8,172.0 93.8,84.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="170.0" y2="40.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="246.2" y2="84.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="246.2" y2="172.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="170.0" y2="216.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="93.8" y2="172.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="93.8" y2="84.0" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,75.2 217.3,100.7 211.9,152.2 170.0,172.0 141.0,144.7 138.0,109.5" fill="none" stroke="#A3B1C4" stroke-width="2" stroke-dasharray="5 4"/><polygon class="popin" style="transform-origin:170px 128px" points="170.0,66.4 232.5,91.9 215.7,154.4 170.0,176.4 139.5,145.6 131.9,106.0" fill="rgba(92,159,214,.25)" stroke="#0A264F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="170.0" cy="66.4" r="4" fill="#0A264F"/><circle cx="232.5" cy="91.9" r="4" fill="#0A264F"/><circle cx="215.7" cy="154.4" r="4" fill="#0A264F"/><circle cx="170.0" cy="176.4" r="4" fill="#0A264F"/><circle cx="139.5" cy="145.6" r="4" fill="#0A264F"/><circle cx="131.9" cy="106.0" r="4" fill="#0A264F"/><text x="170.0" y="24.0" text-anchor="middle" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Kognitif</text><text x="265.3" y="78.0" text-anchor="start" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Motorik</text><text x="265.3" y="186.0" text-anchor="start" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Kreativitas</text><text x="170.0" y="240.0" text-anchor="middle" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Empati</text><text x="74.7" y="186.0" text-anchor="end" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Literasi</text><text x="74.7" y="78.0" text-anchor="end" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Komunikasi</text></svg></sc-if>
+      <sc-if value="{{isMinggu}}" hint-placeholder-val="{{false}}"><svg width="340" height="256" viewBox="0 0 340 256" role="img" aria-label="Radar keahlian Rafi"><polygon points="170.0,106.0 189.1,117.0 189.1,139.0 170.0,150.0 150.9,139.0 150.9,117.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,84.0 208.1,106.0 208.1,150.0 170.0,172.0 131.9,150.0 131.9,106.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,62.0 227.2,95.0 227.2,161.0 170.0,194.0 112.8,161.0 112.8,95.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,40.0 246.2,84.0 246.2,172.0 170.0,216.0 93.8,172.0 93.8,84.0" fill="none" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="170.0" y2="40.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="246.2" y2="84.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="246.2" y2="172.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="170.0" y2="216.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="93.8" y2="172.0" stroke="#E8EEF5" stroke-width="1.5"/><line x1="170" y1="128" x2="93.8" y2="84.0" stroke="#E8EEF5" stroke-width="1.5"/><polygon points="170.0,69.9 226.4,95.4 214.2,153.5 170.0,175.5 139.5,145.6 134.9,107.8" fill="none" stroke="#A3B1C4" stroke-width="2" stroke-dasharray="5 4"/><polygon class="popin" style="transform-origin:170px 128px" points="170.0,68.2 231.0,92.8 214.2,153.5 170.0,176.4 139.5,145.6 133.4,106.9" fill="rgba(92,159,214,.25)" stroke="#0A264F" stroke-width="2.5" stroke-linejoin="round"/><circle cx="170.0" cy="68.2" r="4" fill="#0A264F"/><circle cx="231.0" cy="92.8" r="4" fill="#0A264F"/><circle cx="214.2" cy="153.5" r="4" fill="#0A264F"/><circle cx="170.0" cy="176.4" r="4" fill="#0A264F"/><circle cx="139.5" cy="145.6" r="4" fill="#0A264F"/><circle cx="133.4" cy="106.9" r="4" fill="#0A264F"/><text x="170.0" y="24.0" text-anchor="middle" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Kognitif</text><text x="265.3" y="78.0" text-anchor="start" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Motorik</text><text x="265.3" y="186.0" text-anchor="start" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Kreativitas</text><text x="170.0" y="240.0" text-anchor="middle" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Empati</text><text x="74.7" y="186.0" text-anchor="end" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Literasi</text><text x="74.7" y="78.0" text-anchor="end" font-family="Nunito, sans-serif" font-size="12" font-weight="900" fill="#3D5677">Komunikasi</text></svg></sc-if>
+      <div style="display:flex;gap:16px">
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#3D5677"><span style="width:14px;height:10px;border-radius:3px;background:rgba(92,159,214,.35);border:2px solid #0A264F"></span>{{nowLabel}}</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#3D5677"><span style="width:16px;height:0;border-top:2px dashed #A3B1C4"></span>{{prevLabel}}</span>
+      </div>
+    </div>
+    <div style="position:relative;background:#EBF4FA;border:2px solid #A5CBEB;border-radius:20px;padding:12px 96px 12px 14px;overflow:hidden;display:flex;flex-direction:column;gap:4px">
+      <img src="/mascot/maro-athlete-win.webp" alt="" style="position:absolute;right:-4px;bottom:-14px;width:92px;height:112px;object-fit:contain">
+      <span style="font-size:15px;font-weight:900">Motorik paling berkembang</span>
+      <span style="font-size:13px;line-height:18px;font-weight:700;color:#1E467A">Rafi makin lincah setelah 4 misi Atlet. Coba Seniman untuk melatih kreativitas.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;padding-top:2px"><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Motorik</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:82%;border-radius:9999px;background:#5C9FD6"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+20</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Kognitif</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:70%;border-radius:9999px;background:#0A264F"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+10</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Kreativitas</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:60%;border-radius:9999px;background:#F08A4B"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+5</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Empati</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:55%;border-radius:9999px;background:#9B7FD4"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+5</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Komunikasi</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:50%;border-radius:9999px;background:#F1A22F"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+8</span></div><div style="display:flex;align-items:center;gap:10px"><span style="width:92px;font-size:13px;font-weight:900">Literasi</span><span style="flex:1;height:10px;border-radius:9999px;background:#E8EEF5;overflow:hidden;display:block"><span class="grow-x" style="display:block;height:100%;width:40%;border-radius:9999px;background:#5FA873"></span></span><span style="width:34px;text-align:right;font-size:12px;font-weight:900;color:#15803D">+2</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { p: 'bulan' }; }
+  renderVals() {
+    const p = this.state.p;
+    const tabs = [['minggu','Minggu ini'],['bulan','Bulan ini']].map(([id, label]) => ({ label, sel: p === id ? 'true' : 'false', pick: () => this.setState({ p: id }),
+      style: 'flex:1;height:38px;border:0;border-radius:10px;font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;' + (p === id ? 'background:#FFFFFF;color:#0A264F;box-shadow:0 2px 0 #D5DEEA' : 'background:transparent;color:#5B6F8A') }));
+    return { tabs, isBulan: p === 'bulan', isMinggu: p === 'minggu', nowLabel: p === 'bulan' ? 'November' : 'Minggu ini', prevLabel: p === 'bulan' ? 'Oktober' : 'Minggu lalu' };
+  }
+}
+</script>
+</body>
+</html>

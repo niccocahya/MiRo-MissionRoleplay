@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Kolase bulanan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:12px"><a href="Memori.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><span style="flex:1;font-size:17px;font-weight:900">Kolase November</span></div>
+  <div style="flex:1;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="position:relative;background:#FFE8B6;border-radius:24px;padding:16px 14px 14px;box-shadow:0 5px 0 #F1C97A">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="display:flex;flex-direction:column"><span style="font-size:20px;font-weight:900;color:#0A264F">Petualangan November</span><span style="font-size:13px;font-weight:800;color:#8A5608">Rafi, Nara, Dimas</span></span>
+        <img src="/mascot/maro-wave.webp" alt="" style="width:54px;height:62px;object-fit:contain">
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px 8px"><span class="popr" style="--r:-5deg;transform:rotate(-5deg);animation-delay:0.00s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-cooking.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#EBF4FA;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bola Biskuit</span></span><span class="popr" style="--r:4deg;transform:rotate(4deg);animation-delay:0.05s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-doctor-win.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#E8F2E6;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kuman Takut Sabun</span></span><span class="popr" style="--r:3deg;transform:rotate(3deg);animation-delay:0.10s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-artist-win.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#FDF1E8;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kolase Alam</span></span><span class="popr" style="--r:-4deg;transform:rotate(-4deg);animation-delay:0.15s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-athlete-win.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#FAF0F0;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Yoga Hewan</span></span><span class="popr" style="--r:-3deg;transform:rotate(-3deg);animation-delay:0.20s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-teacher-win.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#F6F0FA;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Mengajari Mainan</span></span><span class="popr" style="--r:5deg;transform:rotate(5deg);animation-delay:0.25s;background:#FFFFFF;border-radius:8px;padding:6px 6px 8px;box-shadow:0 3px 0 rgba(10,38,79,.12);display:flex;flex-direction:column;gap:4px"><img src="/mascot/maro-chef-win.webp" alt="" style="width:100%;height:92px;object-fit:cover;object-position:50% 25%;background:#EBF4FA;border-radius:4px;display:block"><span style="font-size:11px;font-weight:900;color:#0A264F;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Salad Pelangi</span></span></div>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:12px;font-weight:900;color:#8A5608"><span>6 momen, 9 misi selesai</span><span>dibuat dengan MiRO</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:13px;font-weight:800;color:#5B6F8A">Gaya kolase</span>
+      <div style="display:flex;gap:8px"><button class="press" aria-pressed="true" style="flex:1;height:44px;border-radius:14px;font-family:inherit;font-size:15px;font-weight:900;background:#0A264F;color:#FFFFFF;border:2px solid #0A264F;box-shadow:0 3px 0 #04152E">Ceria</button><button class="press" aria-pressed="false" style="flex:1;height:44px;border-radius:14px;font-family:inherit;font-size:15px;font-weight:900;background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA">Grid</button><button class="press" aria-pressed="false" style="flex:1;height:44px;border-radius:14px;font-family:inherit;font-size:15px;font-weight:900;background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA">Album</button></div>
+    </div>
+  </div>
+  <div style="padding:14px 20px 24px;display:flex;gap:10px">
+    <a href="KolaseBulanan.dc.html" class="press" style="flex:1;height:56px;border-radius:16px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 4px 0 #D5DEEA;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:#0A264F;letter-spacing:.04em;text-transform:uppercase"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#0A264F"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Simpan</a>
+    <a href="KolaseBulanan.dc.html" class="press" style="flex:1;height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:800;color:#FFFFFF;letter-spacing:.04em;text-transform:uppercase"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:#FFFFFF"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>Kirim</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Setup kelas</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,#A5CBEB 0%,#D3E3F2 55%,#E9DFCE 100%);font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;inset:0;background-image:url(/mascot/snow.webp);background-size:cover;opacity:.5;pointer-events:none"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:14px"><a href="Masuk.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.75);border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div role="progressbar" aria-label="Langkah 4 dari 6" style="flex:1;height:16px;border-radius:9999px;background:rgba(255,255,255,.6);overflow:hidden"><div style="width:67%;height:100%;border-radius:9999px;background:#22C55E;position:relative"><div style="position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9999px;background:rgba(255,255,255,.4)"></div></div></div></div>
+  <div style="position:relative;padding:6px 20px 0;display:flex;align-items:flex-end;gap:6px">
+    <img class="floaty" src="/mascot/maro-main.webp" alt="Maro" style="width:78px;height:110px;object-fit:contain;flex-shrink:0">
+    <div class="popin" style="transform-origin:left bottom;position:relative;margin-bottom:36px;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:20px;padding:12px 14px;font-size:17px;line-height:23px;font-weight:800">Kelas mana yang akan berpetualang, Bu?<span style="position:absolute;left:-10px;bottom:16px;width:16px;height:16px;background:#FFFFFF;border-left:2px solid #D5DEEA;border-bottom:2px solid #D5DEEA;transform:rotate(45deg)"></span></div>
+  </div>
+  <div style="position:relative;padding:8px 20px 0;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <label for="kn" style="font-size:15px;font-weight:900">Nama kelas</label>
+      <input id="kn" value="TK B Melati" style="height:52px;box-sizing:border-box;border:2px solid #0A264F;box-shadow:0 0 0 4px #D3E3F2;border-radius:12px;padding:0 16px;font-family:inherit;font-size:17px;font-weight:800;color:#0A264F;background:#FFFFFF;outline:none">
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:15px;font-weight:900">Ikon dan warna kelas</span>
+      <div role="radiogroup" style="display:flex;gap:8px">
+        <sc-for list="{{icons}}" as="i" hint-placeholder-count="6"><button role="radio" aria-checked="{{i.sel}}" aria-label="{{i.label}}" onClick="{{i.pick}}" class="press" style="{{i.style}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.5 2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8Z" fill="#FFFFFF"/></svg></button></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:15px;font-weight:900">Usia siswa</span>
+      <div role="radiogroup" style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ages}}" as="a" hint-placeholder-count="5"><button role="radio" aria-checked="{{a.sel}}" onClick="{{a.pick}}" class="press" style="{{a.style}}">{{a.label}}</button></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:16px;padding:10px 12px 10px 16px">
+      <span style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:900">Perkiraan jumlah siswa</span><span style="font-size:12px;font-weight:700;color:#3D5677">Tanpa nama siswa</span></span>
+      <span style="display:flex;align-items:center;gap:10px">
+        <button onClick="{{dec}}" aria-label="Kurangi" class="press" style="width:40px;height:40px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <span style="width:32px;text-align:center;font-size:24px;font-weight:900;font-variant-numeric:tabular-nums">{{n}}</span>
+        <button onClick="{{inc}}" aria-label="Tambah" class="press" style="width:40px;height:40px;border-radius:9999px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      </span>
+    </div>
+  </div>
+  <div style="position:relative;margin-top:auto;padding:16px 20px 28px"><a href="GuruBeranda.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Lanjut</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { ic: 3, age: 2, n: 24 }; }
+  renderVals() {
+    const C = [['#5FA873','Hijau'],['#5C9FD6','Biru'],['#F08A4B','Oranye'],['#9B7FD4','Ungu'],['#E56B7E','Merah muda'],['#F1A22F','Kuning']];
+    const icons = C.map(([c, label], i) => { const on = this.state.ic === i; return { label, sel: on ? 'true' : 'false', pick: () => this.setState({ ic: i }),
+      style: 'width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:' + c + ';' + (on ? 'border:3px solid #0A264F;box-shadow:0 3px 0 #04152E;transform:scale(1.06)' : 'border:3px solid transparent;box-shadow:0 3px 0 rgba(10,38,79,.2)') + ';transition:transform 200ms cubic-bezier(.34,1.56,.64,1)' }; });
+    const A = ['3 sampai 4','4 sampai 5','5 sampai 6','6 sampai 7','7 sampai 8'];
+    const ages = A.map((label, i) => { const on = this.state.age === i; return { label: label + ' th', sel: on ? 'true' : 'false', pick: () => this.setState({ age: i }),
+      style: 'height:40px;padding:0 14px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:900;' + (on ? 'background:#0A264F;color:#FFFFFF;border:2px solid #0A264F;box-shadow:0 2px 0 #04152E' : 'background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA') }; });
+    const n = this.state.n;
+    return { icons, ages, n, dec: () => this.setState({ n: Math.max(1, n - 1) }), inc: () => this.setState({ n: Math.min(60, n + 1) }) };
+  }
+}
+</script>
+</body>
+</html>

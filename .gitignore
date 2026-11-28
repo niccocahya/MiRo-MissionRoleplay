@@ -68,3 +68,6 @@ android/key.properties
 android/keystore/
 *.jks
 *.keystore
+
+# Kredensial Supabase staging (DECISIONS §H4)
+env.staging.json

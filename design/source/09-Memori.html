@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Memori, kolase momen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F5F8FB;font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+  <div style="padding:20px 20px 0;display:flex;justify-content:space-between;align-items:baseline">
+    <h1 style="margin:0;font-size:32px;line-height:38px;font-weight:900">Memori</h1>
+    <span style="font-size:15px;font-weight:800;color:#3D5677">{{countLabel}}</span>
+  </div>
+  <div role="tablist" aria-label="Filter anak" style="padding:12px 20px 0;display:flex;gap:8px">
+    <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+      <button role="tab" aria-selected="{{f.sel}}" onClick="{{f.pick}}" class="press" style="{{f.style}}">
+        <sc-if value="{{f.hasAv}}" hint-placeholder-val="{{false}}"><span style="width:24px;height:24px;border-radius:9999px;background:{{f.bg}};overflow:hidden;display:block"><img src="/mascot/maro-peek.webp" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></sc-if>{{f.label}}
+      </button>
+    </sc-for>
+  </div>
+
+  <!-- kolase bulan ini -->
+  <div class="rise" style="padding:16px 20px 0">
+    <a href="KolaseBulanan.dc.html" class="press" style="position:relative;display:flex;align-items:center;gap:14px;background:#FBEBE8;border:2px solid #F4C6BC;box-shadow:0 4px 0 #F4C6BC;border-radius:20px;padding:14px;color:#0A264F;overflow:hidden">
+      <span style="position:relative;width:96px;height:84px;flex-shrink:0">
+        <span style="position:absolute;left:0;top:10px;width:56px;height:66px;background:#FFFFFF;border-radius:6px;padding:4px 4px 10px;box-sizing:border-box;transform:rotate(-8deg);box-shadow:0 2px 0 #F4C6BC"><img src="/mascot/maro-artist-win.webp" alt="" style="width:100%;height:100%;object-fit:cover;background:#FDF1E8;border-radius:3px;display:block"></span>
+        <span style="position:absolute;left:36px;top:4px;width:56px;height:66px;background:#FFFFFF;border-radius:6px;padding:4px 4px 10px;box-sizing:border-box;transform:rotate(7deg);box-shadow:0 2px 0 #F4C6BC"><img src="/mascot/maro-cooking.webp" alt="" style="width:100%;height:100%;object-fit:cover;background:#EBF4FA;border-radius:3px;display:block"></span>
+      </span>
+      <span style="flex:1;display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:17px;font-weight:900">Kolase November</span>
+        <span style="font-size:13px;line-height:18px;font-weight:700;color:#3D5677">6 momen bulan ini, siap dibagikan ke keluarga</span>
+      </span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B24A34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+  </div>
+
+  <div style="padding:20px 20px 10px;display:flex;justify-content:space-between;align-items:baseline">
+    <span style="font-size:20px;font-weight:900">November 2026</span>
+  </div>
+
+  <!-- masonry -->
+  <div class="rise" key="{{filterKey}}" style="padding:0 20px;display:flex;gap:12px;align-items:flex-start">
+    <sc-for list="{{cols}}" as="c" hint-placeholder-count="2">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{c.items}}" as="m" hint-placeholder-count="2">
+          <a href="DetailMomen.dc.html" class="press" aria-label="{{m.aria}}" style="color:inherit;padding:6px 6px 10px;background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 3px 0 #D5DEEA;border-radius:16px;font-family:inherit;text-align:left;display:flex;flex-direction:column;gap:8px">
+            <span style="{{m.photoStyle}}">
+              <img src="{{m.img}}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 25%;display:block">
+              <span style="{{m.tagStyle}}">{{m.role}}</span>
+            </span>
+            <span style="padding:0 4px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:15px;line-height:19px;font-weight:900;color:#0A264F">{{m.title}}</span>
+              <span style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:12px;font-weight:800;color:#5B6F8A">{{m.date}}</span>
+                <span style="display:flex">
+                  <sc-for list="{{m.kids}}" as="k" hint-placeholder-count="2"><span style="{{k.style}}"><img src="/mascot/maro-peek.webp" alt="{{k.name}}" style="width:100%;height:100%;object-fit:cover;object-position:50% 0;padding-top:16%;box-sizing:border-box;display:block"></span></sc-for>
+                </span>
+              </span>
+            </span>
+          </a>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+  </div>
+<nav aria-label="Navigasi utama" style="position:relative;z-index:2;height:80px;flex-shrink:0;background:#FFFFFF;border-top:2px solid #E8EEF5;display:flex;align-items:center;justify-content:space-around;padding:0 12px 6px;box-sizing:border-box"><a href="Main.dc.html" aria-label="Petualangan" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5Z" fill="none" stroke="#A3B1C4" stroke-width="2.6" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="#A3B1C4" stroke-width="1.8"/></svg></a><a href="Tantangan.dc.html" aria-label="Tantangan" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="#A3B1C4" stroke-width="2.6"/><circle cx="12" cy="12" r="5" fill="none" stroke="#A3B1C4" stroke-width="2.4"/><circle cx="12" cy="12" r="1.4" fill="#A3B1C4"/></svg></a><a href="Memori.dc.html" aria-label="Memori" aria-current="page" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#FBEBE8;border:2px solid #F4C6BC"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="14" rx="2.5" fill="#E57B65" stroke="#E57B65" stroke-width="0"/><path d="M21 8v11a2 2 0 0 1-2 2H7" fill="none" stroke="#E57B65" stroke-width="2.6" stroke-linecap="round"/><path d="m3 16 4-4 4 4 2-2 5 5" fill="none" stroke="#FBEBE8" stroke-width="2.2" stroke-linejoin="round"/></svg></a><a href="Profil.dc.html" aria-label="Profil" style="width:56px;height:44px;border-radius:14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;"><span style="width:30px;height:30px;border-radius:9999px;background:#E8EEF5;border:2px solid #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#5B6F8A">D</span></a></nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { who: 'all' }; }
+  renderVals() {
+    const KID = { rafi: ['Rafi','#D3E3F2'], nara: ['Nara','#FBEBE8'], dimas: ['Dimas','#E8F2E6'] };
+    const ROLE = { chef: ['Koki','#EBF4FA','#3D7FB8','/mascot/maro-chef-win.webp'], doctor: ['Dokter','#E8F2E6','#3F8253','/mascot/maro-doctor-win.webp'], artist: ['Seniman','#FDF1E8','#C86A30','/mascot/maro-artist-win.webp'], athlete: ['Atlet','#FAF0F0','#BF4C5F','/mascot/maro-athlete-win.webp'], teacher: ['Guru','#F6F0FA','#7A5FB3','/mascot/maro-teacher-win.webp'] };
+    const all = [
+      ['Membuat Bola Biskuit','chef','27 Nov',['rafi','nara'],170],
+      ['Kuman Takut Sabun','doctor','25 Nov',['rafi'],130],
+      ['Jalan-jalan Kolase Alam','artist','22 Nov',['nara','dimas'],130],
+      ['Yoga Hewan','athlete','20 Nov',['dimas'],170],
+      ['Mengajari Mainan','teacher','18 Nov',['nara'],150],
+      ['Salad Pelangi','chef','15 Nov',['rafi','dimas'],150]
+    ];
+    const who = this.state.who;
+    const list = all.filter((m) => who === 'all' || m[3].indexOf(who) >= 0).map((m, i) => {
+      const r = ROLE[m[1]];
+      return { title: m[0], role: r[0], date: m[2], img: r[3], aria: 'Momen ' + m[0] + ', ' + m[2],
+        photoStyle: 'position:relative;display:block;height:' + m[4] + 'px;border-radius:11px;overflow:hidden;background:' + r[1],
+        tagStyle: 'position:absolute;left:8px;top:8px;font-size:12px;font-weight:900;color:' + r[2] + ';background:#FFFFFF;border-radius:9999px;padding:2px 9px',
+        kids: m[3].map((k, j) => ({ name: KID[k][0], style: 'width:22px;height:22px;border-radius:9999px;border:2px solid #FFFFFF;overflow:hidden;display:block;background:' + KID[k][1] + (j ? ';margin-left:-8px' : '') }))
+      };
+    });
+    const cols = [{ items: list.filter((_, i) => i % 2 === 0) }, { items: list.filter((_, i) => i % 2 === 1) }];
+    const filters = [['all','Semua'],['rafi','Rafi'],['nara','Nara'],['dimas','Dimas']].map(([id, label]) => {
+      const on = who === id;
+      return { label, sel: on ? 'true' : 'false', hasAv: id !== 'all', bg: id === 'all' ? '' : KID[id][1],
+        pick: () => this.setState({ who: id }),
+        style: 'height:36px;display:flex;align-items:center;gap:6px;padding:0 12px 0 ' + (id === 'all' ? '12px' : '6px') + ';border-radius:9999px;font-family:inherit;font-size:13px;font-weight:900;' + (on ? 'background:#0A264F;color:#FFFFFF;border:2px solid #0A264F;box-shadow:0 2px 0 #04152E' : 'background:#FFFFFF;color:#0A264F;border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA')
+      };
+    });
+    return { cols, filters, filterKey: 'f' + who, countLabel: list.length + ' momen' };
+  }
+}
+</script>
+</body>
+</html>

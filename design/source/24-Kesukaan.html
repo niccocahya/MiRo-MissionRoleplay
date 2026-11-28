@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Kegiatan kesukaan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#B24A34;text-decoration:none}a:hover{color:#8f3a28}
+.press{transition:transform 80ms ease-out, box-shadow 80ms ease-out;cursor:pointer}
+.press:active{transform:translateY(4px);box-shadow:none !important}
+.popin{animation:popin 460ms cubic-bezier(.34,1.56,.64,1) both}
+.rise{animation:rise 420ms cubic-bezier(.22,1,.36,1) both}
+.floaty{animation:floaty 2.4s ease-in-out .6s 3}
+.grow-x{transform-origin:left center;animation:growx 900ms cubic-bezier(.22,1,.36,1) .35s both}
+@keyframes popin{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes growx{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none !important;transition:none !important}}
+
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:linear-gradient(180deg,#A5CBEB 0%,#D3E3F2 55%,#E9DFCE 100%);font-family:Nunito, system-ui, sans-serif;color:#0A264F;position:relative;overflow:hidden;display:flex;flex-direction:column">
+  <span aria-hidden="true" style="position:absolute;inset:0;background-image:url(/mascot/snow.webp);background-size:cover;opacity:.5;pointer-events:none"></span>
+  <div style="position:relative;height:64px;flex-shrink:0;padding:8px 20px 0;box-sizing:border-box;display:flex;align-items:center;gap:14px"><a href="SetupAnak.dc.html" aria-label="Kembali" class="press" style="width:44px;height:44px;flex-shrink:0;border-radius:9999px;background:rgba(255,255,255,.75);border:2px solid #D5DEEA;box-shadow:0 2px 0 #D5DEEA;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A264F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a><div role="progressbar" aria-label="Langkah 5 dari 7" style="flex:1;height:16px;border-radius:9999px;background:rgba(255,255,255,.6);overflow:hidden"><div style="width:71%;height:100%;border-radius:9999px;background:#22C55E;position:relative"><div style="position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9999px;background:rgba(255,255,255,.4)"></div></div></div></div>
+  <div style="position:relative;padding:6px 20px 0;display:flex;align-items:flex-end;gap:6px">
+    <img class="floaty" src="/mascot/maro-main.webp" alt="Maro" style="width:78px;height:110px;object-fit:contain;flex-shrink:0">
+    <div class="popin" style="transform-origin:left bottom;position:relative;margin-bottom:36px;background:#FFFFFF;border:2px solid #D5DEEA;border-radius:20px;padding:12px 14px;font-size:17px;line-height:23px;font-weight:800">Apa kegiatan kesukaan Rafi?<span style="position:absolute;left:-10px;bottom:16px;width:16px;height:16px;background:#FFFFFF;border-left:2px solid #D5DEEA;border-bottom:2px solid #D5DEEA;transform:rotate(45deg)"></span></div>
+  </div>
+  <div style="position:relative;padding:8px 22px 0;display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:800;color:#3D5677">Pilih hingga 3</span><span style="font-size:13px;font-weight:900;color:#1E467A">{{countLabel}}</span></div>
+  <div role="group" style="position:relative;padding:8px 20px 0;display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="6">
+      <button aria-pressed="{{c.sel}}" onClick="{{c.pick}}" class="press" style="{{c.style}}">
+        <span style="{{c.tile}}"><sc-if value="{{c.is_gambar}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.3" fill="currentColor"/><circle cx="12" cy="7.5" r="1.3" fill="currentColor"/><circle cx="16" cy="10" r="1.3" fill="currentColor"/><path d="M12 21a2 2 0 0 1 0-4h2a3 3 0 0 0 3-3"/></svg></sc-if><sc-if value="{{c.is_baca}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/></svg></sc-if><sc-if value="{{c.is_bicara}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></sc-if><sc-if value="{{c.is_musik}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></sc-if><sc-if value="{{c.is_olahraga}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m12 7 4 3-1.5 4.5h-5L8 10Z"/><path d="M12 3v4M3.5 9.5 8 10M20.5 9.5 16 10M7 19.5l2.5-5M17 19.5l-2.5-5"/></svg></sc-if><sc-if value="{{c.is_masak}}" hint-placeholder-val="{{false}}"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="{{c.icColor}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z"/><path d="M2 10h20M9 6.5c0-1 .5-2 1.5-2M14 6.5c0-1 .5-2 1.5-2"/></svg></sc-if></span>
+        <span style="display:flex;flex-direction:column;gap:1px;align-items:center;text-align:center"><span style="font-size:15px;font-weight:900;color:#0A264F">{{c.label}}</span><sc-if value="{{c.hasSub}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;font-weight:700;color:#3D5677">{{c.sub}}</span></sc-if></span>
+        <span style="{{c.check}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </button>
+    </sc-for>
+  </div>
+  <div style="position:relative;margin-top:auto;padding:16px 20px 28px"><a href="GayaBelajar.dc.html" class="press" style="height:56px;border-radius:16px;background:#D9654E;box-shadow:0 4px 0 #B24A34;display:flex;align-items:center;justify-content:center;color:#FFFFFF;font-size:17px;font-weight:800;letter-spacing:.04em;text-transform:uppercase">Lanjut</a></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(p){ super(p); this.state = { sel: ["gambar", "baca"] }; }
+  renderVals() {
+    const ITEMS = [["gambar", "Menggambar", "", "palette", "#FDF1E8", "#C86A30"], ["baca", "Membaca", "", "book", "#E8F2E6", "#3F8253"], ["bicara", "Berbicara", "", "mic", "#F6F0FA", "#7A5FB3"], ["musik", "Musik", "", "music", "#FBEBE8", "#B24A34"], ["olahraga", "Olahraga", "", "ball", "#EBF4FA", "#3D7FB8"], ["masak", "Memasak", "", "pot", "#FEF7EE", "#8A5608"]], MAX = 3, sel = this.state.sel;
+    const cards = ITEMS.map(([id, label, sub, icon, soft, color]) => {
+      const on = sel.indexOf(id) >= 0;
+      const c = { label, sub, hasSub: !!sub, sel: on ? 'true' : 'false', icColor: on ? '#FFFFFF' : color,
+        pick: () => { let n; if (MAX === 1) n = [id]; else if (on) n = sel.filter((x) => x !== id); else if (sel.length < MAX) n = sel.concat([id]); else n = sel; this.setState({ sel: n }); },
+        style: 'position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px 14px;border-radius:20px;font-family:inherit;' + (on ? 'background:#FFE8B6;border:2px solid #E57B65;box-shadow:0 4px 0 #E57B65' : 'background:#FFFFFF;border:2px solid #D5DEEA;box-shadow:0 4px 0 #D5DEEA'),
+        tile: 'width:56px;height:56px;flex-shrink:0;border-radius:9999px;display:flex;align-items:center;justify-content:center;transition:transform 200ms cubic-bezier(.34,1.56,.64,1);background:' + (on ? color : soft) + (on ? ';transform:scale(1.06)' : ''),
+        check: 'position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:9999px;background:#22C55E;display:flex;align-items:center;justify-content:center;transition:transform 200ms cubic-bezier(.34,1.56,.64,1);transform:scale(' + (on ? 1 : 0) + ')' };
+      ITEMS.forEach((it) => { c['is_' + it[0]] = it[0] === id; });
+      return c;
+    });
+    return { cards, countLabel: MAX === 1 ? '' : sel.length + ' dari ' + MAX + ' dipilih' };
+  }
+}
+</script>
+</body>
+</html>
