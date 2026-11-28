@@ -14,6 +14,8 @@ Aplikasi ini **sudah ada dan sudah dipakai untuk uji coba** (±22 ribu baris Dar
 | 3 | `docs/DESIGN_SYSTEM.md` §0 sampai §12 | Token, komponen, motion, copy (§13 versi web tidak berlaku; diganti `docs/standards/`) |
 | 4 | `docs/HANDOFF.md` | Spesifikasi per layar (01 sampai 54) |
 | 5 | `docs/standards/*.md` | Arsitektur, widget, animasi, UX, keamanan, performa, kualitas kode, desain |
+| 5a | `docs/standards/RESPONSIVE.md` | Matriks ukuran layar, layar pendek, ukuran teks, safe area, keyboard, golden 3 ukuran, overflow = tes gagal |
+| 5b | `docs/standards/QA.md` | CI, Sentry, parsing tahan banting, error handling, aksi ganda, lifecycle, checklist uji manual |
 | 6 | `design/SCREENS.md` | Nomor layar → route go_router → file Dart → widget → fase |
 | 7 | `design/screens/NN-Nama.png` | Gambar final tiap layar (390×844 @2x) |
 | 8 | `design/source/NN-Nama.html` | Sumber mockup: nilai px, warna, dan copy yang persis (1 px CSS = 1 logical pixel Flutter) |
@@ -25,7 +27,7 @@ Urutan kebenaran jika bertentangan: `DECISIONS.md` > gambar layar > `HANDOFF.md`
 - Flutter 3.x, Dart 3, **Riverpod 3** (`flutter_riverpod`, `hooks_riverpod`), **go_router**
 - `supabase_flutter` (Auth, Postgres + RLS, Storage, Edge Functions)
 - `google_fonts` (Nunito, dibundel sebagai aset), `fl_chart`, `confetti`, `image_picker`, `share_plus`, `gal`, `pdf`, `printing`, `flutter_tts`, `cached_network_image`, `shared_preferences`
-- Tambahan yang diizinkan: `phosphor_flutter` (ikon), `flutter_svg` (ikon game kustom), `flutter_image_compress` (kompres + hapus EXIF). Paket lain butuh alasan tertulis.
+- Tambahan yang diizinkan: `phosphor_flutter` (ikon), `flutter_svg` (ikon game kustom), `flutter_image_compress` (kompres + hapus EXIF), `sentry_flutter` (laporan crash, aturan di `docs/standards/QA.md` §2). Paket lain butuh alasan tertulis.
 
 ## Perintah
 
@@ -67,4 +69,4 @@ dart run flutter_launcher_icons
 
 ## Definition of Done
 
-Ikuti `docs/standards/CODE_QUALITY.md` §Definition of Done.
+Ikuti `docs/standards/CODE_QUALITY.md` §Definition of Done, termasuk `docs/standards/RESPONSIVE.md` §10 (golden 3 ukuran + teks 1.3×, nol overflow) dan `docs/standards/QA.md` §9 (nol overflow, nol exception tak tertangani).
