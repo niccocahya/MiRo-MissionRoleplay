@@ -71,7 +71,10 @@ Alur wajib (pakai repository fake atau project Supabase staging, bukan produksi)
 Sebuah layar dianggap selesai jika:
 
 - [ ] Sama dengan `design/screens/NN-*.png` di 390×844 (jarak, warna, ukuran font, copy)
-- [ ] Rapi di lebar 360 dan 430, dan dengan teks 1.3×
+- [ ] Rapi di semua ukuran `RESPONSIVE.md` §1; golden di 360×640, 390×844, 430×932, dan 390×844 dengan teks 1.3× (`RESPONSIVE.md` §10)
+- [ ] Nol overflow dan nol exception tak tertangani (`QA.md` §9)
+- [ ] Aksi tulis ke server: loading + nonaktif sampai selesai, `try`/`catch` dengan pesan ramah, tidak ada `catch` kosong (`QA.md` §4, §5)
+- [ ] Model baru: `fromJson` tahan data lama + unit test parsing (`QA.md` §3)
 - [ ] Memakai widget katalog; widget baru terdaftar dan ada di galeri
 - [ ] Semua state di HANDOFF diimplementasikan
 - [ ] Animasi sesuai ANIMATION §6, "Kurangi animasi" diuji

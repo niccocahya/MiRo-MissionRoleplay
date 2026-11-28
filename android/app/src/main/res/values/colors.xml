@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#0A264F</color>
+    <color name="ic_launcher_background">#FFE8B6</color>
     <!-- Warna splash native (dipakai launch_background.xml) — sama
          persis AppColors.primary di Dart, biar transisi ke splash
          Flutter (OnboardingStep.splash, navy juga) nggak kedip putih

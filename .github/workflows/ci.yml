@@ -1,0 +1,44 @@
+# CI MiRO (docs/standards/QA.md §1). Merge hanya jika semua langkah hijau.
+name: CI
+
+on:
+  push:
+    branches: [dev-nicco, master]
+  pull_request:
+    branches: [dev-nicco, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # Golden dibuat di Windows (mesin pengembang). Menjalankan golden di
+    # runner yang sama menghindari selisih render font antar-OS.
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.6
+          channel: stable
+          cache: true
+
+      - name: Pasang dependensi
+        run: flutter pub get
+
+      - name: Lint (tidak boleh naik dari docs/LINT_BASELINE.md)
+        run: dart run tool/check_lint_baseline.dart
+
+      - name: Tes (unit, widget, golden)
+        run: flutter test
+
+      - name: Build APK debug
+        # Kredensial asli tidak pernah ada di CI; nilai palsu cukup untuk
+        # memastikan aplikasi bisa dikompilasi.
+        shell: bash
+        run: |
+          echo '{"SUPABASE_URL":"https://ci.invalid","SUPABASE_ANON_KEY":"ci","SENTRY_DSN":""}' > env.ci.json
+          flutter build apk --debug --dart-define-from-file=env.ci.json

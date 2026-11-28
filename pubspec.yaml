@@ -44,6 +44,9 @@ dependencies:
   gal: ^2.3.2
   pdf: ^3.11.3
   printing: ^5.14.2
+  phosphor_flutter: ^2.1.0
+  flutter_svg: ^2.3.4
+  flutter_image_compress: ^2.5.1
 
 # ==================== DEV DEPENDENCIES ====================
 dev_dependencies:
@@ -54,41 +57,21 @@ dev_dependencies:
   build_runner: ^2.13.1
   json_serializable: ^6.7.1
   flutter_launcher_icons: ^0.14.4
+  integration_test:
+    sdk: flutter
 
-# ==================== APP ICON ====================
-# Dulu app-nya kepasang icon DEFAULT Flutter (logo Flutter biru) di semua
-# ukuran mipmap -- file-nya cuma 442-1443 byte, jelas belum pernah diganti
-# sejak `flutter create`. Ini elemen visual pertama yang dilihat orang
-# SEBELUM app-nya kebuka, jadi walau semua kerja di dalam app-nya udah
-# rapi, icon default bikin app kerasa belum jadi.
-#
-# Sumbernya penguin_splash1.png (1214x1214, background transparan, aset
-# ilustrasi yang sama dipakai di layar splash onboarding) -- dipilih
-# ketimbang logo_splash1.png (logo resmi MiRO) karena logo itu cuma
-# kesimpen di 84x84, kegedean upscale-nya buat launcher icon (butuh
-# sampai 192x192) apalagi buat listing Play Store (512x512), hasilnya
-# bakal kelihatan pecah/blur. Maskot penguin-nya sendiri (si "Mink" yang
-# sama muncul di chatbot & seluruh app) kualitasnya jauh lebih tinggi
-# resolusinya dan tetep sama-sama identitas MiRO.
-#
-# Jalanin `dart run flutter_launcher_icons` abis nambah baris ini buat
-# generate ulang semua ukuran mipmap Android + AppIcon iOS.
+# Ikon aplikasi: logo MiRO baru (DECISIONS B18). Jalankan
+# `dart run flutter_launcher_icons` setelah mengubah baris ini.
 flutter_launcher_icons:
   android: "ic_launcher"
   ios: true
-  image_path: "assets/images/penguin_splash1.png"
-  # Background solid warna navy brand (AppColors.primary) -- gambarnya
-  # sendiri transparan, dan launcher icon nggak boleh transparan (Android
-  # nge-render transparan jadi hitam polos di beberapa launcher).
-  adaptive_icon_background: "#0A264F"
-  adaptive_icon_foreground: "assets/images/penguin_splash1.png"
+  image_path: "assets/brand/miro-launcher-1024.png"
+  adaptive_icon_background: "#FFE8B6"
+  adaptive_icon_foreground: "assets/brand/miro-adaptive-foreground-1024.png"
   min_sdk_android: 21
-  # iOS App Store nolak icon yang masih punya alpha channel -- gambar
-  # sumbernya transparan (buat kebutuhan adaptive icon Android), jadi
-  # versi iOS-nya perlu background solid ditambal di baliknya biar
-  # opaque penuh.
+  # App Store menolak ikon dengan alpha channel.
   remove_alpha_ios: true
-  background_color_ios: "#0A264F"
+  background_color_ios: "#FFE8B6"
 
 # ==================== FLUTTER CONFIGURATION ====================
 flutter:
@@ -97,16 +80,23 @@ flutter:
   # ==================== ASSETS ====================
   assets:
     - assets/images/
+    - assets/mascot/
+    - assets/brand/
+    - assets/google_fonts/
     # - assets/sounds/ (uncomment jika ada)
     # - assets/animations/ (uncomment jika ada)
 
   # ==================== FONTS ====================
-  # fonts:
-  #   - family: Poppins
-  #     fonts:
-  #       - asset: assets/fonts/Poppins-Regular.ttf
-  #       - asset: assets/fonts/Poppins-Bold.ttf
-  #         weight: 700
-  #       - asset: assets/fonts/Poppins-SemiBold.ttf
-  #         weight: 600
-  #   # Add more fonts as needed
+  # Nunito dibundel (DECISIONS B16). Hanya 600 sampai 900; bobot lain di
+  # layar lama otomatis memakai bobot terdekat.
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/google_fonts/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/google_fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/google_fonts/Nunito-ExtraBold.ttf
+          weight: 800
+        - asset: assets/google_fonts/Nunito-Black.ttf
+          weight: 900

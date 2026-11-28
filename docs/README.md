@@ -16,6 +16,8 @@
 | [`standards/SECURITY_PRIVACY.md`](./standards/SECURITY_PRIVACY.md) | Data anak, auth, RLS, foto, pembayaran, UU PDP |
 | [`standards/PERFORMANCE.md`](./standards/PERFORMANCE.md) | Anggaran performa, gambar, font, rebuild, offline |
 | [`standards/CODE_QUALITY.md`](./standards/CODE_QUALITY.md) | Konvensi, unit/golden/integration test, git, Definition of Done |
+| [`standards/RESPONSIVE.md`](./standards/RESPONSIVE.md) | Matriks ukuran layar, layar pendek, ukuran teks, safe area, keyboard, tes golden 3 ukuran |
+| [`standards/QA.md`](./standards/QA.md) | CI, Sentry, parsing tahan banting, error handling, aksi ganda, lifecycle, uji manual |
 | [`prompts/CLAUDE_CODE_PROMPTS.md`](./prompts/CLAUDE_CODE_PROMPTS.md) | Prompt siap pakai per fase |
 
 ## Folder `design/`
