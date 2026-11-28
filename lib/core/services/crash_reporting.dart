@@ -143,29 +143,28 @@ abstract final class CrashReporting {
 
   static FutureOr<SentryEvent?> _beforeSend(SentryEvent event, Hint hint) {
     final message = event.message;
-    return event.copyWith(
-      message: message == null
-          ? null
-          : SentryMessage(scrubText(message.formatted)),
-      exceptions: event.exceptions
-          ?.map((e) => e.copyWith(value: e.value == null ? null : scrubText(e.value!)))
-          .toList(),
-      breadcrumbs: event.breadcrumbs
-          ?.map((b) => _beforeBreadcrumb(b, Hint()))
-          .whereType<Breadcrumb>()
-          .toList(),
-      // ignore: deprecated_member_use
-      extra: _scrubMap(event.extra),
-      user: SentryUser(), // Tanpa id/email/IP pengguna.
-    );
+    if (message != null) {
+      event.message = SentryMessage(scrubText(message.formatted));
+    }
+    for (final e in event.exceptions ?? const <SentryException>[]) {
+      final value = e.value;
+      if (value != null) e.value = scrubText(value);
+    }
+    event.breadcrumbs = event.breadcrumbs
+        ?.map((b) => _beforeBreadcrumb(b, Hint()))
+        .whereType<Breadcrumb>()
+        .toList();
+    // ignore: deprecated_member_use
+    event.extra = _scrubMap(event.extra);
+    event.user = SentryUser(); // Tanpa id/email/IP pengguna.
+    return event;
   }
 
   static Breadcrumb? _beforeBreadcrumb(Breadcrumb? crumb, Hint hint) {
     if (crumb == null) return null;
     final message = crumb.message;
-    return crumb.copyWith(
-      message: message == null ? null : scrubText(message),
-      data: _scrubMap(crumb.data),
-    );
+    if (message != null) crumb.message = scrubText(message);
+    crumb.data = _scrubMap(crumb.data);
+    return crumb;
   }
 }

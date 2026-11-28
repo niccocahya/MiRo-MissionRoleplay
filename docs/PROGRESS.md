@@ -8,7 +8,7 @@ Catatan kerja per fase: apa yang selesai, selisih dari desain yang tersisa, kepu
 |---|---|---|---|
 | Dokumen | Selesai | `docs/v2-design-kit` (PR #1, merged) | Kit v2.1 Flutter, DECISIONS §F/§H, 5 skill, Mink |
 | 0. Fondasi | Selesai | `feat/phase-0-foundation` | Lihat di bawah |
-| Sentry (SDK) | Selesai | `chore/sentry-setup` | SDK terpasang; CLI/login menunggu kode handoff baru |
+| Sentry (SDK) | Selesai, project ditunda | `chore/sentry-setup`, `fix/ci-sentry-kotlin` | SDK terpasang, nonaktif selama `SENTRY_DSN` kosong |
 | 1. Widget | Belum | | |
 | 2. Data dan logika | Belum | | Butuh baca skema produksi (lihat "Database") |
 | 3 sampai 9 | Belum | | |
@@ -85,15 +85,18 @@ Belum dijalankan; dilakukan Nic di HP. Hasil ditulis di sini.
 
 Wizard Sentry **tidak** berjalan (kode handoff kedaluwarsa), jadi tidak ada perubahan gradle, `Info.plist`, atau konfigurasi native. Yang berubah hanya file registrasi plugin yang di-generate otomatis oleh `flutter pub add` (`linux/`, `macos/`, `windows/` `generated_plugin*`) dan `pubspec.yaml`/`pubspec.lock`.
 
-### Belum (butuh Nic)
+### TODO (ditunda atas keputusan Nic)
 
-- **Kode handoff Sentry kedaluwarsa** (berlaku 5 menit; installer baru jalan setelah Fase 0 selesai). Login CLI, pembuatan project, dan auth token upload debug symbols belum dilakukan.
-- Setelah ada DSN: isi `SENTRY_DSN` di `env.json`, build release, lalu picu satu error uji untuk memastikan event masuk tanpa data anak.
+- [ ] **Buat project Flutter di sentry.io, isi `SENTRY_DSN` di `env.json`, setup upload debug symbols.** Sampai itu, SDK otomatis nonaktif (DSN kosong). Kode handoff dan DSN tidak diminta lagi.
 - Auth token Sentry (upload debug symbols) hanya sebagai secret lokal/CI (`SENTRY_AUTH_TOKEN`), tidak di-commit.
+
+### Perbaikan CI (`fix/ci-sentry-kotlin`)
+
+CI pertama setelah Sentry: lint dan tes hijau, tetapi **build APK gagal**: `sentry_flutter` 8.14 mengompilasi Kotlin dengan language version 1.6, yang tidak didukung Kotlin di proyek ini. Versi 9.0.0 juga gagal dengan error yang sama. Dinaikkan ke **`sentry_flutter ^9.30.2`** (versi tertinggi yang kompatibel dengan dependensi lain; 10.x belum bisa di-resolve). Scrubbing ditulis ulang memakai API mutable versi 9 (`copyWith` usang). Build APK debug lokal lulus.
 
 ### Catatan keamanan
 
-`env.json` lokal masih berisi `GROQ_API_KEY`. Kode app tidak lagi membacanya (chat AI lewat Edge Function `mink-chat`), dan SECURITY_PRIVACY §3 melarang kunci Groq di app. **Saran: hapus baris itu dari `env.json`** supaya tidak ikut terbawa ke build. Nilainya tidak kusentuh.
+`GROQ_API_KEY` sudah dihapus Nic dari `env.json` (kode app tidak lagi membacanya; chat AI lewat Edge Function `mink-chat`).
 
 ---
 
@@ -115,7 +118,9 @@ Wizard Sentry **tidak** berjalan (kode handoff kedaluwarsa), jadi tidak ada peru
 
 ### Status akses
 
-- Supabase MCP yang sempat tersambung terputus di awal sesi otonom, sehingga skema produksi **belum bisa dibaca** dan branch/project staging **belum bisa dibuat** dari sini.
+- Nic menambahkan Supabase MCP read-only (`.mcp.json`, project produksi, `read_only=true`). **Di sesi kerja ini tool MCP Supabase belum muncul** (kemungkinan perlu sesi baru dan persetujuan server MCP), jadi skema produksi belum bisa dibaca dari sini. Sesuai arahan Nic: UI memakai repository Fake, migrasi ditulis sebagai file tanpa dijalankan, bagian yang menunggu database ditandai.
+- `.mcp.json` dimasukkan ke `.gitignore` (berisi project ref produksi, konfigurasi lokal).
+- Supabase MCP yang sempat tersambung sebelumnya terputus di awal sesi otonom.
 - Supabase CLI tersedia lewat `npx supabase` (v3.4) tetapi belum login.
 - Pekerjaan yang tidak butuh database (widget, layar dengan repository fake) tetap jalan.
 
