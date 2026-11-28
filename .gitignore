@@ -71,3 +71,6 @@ android/keystore/
 
 # Kredensial Supabase staging (DECISIONS §H4)
 env.staging.json
+
+# Konfigurasi MCP lokal (berisi project ref produksi), bukan untuk repo
+.mcp.json
